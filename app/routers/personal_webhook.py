@@ -157,7 +157,7 @@ async def green_api_webhook(
     It does not reply to the customer's WhatsApp chat.
     """
 
-    verify_green_api_authorization(request)
+    #verify_green_api_authorization(request)
     
     payload = await request.json()
 
