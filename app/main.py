@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 
 from app.config import settings
-from app.routers import webhook
+from app.routers import business_webhook, personal_webhook
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 
@@ -20,7 +20,8 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-app.include_router(webhook.router)
+app.include_router(business_webhook.router)
+app.include_router(personal_webhook.router)
 
 
 def serve() -> None:
