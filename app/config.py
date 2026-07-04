@@ -22,6 +22,7 @@ class Settings:
     langsmith_project: str
     langsmith_tracing: bool
     conversation_max_messages: int
+    allowed_chat_ids: list[str]
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -54,6 +55,7 @@ class Settings:
             langsmith_project=os.getenv("LANGSMITH_PROJECT", "echo2").strip(),
             langsmith_tracing=os.getenv("LANGSMITH_TRACING_V2", "false").strip().lower() == "true",
             conversation_max_messages=int(os.getenv("CONVERSATION_MAX_MESSAGES", "20")),
+            allowed_chat_ids=[chat_id.strip() for chat_id in os.getenv("ALLOWED_CHAT_IDS", "").split(",") if chat_id.strip()],
         )
 
 settings = Settings.from_env()
