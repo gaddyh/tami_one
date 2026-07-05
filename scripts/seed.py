@@ -1,5 +1,5 @@
 """CLI entry point for seeding the database.
-
+locally 
 DATABASE_URL="postgresql://tami_one_postgre_user:YOUR_PASSWORD@es.render.com/tami_one_postgre" .venv/bin/python scripts/seed.py
 
 """

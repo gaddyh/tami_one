@@ -100,7 +100,7 @@ def test_creates_new_contact_and_chat(db_session):
 
     contact = session.exec(select(Contact)).first()
     assert contact is not None
-    assert contact.chat_id == "972546610653"
+    assert contact.chat_id == "972546610653@c.us"
     assert contact.display_name == "Gaddy"
     assert contact.tenant_id == tenant.id
 

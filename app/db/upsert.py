@@ -22,13 +22,6 @@ from app.routers.green_api import MessageEvent
 logger = logging.getLogger(__name__)
 
 
-def _extract_phone(chat_id: str) -> str | None:
-    """Extract phone number from a WhatsApp chat ID like '972546610653@c.us'."""
-    if "@" in chat_id:
-        return chat_id.split("@")[0]
-    return chat_id
-
-
 def _is_group(chat_id: str) -> bool:
     return chat_id.endswith("@g.us")
 
@@ -54,7 +47,7 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
         return {"ok": False, "reason": "no account"}
 
     tenant_id = account.tenant_id
-    phone = _extract_phone(event.chat_id)
+    chat_id = event.chat_id
     is_group = _is_group(event.chat_id)
 
     own_session = session is None
@@ -66,20 +59,20 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
         created_chat = False
 
         # --- Contact (insert-only) ---
-        contact_key = (tenant_id, phone)
+        contact_key = (tenant_id, chat_id)
         contact = contacts_by_tenant_chat_id.get(contact_key)
 
         if not contact:
             contact = Contact(
                 tenant_id=tenant_id,
-                chat_id=phone,
+                chat_id=chat_id,
                 display_name=event.chat_name,
             )
             session.add(contact)
             session.flush()
             contacts_by_tenant_chat_id[contact_key] = contact
             created_contact = True
-            logger.info("Created Contact: %s (%s)", contact.id, phone)
+            logger.info("Created Contact: %s (%s)", contact.id, chat_id)
 
         # --- Chat (insert-only) ---
         chat_key = (tenant_id, event.chat_id)
