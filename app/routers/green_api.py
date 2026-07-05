@@ -32,6 +32,8 @@ class MessageEvent:
     """
 
     provider_message_id: str | None
+    idInstance: str | None
+    wId: str | None
     chat_id: str
     chat_name: str | None
     direction: MessageDirection
@@ -64,6 +66,8 @@ def normalize_green_api_message_event(
 
     return MessageEvent(
         provider_message_id=get_message_id(payload),
+        idInstance=payload.get("instanceData", {}).get("idInstance"),
+        wId=payload.get("instanceData", {}).get("wid"),
         chat_id=chat_id,
         chat_name=get_chat_name(payload),
         direction=direction,
