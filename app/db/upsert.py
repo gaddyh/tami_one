@@ -9,6 +9,7 @@ later processing.
 from __future__ import annotations
 
 import logging
+from dataclasses import asdict
 
 from sqlmodel import Session
 
@@ -77,6 +78,7 @@ async def upsert_contact_and_chat(event: MessageEvent, session: Session | None =
             "Buffered message for (%s, %s)",
             tenant_id,
             chat_id,
+            extra={"event": asdict(event)},
         )
 
         return {
