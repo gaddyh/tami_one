@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from sqlmodel import Session
 
+from app.db.cache import load_cache
 from app.db.engine import engine, init_db
 from app.db.models import Tenant, TenantKind, WhatsAppAccount, WhatsAppProvider
 
@@ -25,6 +26,8 @@ def run_seed(overwrite: bool = False) -> dict[str, str]:
         )
         session.add(account)
         session.commit()
+
+        load_cache()
 
         return {
             "tenant_id": tenant.id,

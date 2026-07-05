@@ -1,4 +1,8 @@
-"""Upsert Contact and Chat rows from a normalized Green API message event."""
+"""Insert Contact and Chat rows from a normalized Green API message event.
+
+Uses an in-memory cache to skip DB queries for known rows. Only inserts
+new rows — existing rows are never updated (metadata is write-once).
+"""
 
 from __future__ import annotations
 
@@ -6,6 +10,11 @@ import logging
 
 from sqlmodel import Session, select
 
+from app.db.cache import (
+    accounts_by_instance,
+    chats_by_tenant_chat_id,
+    contacts_by_tenant_phone,
+)
 from app.db.engine import engine
 from app.db.models import Chat, Contact, WhatsAppAccount
 from app.routers.green_api import MessageEvent
@@ -25,10 +34,10 @@ def _is_group(chat_id: str) -> bool:
 
 
 def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None) -> dict:
-    """Create or update Contact and Chat rows for a Green API message event.
+    """Create Contact and Chat rows if they don't exist yet.
 
-    Looks up the WhatsAppAccount by provider_instance_id (idInstance) to
-    determine the tenant. If no account is found, does nothing.
+    Uses the in-memory cache for existence checks. Only inserts — never
+    updates existing rows.
     """
     if not event.idInstance:
         logger.warning("Message event has no idInstance, skipping upsert")
@@ -36,89 +45,72 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
 
     id_instance = str(event.idInstance)
 
-    if session is None:
-        with Session(engine) as session:
-            return _upsert(session, event, id_instance)
-
-    return _upsert(session, event, id_instance)
-
-
-def _upsert(session: Session, event: MessageEvent, id_instance: str) -> dict:
-    account = session.exec(
-        select(WhatsAppAccount).where(
-            WhatsAppAccount.provider_instance_id == id_instance
-        )
-    ).first()
-
+    account = accounts_by_instance.get(id_instance)
     if not account:
         logger.warning(
             "No WhatsAppAccount for idInstance=%s, skipping upsert",
-            event.idInstance,
+            id_instance,
         )
         return {"ok": False, "reason": "no account"}
 
     tenant_id = account.tenant_id
-    created_contact = False
-    created_chat = False
-
-    # --- Contact ---
     phone = _extract_phone(event.chat_id)
-    contact = session.exec(
-        select(Contact).where(
-            Contact.tenant_id == tenant_id,
-            Contact.phone_number == phone,
-        )
-    ).first()
+    is_group = _is_group(event.chat_id)
 
-    if not contact:
-        contact = Contact(
-            tenant_id=tenant_id,
-            phone_number=phone,
-            display_name=event.chat_name,
-        )
-        session.add(contact)
-        session.flush()
-        created_contact = True
-        logger.info("Created Contact: %s (%s)", contact.id, phone)
-    else:
-        if event.chat_name and not contact.display_name:
-            contact.display_name = event.chat_name
+    own_session = session is None
+    if own_session:
+        session = Session(engine)
+
+    try:
+        created_contact = False
+        created_chat = False
+
+        # --- Contact (insert-only) ---
+        contact_key = (tenant_id, phone)
+        contact = contacts_by_tenant_phone.get(contact_key)
+
+        if not contact:
+            contact = Contact(
+                tenant_id=tenant_id,
+                phone_number=phone,
+                display_name=event.chat_name,
+            )
             session.add(contact)
+            session.flush()
+            contacts_by_tenant_phone[contact_key] = contact
+            created_contact = True
+            logger.info("Created Contact: %s (%s)", contact.id, phone)
 
-    # --- Chat ---
-    chat = session.exec(
-        select(Chat).where(
-            Chat.tenant_id == tenant_id,
-            Chat.provider_chat_id == event.chat_id,
-        )
-    ).first()
+        # --- Chat (insert-only) ---
+        chat_key = (tenant_id, event.chat_id)
+        chat = chats_by_tenant_chat_id.get(chat_key)
 
-    if not chat:
-        chat = Chat(
-            tenant_id=tenant_id,
-            whatsapp_account_id=account.id,
-            provider_chat_id=event.chat_id,
-            title=event.chat_name,
-            is_group=_is_group(event.chat_id),
-            primary_contact_id=contact.id if not _is_group(event.chat_id) else None,
-            last_message_at=event.message_time,
-        )
-        session.add(chat)
-        session.flush()
-        created_chat = True
-        logger.info("Created Chat: %s (%s)", chat.id, event.chat_id)
-    else:
-        chat.last_message_at = event.message_time
-        if event.chat_name and not chat.title:
-            chat.title = event.chat_name
-        session.add(chat)
+        if not chat:
+            chat = Chat(
+                tenant_id=tenant_id,
+                whatsapp_account_id=account.id,
+                provider_chat_id=event.chat_id,
+                title=event.chat_name,
+                is_group=is_group,
+                primary_contact_id=contact.id if not is_group else None,
+                last_message_at=event.message_time,
+            )
+            session.add(chat)
+            session.flush()
+            chats_by_tenant_chat_id[chat_key] = chat
+            created_chat = True
+            logger.info("Created Chat: %s (%s)", chat.id, event.chat_id)
 
-    session.commit()
+        if created_contact or created_chat:
+            session.commit()
 
-    return {
-        "ok": True,
-        "contact_id": contact.id,
-        "chat_id": chat.id,
-        "created_contact": created_contact,
-        "created_chat": created_chat,
-    }
+        return {
+            "ok": True,
+            "contact_id": contact.id,
+            "chat_id": chat.id,
+            "created_contact": created_contact,
+            "created_chat": created_chat,
+        }
+    finally:
+        if own_session:
+            session.close()

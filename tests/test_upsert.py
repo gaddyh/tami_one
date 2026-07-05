@@ -9,6 +9,11 @@ from datetime import datetime, timezone
 import pytest
 from sqlmodel import Session, SQLModel, create_engine, select
 
+from app.db.cache import (
+    accounts_by_instance,
+    chats_by_tenant_chat_id,
+    contacts_by_tenant_phone,
+)
 from app.db.models import (
     Chat,
     Contact,
@@ -50,6 +55,12 @@ def db_session():
         session.commit()
         session.refresh(account)
         session.refresh(tenant)
+
+        # Populate in-memory cache
+        accounts_by_instance.clear()
+        accounts_by_instance[account.provider_instance_id] = account
+        contacts_by_tenant_phone.clear()
+        chats_by_tenant_chat_id.clear()
 
         yield session, tenant, account
 
@@ -101,7 +112,7 @@ def test_creates_new_contact_and_chat(db_session):
     assert chat.whatsapp_account_id == account.id
 
 
-def test_second_message_updates_existing(db_session):
+def test_second_message_skips_existing(db_session):
     session, _, _ = db_session
     event1 = _make_event(message_time=datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc))
     upsert_contact_and_chat(event1, session=session)
@@ -118,8 +129,9 @@ def test_second_message_updates_existing(db_session):
     assert len(contacts) == 1
     assert len(chats) == 1
 
+    # Insert-only: last_message_at stays from first creation
     chat = chats[0]
-    expected = datetime(2025, 1, 2, 14, 0, 0, tzinfo=timezone.utc).replace(tzinfo=None)
+    expected = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc).replace(tzinfo=None)
     assert chat.last_message_at == expected
 
 
@@ -158,7 +170,7 @@ def test_unknown_account_returns_not_ok(db_session):
     assert result["reason"] == "no account"
 
 
-def test_fills_missing_display_name_on_existing_contact(db_session):
+def test_existing_contact_not_updated(db_session):
     session, _, _ = db_session
     event1 = _make_event(chat_name=None)
     upsert_contact_and_chat(event1, session=session)
@@ -170,7 +182,7 @@ def test_fills_missing_display_name_on_existing_contact(db_session):
     upsert_contact_and_chat(event2, session=session)
 
     session.refresh(contact)
-    assert contact.display_name == "Gaddy Updated"
+    assert contact.display_name is None
 
 
 def test_different_chats_create_separate_rows(db_session):
