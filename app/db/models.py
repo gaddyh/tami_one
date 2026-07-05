@@ -129,3 +129,46 @@ class WhatsAppAccount(SQLModel, table=True):
 
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
+
+class Contact(SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "phone_number"),
+    )
+
+    id: str = Field(default_factory=new_id, primary_key=True)
+
+    tenant_id: str = Field(index=True, foreign_key="tenant.id")
+
+    display_name: Optional[str] = None
+    phone_number: Optional[str] = Field(default=None, index=True)
+
+    kind: ChatKind = ChatKind.UNKNOWN
+
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+
+
+class Chat(SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "provider_chat_id"),
+    )
+
+    id: str = Field(default_factory=new_id, primary_key=True)
+
+    tenant_id: str = Field(index=True, foreign_key="tenant.id")
+    whatsapp_account_id: str = Field(index=True, foreign_key="whatsappaccount.id")
+
+    provider_chat_id: str = Field(index=True)
+
+    title: Optional[str] = None
+    kind: ChatKind = ChatKind.UNKNOWN
+
+    is_group: bool = False
+    is_active: bool = True
+
+    primary_contact_id: Optional[str] = Field(default=None, foreign_key="contact.id")
+
+    last_message_at: Optional[datetime] = Field(default=None, index=True)
+
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)

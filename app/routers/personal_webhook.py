@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 
 from app.config import settings
+from app.db.upsert import upsert_contact_and_chat
 from app.routers.green_api import normalize_green_api_message_event
 
 
@@ -49,9 +50,15 @@ async def handle_green_api_webhook(payload: dict[str, Any]) -> dict[str, Any]:
 
     event = normalize_green_api_message_event(payload)
 
+    if event is None:
+        return {"ok": True, "event": None}
+
     logger.info("Green API message event: %s", event)
 
-    return {"ok": True, "event": event}
+    upsert_result = upsert_contact_and_chat(event)
+    logger.info("Upsert result: %s", upsert_result)
+
+    return {"ok": True, "event": event, "upsert": upsert_result}
 
 @router.get("/debug/settings")
 async def debug_settings() -> dict[str, Any]:
@@ -73,13 +80,13 @@ async def debug_settings() -> dict[str, Any]:
         "timezone": settings.timezone,
     }
 
-
+# curl -X POST https://i-me.onrender.com/admin/seed
 @router.post("/admin/seed")
 async def seed_db() -> dict[str, Any]:
     """Insert demo Tenant and WhatsAppAccount rows. For initial setup on Render."""
     from app.db.seed import run_seed
 
-    return run_seed()
+    return run_seed(overwrite=True)
 
 
 @router.post("/webhook/green-api")

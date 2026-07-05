@@ -8,8 +8,8 @@ from app.db.engine import engine, init_db
 from app.db.models import Tenant, TenantKind, WhatsAppAccount, WhatsAppProvider
 
 
-def run_seed() -> dict[str, str]:
-    init_db()
+def run_seed(overwrite: bool = False) -> dict[str, str]:
+    init_db(overwrite=overwrite)
 
     with Session(engine) as session:
         tenant = Tenant(name="Gaddy Test", kind=TenantKind.SOLO)

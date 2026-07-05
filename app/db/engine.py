@@ -1,4 +1,4 @@
-"""SQLite database engine and session helpers."""
+"""Database engine and session helpers (PostgreSQL or SQLite)."""
 
 from __future__ import annotations
 
@@ -11,47 +11,59 @@ from sqlmodel import Session, SQLModel, create_engine
 logger = logging.getLogger(__name__)
 
 
-def _db_path() -> str:
-    return os.getenv("DATABASE_PATH", "tami.db")
-
-
 def _database_url() -> str:
-    return f"sqlite:///{_db_path()}"
+    url = os.getenv("DATABASE_URL", "").strip()
+    if url:
+        return url
+    db_path = os.getenv("DATABASE_PATH", "tami.db")
+    return f"sqlite:///{db_path}"
+
+
+def _is_sqlite() -> bool:
+    return _database_url().startswith("sqlite")
 
 
 def _connect_args() -> dict:
-    return {"check_same_thread": False}
+    if _is_sqlite():
+        return {"check_same_thread": False}
+    return {}
 
 
 engine = create_engine(_database_url(), echo=False, connect_args=_connect_args())
 
 
 def init_db(*, overwrite: bool = False) -> None:
-    """Create the SQLite database file and tables if they don't exist.
+    """Create tables if they don't exist.
 
-    If the database file already exists, loads it as-is. If *overwrite* is
-    True, deletes the existing file and creates a fresh one with all tables.
+    For SQLite: manages the local file (overwrite deletes it first).
+    For PostgreSQL: create_all is idempotent, overwrite is ignored.
     """
-    db_path = _db_path()
+    if _is_sqlite():
+        db_path = os.getenv("DATABASE_PATH", "tami.db")
 
-    if overwrite and os.path.isfile(db_path):
-        os.remove(db_path)
-        logger.info("Removed existing database for overwrite: %s", db_path)
+        if overwrite and os.path.isfile(db_path):
+            os.remove(db_path)
+            logger.info("Removed existing database for overwrite: %s", db_path)
 
-    db_existed = os.path.isfile(db_path)
+        db_existed = os.path.isfile(db_path)
 
-    parent = os.path.dirname(os.path.abspath(db_path))
-    if parent:
-        os.makedirs(parent, exist_ok=True)
+        parent = os.path.dirname(os.path.abspath(db_path))
+        if parent:
+            os.makedirs(parent, exist_ok=True)
 
-    import app.db.models  # noqa: F401 — registers tables
+        import app.db.models  # noqa: F401 — registers tables
 
-    SQLModel.metadata.create_all(engine)
+        SQLModel.metadata.create_all(engine)
 
-    if db_existed:
-        logger.info("Loaded existing database: %s", db_path)
+        if db_existed:
+            logger.info("Loaded existing database: %s", db_path)
+        else:
+            logger.info("Created new database: %s", db_path)
     else:
-        logger.info("Created new database: %s", db_path)
+        import app.db.models  # noqa: F401 — registers tables
+
+        SQLModel.metadata.create_all(engine)
+        logger.info("Ensured tables exist in PostgreSQL")
 
 
 def get_session() -> Generator[Session, None, None]:

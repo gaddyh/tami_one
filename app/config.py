@@ -24,6 +24,7 @@ class Settings:
     conversation_max_messages: int
     allowed_chat_ids: list[str]
     database_path: str
+    database_url: str
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -58,6 +59,7 @@ class Settings:
             conversation_max_messages=int(os.getenv("CONVERSATION_MAX_MESSAGES", "20")),
             allowed_chat_ids=[chat_id.strip() for chat_id in os.getenv("ALLOWED_CHAT_IDS", "").split(",") if chat_id.strip()],
             database_path=os.getenv("DATABASE_PATH", "tami.db"),
+            database_url=os.getenv("DATABASE_URL", "").strip(),
         )
 
 settings = Settings.from_env()
