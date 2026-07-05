@@ -61,8 +61,17 @@ def init_db(*, overwrite: bool = False) -> None:
             logger.info("Created new database: %s", db_path)
     else:
         if overwrite:
-            SQLModel.metadata.drop_all(engine)
-            logger.info("Dropped all tables for overwrite in PostgreSQL")
+            from sqlalchemy import text
+
+            with engine.connect() as conn:
+                conn.execute(text(
+                    "DROP SCHEMA public CASCADE;"
+                ))
+                conn.execute(text(
+                    "CREATE SCHEMA public;"
+                ))
+                conn.commit()
+            logger.info("Dropped and recreated public schema for overwrite in PostgreSQL")
 
         SQLModel.metadata.create_all(engine)
         logger.info("Ensured tables exist in PostgreSQL")

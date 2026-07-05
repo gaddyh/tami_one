@@ -45,6 +45,6 @@ def load_cache() -> None:
     logger.info(
         "Cache loaded: %d accounts, %d contacts, %d chats",
         len(accounts_by_instance),
-        len(contacts_by_tenant_phone),
+        len(contacts_by_tenant_chat_id),
         len(chats_by_tenant_chat_id),
     )
