@@ -3,11 +3,17 @@ import logging
 from fastapi import FastAPI
 
 from app.config import settings
+from app.db import init_db
 from app.routers import business_webhook, personal_webhook
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 
 app = FastAPI(title="360dialog Echo Bot")
+
+
+@app.on_event("startup")
+def _on_startup() -> None:
+    init_db()
 
 
 @app.get("/")
