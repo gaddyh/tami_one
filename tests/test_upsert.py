@@ -12,7 +12,7 @@ from sqlmodel import Session, SQLModel, create_engine, select
 from app.db.cache import (
     accounts_by_instance,
     chats_by_tenant_chat_id,
-    contacts_by_tenant_phone,
+    contacts_by_tenant_chat_id,
 )
 from app.db.models import (
     Chat,
@@ -48,7 +48,7 @@ def db_session():
             tenant_id=tenant.id,
             provider=WhatsAppProvider.GREEN_API,
             provider_instance_id="7700673764",
-            phone_number="972546610653",
+            chat_id="972546610653@c.us",
             display_name="Test WhatsApp",
         )
         session.add(account)
@@ -59,7 +59,7 @@ def db_session():
         # Populate in-memory cache
         accounts_by_instance.clear()
         accounts_by_instance[account.provider_instance_id] = account
-        contacts_by_tenant_phone.clear()
+        contacts_by_tenant_chat_id.clear()
         chats_by_tenant_chat_id.clear()
 
         yield session, tenant, account
@@ -100,7 +100,7 @@ def test_creates_new_contact_and_chat(db_session):
 
     contact = session.exec(select(Contact)).first()
     assert contact is not None
-    assert contact.phone_number == "972546610653"
+    assert contact.chat_id == "972546610653"
     assert contact.display_name == "Gaddy"
     assert contact.tenant_id == tenant.id
 

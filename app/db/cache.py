@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 # provider_instance_id -> WhatsAppAccount
 accounts_by_instance: dict[str, WhatsAppAccount] = {}
 
-# (tenant_id, phone_number) -> Contact
-contacts_by_tenant_phone: dict[tuple[str, str | None], Contact] = {}
+# (tenant_id, chat_id) -> Contact
+contacts_by_tenant_chat_id: dict[tuple[str, str | None], Contact] = {}
 
 # (tenant_id, provider_chat_id) -> Chat
 chats_by_tenant_chat_id: dict[tuple[str, str], Chat] = {}
@@ -31,9 +31,9 @@ def load_cache() -> None:
         )
 
         contacts = session.exec(select(Contact)).all()
-        contacts_by_tenant_phone.clear()
-        contacts_by_tenant_phone.update(
-            {(c.tenant_id, c.phone_number): c for c in contacts}
+        contacts_by_tenant_chat_id.clear()
+        contacts_by_tenant_chat_id.update(
+            {(c.tenant_id, c.chat_id): c for c in contacts}
         )
 
         chats = session.exec(select(Chat)).all()

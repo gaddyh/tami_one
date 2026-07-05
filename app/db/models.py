@@ -122,7 +122,7 @@ class WhatsAppAccount(SQLModel, table=True):
     provider: WhatsAppProvider
     provider_instance_id: str
 
-    phone_number: Optional[str] = Field(default=None, index=True)
+    chat_id: Optional[str] = Field(default=None, index=True)
     display_name: Optional[str] = None
 
     is_active: bool = True
@@ -132,7 +132,7 @@ class WhatsAppAccount(SQLModel, table=True):
 
 class Contact(SQLModel, table=True):
     __table_args__ = (
-        UniqueConstraint("tenant_id", "phone_number"),
+        UniqueConstraint("tenant_id", "chat_id"),
     )
 
     id: str = Field(default_factory=new_id, primary_key=True)
@@ -140,7 +140,7 @@ class Contact(SQLModel, table=True):
     tenant_id: str = Field(index=True, foreign_key="tenant.id")
 
     display_name: Optional[str] = None
-    phone_number: Optional[str] = Field(default=None, index=True)
+    chat_id: Optional[str] = Field(default=None, index=True)
 
     kind: ChatKind = ChatKind.UNKNOWN
 

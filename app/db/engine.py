@@ -35,9 +35,11 @@ engine = create_engine(_database_url(), echo=False, connect_args=_connect_args()
 def init_db(*, overwrite: bool = False) -> None:
     """Create tables if they don't exist.
 
-    For SQLite: manages the local file (overwrite deletes it first).
-    For PostgreSQL: create_all is idempotent, overwrite is ignored.
+    If *overwrite* is True, drops all tables first (SQLite deletes the file,
+    PostgreSQL drops via DROP TABLE ... CASCADE).
     """
+    import app.db.models  # noqa: F401 — registers tables
+
     if _is_sqlite():
         db_path = os.getenv("DATABASE_PATH", "tami.db")
 
@@ -51,8 +53,6 @@ def init_db(*, overwrite: bool = False) -> None:
         if parent:
             os.makedirs(parent, exist_ok=True)
 
-        import app.db.models  # noqa: F401 — registers tables
-
         SQLModel.metadata.create_all(engine)
 
         if db_existed:
@@ -60,7 +60,9 @@ def init_db(*, overwrite: bool = False) -> None:
         else:
             logger.info("Created new database: %s", db_path)
     else:
-        import app.db.models  # noqa: F401 — registers tables
+        if overwrite:
+            SQLModel.metadata.drop_all(engine)
+            logger.info("Dropped all tables for overwrite in PostgreSQL")
 
         SQLModel.metadata.create_all(engine)
         logger.info("Ensured tables exist in PostgreSQL")

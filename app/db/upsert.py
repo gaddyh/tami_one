@@ -13,7 +13,7 @@ from sqlmodel import Session, select
 from app.db.cache import (
     accounts_by_instance,
     chats_by_tenant_chat_id,
-    contacts_by_tenant_phone,
+    contacts_by_tenant_chat_id,
 )
 from app.db.engine import engine
 from app.db.models import Chat, Contact, WhatsAppAccount
@@ -67,17 +67,17 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
 
         # --- Contact (insert-only) ---
         contact_key = (tenant_id, phone)
-        contact = contacts_by_tenant_phone.get(contact_key)
+        contact = contacts_by_tenant_chat_id.get(contact_key)
 
         if not contact:
             contact = Contact(
                 tenant_id=tenant_id,
-                phone_number=phone,
+                chat_id=phone,
                 display_name=event.chat_name,
             )
             session.add(contact)
             session.flush()
-            contacts_by_tenant_phone[contact_key] = contact
+            contacts_by_tenant_chat_id[contact_key] = contact
             created_contact = True
             logger.info("Created Contact: %s (%s)", contact.id, phone)
 

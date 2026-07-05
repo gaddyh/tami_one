@@ -21,7 +21,7 @@ def run_seed(overwrite: bool = False) -> dict[str, str]:
             tenant_id=tenant.id,
             provider=WhatsAppProvider.GREEN_API,
             provider_instance_id="7700673764",
-            phone_number="972546610653",
+            chat_id="972546610653@c.us",
             display_name="Gaddy Test WhatsApp",
         )
         session.add(account)
