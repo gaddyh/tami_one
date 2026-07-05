@@ -34,17 +34,19 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
         logger.warning("Message event has no idInstance, skipping upsert")
         return {"ok": False, "reason": "no idInstance"}
 
+    id_instance = str(event.idInstance)
+
     if session is None:
         with Session(engine) as session:
-            return _upsert(session, event)
+            return _upsert(session, event, id_instance)
 
-    return _upsert(session, event)
+    return _upsert(session, event, id_instance)
 
 
-def _upsert(session: Session, event: MessageEvent) -> dict:
+def _upsert(session: Session, event: MessageEvent, id_instance: str) -> dict:
     account = session.exec(
         select(WhatsAppAccount).where(
-            WhatsAppAccount.provider_instance_id == event.idInstance
+            WhatsAppAccount.provider_instance_id == id_instance
         )
     ).first()
 
