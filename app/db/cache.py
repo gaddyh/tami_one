@@ -1,9 +1,11 @@
-"""In-memory cache of DB rows and message queue."""
+"""In-memory cache of DB rows and message buffer."""
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from collections import defaultdict
+from typing import DefaultDict
 
 from sqlmodel import Session, select
 
@@ -19,8 +21,56 @@ accounts_by_instance: dict[str, WhatsAppAccount] = {}
 # (tenant_id, chat_id) -> Contact
 contacts_by_tenant_chat_id: dict[tuple[str, str | None], Contact] = {}
 
-# (tenant_id, chat_id) -> list of MessageEvent waiting to be processed
-messages_by_chat: dict[tuple[str, str], list[MessageEvent]] = defaultdict(list)
+
+ChatBufferKey = tuple[str, str]  # tenant_id, chat_id
+
+
+class MessageBuffer:
+    def __init__(self) -> None:
+        self._messages_by_chat: DefaultDict[
+            ChatBufferKey,
+            list[MessageEvent],
+        ] = defaultdict(list)
+        self._lock = asyncio.Lock()
+
+    async def append(
+        self,
+        *,
+        tenant_id: str,
+        event: MessageEvent,
+    ) -> None:
+        key = (tenant_id, event.chat_id)
+
+        async with self._lock:
+            self._messages_by_chat[key].append(event)
+
+    async def drain(self) -> dict[ChatBufferKey, list[MessageEvent]]:
+        """Atomically pop all currently buffered messages.
+
+        We copy/swap under lock, then process outside the lock.
+        """
+        async with self._lock:
+            drained = dict(self._messages_by_chat)
+            self._messages_by_chat.clear()
+
+        return drained
+
+    async def requeue_front(
+        self,
+        batches: dict[ChatBufferKey, list[MessageEvent]],
+    ) -> None:
+        """Put failed batches back at the front.
+
+        Newer messages may already exist in the buffer, so failed messages
+        should stay before them.
+        """
+        async with self._lock:
+            for key, failed_messages in batches.items():
+                existing = self._messages_by_chat.get(key, [])
+                self._messages_by_chat[key] = failed_messages + existing
+
+
+message_buffer = MessageBuffer()
 
 
 def load_cache() -> None:

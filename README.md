@@ -1,14 +1,62 @@
-# 360dialog Echo Bot
+# Tami One
 
-Tiny FastAPI WhatsApp bot for 360dialog Direct API.
+WhatsApp assistant backend built with FastAPI. Receives messages via Green API webhooks, stores contacts and messages, and processes them through an AI agent. Also supports 360dialog Direct API for business WhatsApp.
 
-It receives inbound WhatsApp text messages at `/webhook/360dialog` and replies to the sender with:
+## Architecture
 
-```text
-echo: <their message>
+```
+app/
+├── main.py                  # FastAPI app, startup (init_db + load_cache)
+├── config.py                # Settings from env vars
+├── routers/
+│   ├── green_api.py         # Green API webhook normalization → MessageEvent
+│   └── personal_webhook.py  # /webhook/green-api endpoint, /admin/seed
+│   └── business_webhook.py  # /webhook/360dialog endpoint (360dialog)
+├── db/
+│   ├── engine.py            # SQLAlchemy engine (PostgreSQL or SQLite)
+│   ├── models.py            # SQLModel tables: Tenant, WhatsAppAccount, Contact, Chat, ChatMessage
+│   ├── cache.py             # In-memory cache + message queue
+│   ├── upsert.py            # Insert-only contact creation + message queueing
+│   └── seed.py              # Demo data seeding
+├── agents/
+│   ├── core.py              # OpenAI agent with conversation memory
+│   └── memory.py            # Per-user in-memory conversation history
+└── services/
+    ├── whatsapp.py          # 360dialog API client
+    └── transcription.py     # Audio transcription via OpenAI
+scripts/
+└── seed.py                  # CLI seed entry point
+tests/
+└── test_upsert.py           # Upsert + message queue tests
 ```
 
-## 1. Setup
+## Data Flow
+
+1. **Green API webhook** → `POST /webhook/green-api`
+2. Payload normalized into `MessageEvent` (chat_id, direction, text, etc.)
+3. `upsert_contact_and_chat()`:
+   - Looks up `WhatsAppAccount` in cache by `idInstance`
+   - Looks up `Contact` in cache by `(tenant_id, chat_id)` — inserts if new
+   - Appends `MessageEvent` to in-memory queue `messages_by_chat[(tenant_id, chat_id)]`
+4. Messages are queued for later processing (pop + process step coming next)
+
+## Database
+
+Supports **PostgreSQL** (production, Render) and **SQLite** (local dev).
+
+**Tables:**
+- **Tenant** — multi-tenant root
+- **WhatsAppAccount** — Green API instance (provider, instance_id, chat_id)
+- **Contact** — WhatsApp contact (tenant_id, chat_id, display_name)
+- **Chat** — conversation (tenant_id, provider_chat_id, is_group, primary_contact_id)
+- **ChatMessage** — individual message (tenant_id, chat_id, provider_message_id, direction, text)
+
+**In-memory cache** (`app/db/cache.py`):
+- `accounts_by_instance` — provider_instance_id → WhatsAppAccount
+- `contacts_by_tenant_chat_id` — (tenant_id, chat_id) → Contact
+- `messages_by_chat` — (tenant_id, chat_id) → list[MessageEvent] (pending processing)
+
+## Setup
 
 ```bash
 python -m venv .venv
@@ -17,64 +65,60 @@ pip install -r requirements.txt
 cp example.env .env
 ```
 
-Edit `.env`:
+Edit `.env` with your keys (see `example.env` for all options).
 
-```env
-D360_API_KEY=your_360dialog_phone_number_api_key
-D360_API_BASE_URL=https://waba-v2.360dialog.io
-WEBHOOK_AUTH_MODE=none
-```
+Key env vars:
+- `DATABASE_URL` — PostgreSQL connection string (takes priority over SQLite)
+- `DATABASE_PATH` — SQLite file path (local dev default: `tami.db`)
+- `D360_API_KEY` — 360dialog API key
+- `OPENAI_API_KEY` — OpenAI API key
+- `ALLOWED_CHAT_IDS` — comma-separated whitelist of chat IDs
 
-For the 360dialog sandbox:
-
-```env
-D360_API_BASE_URL=https://waba-sandbox.360dialog.io/v1
-```
-
-## 2. Run locally
+## Run locally
 
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
 
-Check:
-
+Check health:
 ```bash
 curl http://localhost:8000/health
 ```
 
-## 3. Expose publicly
+## Seed the database
 
-Use Render, Railway, Fly.io, ngrok, Cloudflare Tunnel, etc.
-
-Your webhook URL will be:
-
-```text
-https://your-domain.com/webhook/360dialog
+Local (with PostgreSQL):
+```bash
+DATABASE_URL="postgresql://user:password@host:5432/dbname" .venv/bin/python scripts/seed.py
 ```
 
-## 4. Configure 360dialog webhook
-
-In 360dialog Hub, configure the **Phone Number / Channel webhook** for the registered WhatsApp number:
-
-```text
-https://your-domain.com/webhook/360dialog
+On Render:
+```bash
+curl -X POST https://your-app.onrender.com/admin/seed
 ```
 
-Use the phone-number/channel webhook, not the WABA-level fallback, unless you intentionally want one webhook for all numbers in the WABA.
+Seeding with `overwrite=True` drops the entire `public` schema and recreates all tables from scratch.
 
-## 5. Test
+## Tests
 
-Send a WhatsApp text message to the registered bot number.
-
-Expected reply:
-
-```text
-echo: your message
+```bash
+.venv/bin/python -m pytest tests/ -v
 ```
 
-## Notes
+## Deploy (Render)
 
-- Free-form text replies only work when the WhatsApp customer-service window is open. The easiest test is to message the bot number first from your personal WhatsApp.
-- For production, return quickly and move heavier work to a queue/background worker. This echo bot sends inline to keep the repo tiny.
-- Keep your `D360_API_KEY` secret. Do not commit `.env`.
+1. Connect repo to Render
+2. Set env vars (DATABASE_URL, D360_API_KEY, OPENAI_API_KEY, etc.)
+3. Build command: `pip install -r requirements.txt`
+4. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+5. After first deploy, seed: `curl -X POST https://your-app.onrender.com/admin/seed`
+
+## Webhook endpoints
+
+| Endpoint | Provider | Purpose |
+|---|---|---|
+| `POST /webhook/green-api` | Green API | Ingest WhatsApp messages, queue for processing |
+| `POST /webhook/360dialog` | 360dialog | Business WhatsApp with AI agent replies |
+| `POST /admin/seed` | — | Seed demo data (drops all tables first) |
+| `GET /health` | — | Health check |
+| `GET /debug/settings` | — | Dev debug (no secrets) |

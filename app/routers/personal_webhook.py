@@ -55,7 +55,7 @@ async def handle_green_api_webhook(payload: dict[str, Any]) -> dict[str, Any]:
 
     logger.info("Green API message event: %s", event)
 
-    upsert_result = upsert_contact_and_chat(event)
+    upsert_result = await upsert_contact_and_chat(event)
     logger.info("Upsert result: %s", upsert_result)
 
     return {"ok": True, "event": event, "upsert": upsert_result}

@@ -12,7 +12,7 @@ from sqlmodel import Session, SQLModel, create_engine, select
 from app.db.cache import (
     accounts_by_instance,
     contacts_by_tenant_chat_id,
-    messages_by_chat,
+    message_buffer,
 )
 from app.db.models import (
     Contact,
@@ -26,7 +26,7 @@ from app.routers.green_api import MessageDirection, MessageEvent
 
 
 @pytest.fixture()
-def db_session():
+async def db_session():
     """Create a fresh temp SQLite DB with all tables for each test."""
     fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(fd)
@@ -57,7 +57,7 @@ def db_session():
         accounts_by_instance.clear()
         accounts_by_instance[account.provider_instance_id] = account
         contacts_by_tenant_chat_id.clear()
-        messages_by_chat.clear()
+        await message_buffer.drain()
 
         yield session, tenant, account
 
@@ -85,15 +85,14 @@ def _make_event(
     )
 
 
-def test_creates_new_contact_and_queues_message(db_session):
+async def test_creates_new_contact_and_queues_message(db_session):
     session, tenant, _ = db_session
     event = _make_event()
 
-    result = upsert_contact_and_chat(event, session=session)
+    result = await upsert_contact_and_chat(event, session=session)
 
     assert result["ok"] is True
     assert result["created_contact"] is True
-    assert result["queued_messages"] == 1
 
     contact = session.exec(select(Contact)).first()
     assert contact is not None
@@ -101,75 +100,77 @@ def test_creates_new_contact_and_queues_message(db_session):
     assert contact.display_name == "Gaddy"
     assert contact.tenant_id == tenant.id
 
+    drained = await message_buffer.drain()
     key = (tenant.id, "972546610653@c.us")
-    assert len(messages_by_chat[key]) == 1
-    assert messages_by_chat[key][0].text == "hello"
+    assert len(drained[key]) == 1
+    assert drained[key][0].text == "hello"
 
 
-def test_second_message_skips_existing_contact(db_session):
+async def test_second_message_skips_existing_contact(db_session):
     session, tenant, _ = db_session
     event1 = _make_event(message_time=datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc))
-    upsert_contact_and_chat(event1, session=session)
+    await upsert_contact_and_chat(event1, session=session)
 
     event2 = _make_event(message_time=datetime(2025, 1, 2, 14, 0, 0, tzinfo=timezone.utc))
-    result = upsert_contact_and_chat(event2, session=session)
+    result = await upsert_contact_and_chat(event2, session=session)
 
     assert result["ok"] is True
     assert result["created_contact"] is False
-    assert result["queued_messages"] == 2
 
     contacts = list(session.exec(select(Contact)))
     assert len(contacts) == 1
 
+    drained = await message_buffer.drain()
     key = (tenant.id, "972546610653@c.us")
-    assert len(messages_by_chat[key]) == 2
+    assert len(drained[key]) == 2
 
 
-def test_no_id_instance_returns_not_ok(db_session):
+async def test_no_id_instance_returns_not_ok(db_session):
     session, _, _ = db_session
     event = _make_event(id_instance=None)
 
-    result = upsert_contact_and_chat(event, session=session)
+    result = await upsert_contact_and_chat(event, session=session)
 
     assert result["ok"] is False
     assert result["reason"] == "no idInstance"
 
 
-def test_unknown_account_returns_not_ok(db_session):
+async def test_unknown_account_returns_not_ok(db_session):
     session, _, _ = db_session
     event = _make_event(id_instance="9999999999")
 
-    result = upsert_contact_and_chat(event, session=session)
+    result = await upsert_contact_and_chat(event, session=session)
 
     assert result["ok"] is False
     assert result["reason"] == "no account"
 
 
-def test_existing_contact_not_updated(db_session):
+async def test_existing_contact_not_updated(db_session):
     session, _, _ = db_session
     event1 = _make_event(chat_name=None)
-    upsert_contact_and_chat(event1, session=session)
+    await upsert_contact_and_chat(event1, session=session)
 
     contact = session.exec(select(Contact)).first()
     assert contact.display_name is None
 
     event2 = _make_event(chat_name="Gaddy Updated")
-    upsert_contact_and_chat(event2, session=session)
+    await upsert_contact_and_chat(event2, session=session)
 
     session.refresh(contact)
     assert contact.display_name is None
 
 
-def test_different_chats_create_separate_contacts_and_queues(db_session):
+async def test_different_chats_create_separate_contacts_and_queues(db_session):
     session, tenant, _ = db_session
     event1 = _make_event(chat_id="972500000001@c.us", chat_name="Alice")
-    upsert_contact_and_chat(event1, session=session)
+    await upsert_contact_and_chat(event1, session=session)
 
     event2 = _make_event(chat_id="972500000002@c.us", chat_name="Bob")
-    upsert_contact_and_chat(event2, session=session)
+    await upsert_contact_and_chat(event2, session=session)
 
     contacts = list(session.exec(select(Contact)))
     assert len(contacts) == 2
 
-    assert len(messages_by_chat[(tenant.id, "972500000001@c.us")]) == 1
-    assert len(messages_by_chat[(tenant.id, "972500000002@c.us")]) == 1
+    drained = await message_buffer.drain()
+    assert len(drained[(tenant.id, "972500000001@c.us")]) == 1
+    assert len(drained[(tenant.id, "972500000002@c.us")]) == 1

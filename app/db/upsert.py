@@ -15,7 +15,7 @@ from sqlmodel import Session
 from app.db.cache import (
     accounts_by_instance,
     contacts_by_tenant_chat_id,
-    messages_by_chat,
+    message_buffer,
 )
 from app.db.engine import engine
 from app.db.models import Contact
@@ -24,8 +24,8 @@ from app.routers.green_api import MessageEvent
 logger = logging.getLogger(__name__)
 
 
-def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None) -> dict:
-    """Create Contact if needed and append message to in-memory queue.
+async def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None) -> dict:
+    """Create Contact if needed and append message to the message buffer.
 
     Uses the in-memory cache for existence checks. Only inserts — never
     updates existing rows.
@@ -71,20 +71,18 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
             logger.info("Created Contact: %s (%s)", contact.id, chat_id)
             session.commit()
 
-        # --- Queue message for later processing ---
-        messages_by_chat[(tenant_id, chat_id)].append(event)
+        # --- Buffer message for later processing ---
+        await message_buffer.append(tenant_id=tenant_id, event=event)
         logger.info(
-            "Queued message for (%s, %s) — %d pending",
+            "Buffered message for (%s, %s)",
             tenant_id,
             chat_id,
-            len(messages_by_chat[(tenant_id, chat_id)]),
         )
 
         return {
             "ok": True,
             "contact_id": contact.id,
             "created_contact": created_contact,
-            "queued_messages": len(messages_by_chat[(tenant_id, chat_id)]),
         }
     finally:
         if own_session:
