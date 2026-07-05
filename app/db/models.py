@@ -110,21 +110,6 @@ class Tenant(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 
-
-class User(SQLModel, table=True):
-    id: str = Field(default_factory=new_id, primary_key=True)
-
-    tenant_id: str = Field(index=True, foreign_key="tenant.id")
-    email: Optional[str] = Field(default=None, index=True)
-    display_name: str
-
-    role: UserRole = UserRole.OWNER
-    is_active: bool = True
-
-    created_at: datetime = Field(default_factory=utc_now)
-    updated_at: datetime = Field(default_factory=utc_now)
-
-
 class WhatsAppAccount(SQLModel, table=True):
     __table_args__ = (
         UniqueConstraint("tenant_id", "provider", "provider_instance_id"),

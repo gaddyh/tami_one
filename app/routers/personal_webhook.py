@@ -74,6 +74,14 @@ async def debug_settings() -> dict[str, Any]:
     }
 
 
+@router.post("/admin/seed")
+async def seed_db() -> dict[str, Any]:
+    """Insert demo Tenant and WhatsAppAccount rows. For initial setup on Render."""
+    from app.db.seed import run_seed
+
+    return run_seed()
+
+
 @router.post("/webhook/green-api")
 async def green_api_webhook(
     request: Request,
