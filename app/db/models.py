@@ -172,3 +172,32 @@ class Chat(SQLModel, table=True):
 
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
+
+
+class ChatMessage(SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "chat_id", "provider_message_id"),
+    )
+
+    id: str = Field(default_factory=new_id, primary_key=True)
+
+    tenant_id: str = Field(index=True, foreign_key="tenant.id")
+
+    # Internal FK to Chat.id
+    chat_id: str = Field(index=True, foreign_key="chat.id")
+
+    # Original WhatsApp / Green API message id
+    provider_message_id: str = Field(index=True)
+
+    direction: MessageDirection
+    message_type: MessageType = MessageType.TEXT
+
+    sender_name: Optional[str] = None
+    sender_chat_id: Optional[str] = Field(default=None, index=True)
+
+    text: Optional[str] = None
+
+    sent_at: datetime = Field(index=True)
+    received_at: datetime = Field(default_factory=utc_now)
+
+    created_at: datetime = Field(default_factory=utc_now)

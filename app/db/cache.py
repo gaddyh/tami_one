@@ -1,13 +1,15 @@
-"""In-memory cache of DB rows to avoid queries on every message."""
+"""In-memory cache of DB rows and message queue."""
 
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
 
 from sqlmodel import Session, select
 
 from app.db.engine import engine
-from app.db.models import Chat, Contact, WhatsAppAccount
+from app.db.models import Contact, WhatsAppAccount
+from app.routers.green_api import MessageEvent
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +19,8 @@ accounts_by_instance: dict[str, WhatsAppAccount] = {}
 # (tenant_id, chat_id) -> Contact
 contacts_by_tenant_chat_id: dict[tuple[str, str | None], Contact] = {}
 
-# (tenant_id, provider_chat_id) -> Chat
-chats_by_tenant_chat_id: dict[tuple[str, str], Chat] = {}
+# (tenant_id, chat_id) -> list of MessageEvent waiting to be processed
+messages_by_chat: dict[tuple[str, str], list[MessageEvent]] = defaultdict(list)
 
 
 def load_cache() -> None:
@@ -36,15 +38,8 @@ def load_cache() -> None:
             {(c.tenant_id, c.chat_id): c for c in contacts}
         )
 
-        chats = session.exec(select(Chat)).all()
-        chats_by_tenant_chat_id.clear()
-        chats_by_tenant_chat_id.update(
-            {(c.tenant_id, c.provider_chat_id): c for c in chats}
-        )
-
     logger.info(
-        "Cache loaded: %d accounts, %d contacts, %d chats",
+        "Cache loaded: %d accounts, %d contacts",
         len(accounts_by_instance),
         len(contacts_by_tenant_chat_id),
-        len(chats_by_tenant_chat_id),
     )

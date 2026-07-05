@@ -1,33 +1,31 @@
-"""Insert Contact and Chat rows from a normalized Green API message event.
+"""Insert Contact rows and queue messages from a normalized Green API message event.
 
-Uses an in-memory cache to skip DB queries for known rows. Only inserts
-new rows — existing rows are never updated (metadata is write-once).
+Uses an in-memory cache to skip DB queries for known contacts. Only inserts
+new contacts — existing rows are never updated (metadata is write-once).
+Messages are appended to an in-memory queue per (tenant_id, chat_id) for
+later processing.
 """
 
 from __future__ import annotations
 
 import logging
 
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.db.cache import (
     accounts_by_instance,
-    chats_by_tenant_chat_id,
     contacts_by_tenant_chat_id,
+    messages_by_chat,
 )
 from app.db.engine import engine
-from app.db.models import Chat, Contact, WhatsAppAccount
+from app.db.models import Contact
 from app.routers.green_api import MessageEvent
 
 logger = logging.getLogger(__name__)
 
 
-def _is_group(chat_id: str) -> bool:
-    return chat_id.endswith("@g.us")
-
-
 def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None) -> dict:
-    """Create Contact and Chat rows if they don't exist yet.
+    """Create Contact if needed and append message to in-memory queue.
 
     Uses the in-memory cache for existence checks. Only inserts — never
     updates existing rows.
@@ -48,7 +46,6 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
 
     tenant_id = account.tenant_id
     chat_id = event.chat_id
-    is_group = _is_group(event.chat_id)
 
     own_session = session is None
     if own_session:
@@ -56,7 +53,6 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
 
     try:
         created_contact = False
-        created_chat = False
 
         # --- Contact (insert-only) ---
         contact_key = (tenant_id, chat_id)
@@ -73,36 +69,22 @@ def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None)
             contacts_by_tenant_chat_id[contact_key] = contact
             created_contact = True
             logger.info("Created Contact: %s (%s)", contact.id, chat_id)
-
-        # --- Chat (insert-only) ---
-        chat_key = (tenant_id, event.chat_id)
-        chat = chats_by_tenant_chat_id.get(chat_key)
-
-        if not chat:
-            chat = Chat(
-                tenant_id=tenant_id,
-                whatsapp_account_id=account.id,
-                provider_chat_id=event.chat_id,
-                title=event.chat_name,
-                is_group=is_group,
-                primary_contact_id=contact.id if not is_group else None,
-                last_message_at=event.message_time,
-            )
-            session.add(chat)
-            session.flush()
-            chats_by_tenant_chat_id[chat_key] = chat
-            created_chat = True
-            logger.info("Created Chat: %s (%s)", chat.id, event.chat_id)
-
-        if created_contact or created_chat:
             session.commit()
+
+        # --- Queue message for later processing ---
+        messages_by_chat[(tenant_id, chat_id)].append(event)
+        logger.info(
+            "Queued message for (%s, %s) — %d pending",
+            tenant_id,
+            chat_id,
+            len(messages_by_chat[(tenant_id, chat_id)]),
+        )
 
         return {
             "ok": True,
             "contact_id": contact.id,
-            "chat_id": chat.id,
             "created_contact": created_contact,
-            "created_chat": created_chat,
+            "queued_messages": len(messages_by_chat[(tenant_id, chat_id)]),
         }
     finally:
         if own_session:
