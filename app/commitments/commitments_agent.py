@@ -92,12 +92,16 @@ def configure_dspy(settings) -> None:
     if not model.startswith("openai/"):
         model = f"openai/{model}"
 
+    lm_kwargs: dict = {
+        "api_key": getattr(settings, "openai_api_key", None),
+        "drop_params": True,
+    }
+
+    if "gpt-5" not in model:
+        lm_kwargs["temperature"] = 0.0
+
     dspy.configure(
-        lm=dspy.LM(
-            model,
-            temperature=0.0,
-            api_key=getattr(settings, "openai_api_key", None),
-        ),
+        lm=dspy.LM(model, **lm_kwargs),
         adapter=dspy.JSONAdapter(),
     )
 
