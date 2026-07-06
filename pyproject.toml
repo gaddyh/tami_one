@@ -19,6 +19,7 @@ dependencies = [
     "psycopg2-binary>=2.9",
     "dspy-ai>=2.5.0",
     "rich>=13.7.1",
+    "backoff>=2.2.0",
 ]
 
 [project.scripts]

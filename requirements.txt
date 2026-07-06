@@ -35,3 +35,4 @@ sqlmodel>=0.0.22
 psycopg2-binary>=2.9
 dspy-ai>=2.5.0
 rich>=13.0.0
+backoff>=2.2.0
