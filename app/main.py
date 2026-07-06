@@ -15,14 +15,16 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="360dialog Echo Bot")
 
-DRAIN_INTERVAL_SECONDS = 10 * 60
+DRAIN_INTERVAL_SECONDS = 2 * 60
 _drain_task: asyncio.Task | None = None
 
 
 async def _drain_loop() -> None:
     while True:
+        logger.info("Starting drain cycle")
         await asyncio.sleep(DRAIN_INTERVAL_SECONDS)
         try:
+            logger.info("Processing commitments")
             results = await drain_and_process()
             total = sum(len(v) for v in results.values())
             logger.info("Drain cycle complete: %d commitment(s)", total)
@@ -32,6 +34,7 @@ async def _drain_loop() -> None:
 
 @app.on_event("startup")
 async def _on_startup() -> None:
+    logger.info("Configuring DSPy with model=%s", settings.openai_model)
     configure_dspy(settings)
     init_db()
     load_cache()
