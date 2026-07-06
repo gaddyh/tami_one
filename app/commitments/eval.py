@@ -31,15 +31,40 @@ def commitment_metric(
 ) -> float:
     """Compare predicted commitments against expected commitments.
 
-    Uses normalized field-by-field comparison: sorts both lists by
-    (required_action, committed_party) and compares all fields.
-    The 'context' field uses a word-overlap threshold (80% of expected
-    words must appear in actual) instead of exact match.
+    Returns the fraction of expected commitments that matched:
+    matched_commitments / len(expected_commitments).
+
+    - Empty expected + empty actual → 1.0 (correctly ignored)
+    - Empty expected + non-empty actual → 0.0 (false positive)
+    - Non-empty expected → matched / len(expected)
     """
-    mismatches = compare_commitments(
-        example.expected_commitments, prediction.commitments
-    )
-    return 1.0 if not mismatches else 0.0
+    expected = example.expected_commitments
+    actual = prediction.commitments
+
+    if not expected:
+        return 1.0 if not actual else 0.0
+
+    expected_n = _normalize_for_comparison(expected)
+    actual_n = _normalize_for_comparison(actual)
+
+    matched = 0
+    for idx, exp in enumerate(expected_n):
+        act = actual_n[idx] if idx < len(actual_n) else {}
+        field_match = True
+        for field in _FIELDS:
+            ev = exp.get(field, "—")
+            av = act.get(field, "—")
+            if field == "context":
+                if not _word_overlap(str(ev), str(av)):
+                    field_match = False
+                    break
+            elif ev != av:
+                field_match = False
+                break
+        if field_match:
+            matched += 1
+
+    return matched / len(expected_n)
 
 
 def compare_commitments(

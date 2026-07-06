@@ -28,6 +28,7 @@ from app.commitments.eval import (
     act_vs_ignore_metric,
     build_devset,
     compare_commitments,
+    commitment_metric,
     run_evaluation,
 )
 
@@ -53,6 +54,30 @@ def _mismatch_table(mismatches: list[dict]) -> Table:
             av_str,
             "[red]✗[/]",
             style="red",
+        )
+
+    return table
+
+
+def _commitment_details(commitments: list, label: str, style: str) -> Table:
+    """Print commitment fields: committed_party, required_action, deadline, context."""
+    table = Table(show_header=True, header_style=f"bold {style}", title=label)
+    table.add_column("#", style="dim", width=3)
+    table.add_column("committed_party", style=style)
+    table.add_column("required_action", style=style)
+    table.add_column("deadline", style=style)
+    table.add_column("context", style=style)
+    table.add_column("status", style=style)
+
+    for idx, c in enumerate(commitments):
+        vals = c.model_dump(mode="json") if hasattr(c, "model_dump") else c
+        table.add_row(
+            str(idx),
+            str(vals.get("committed_party", "—")),
+            str(vals.get("required_action", "—")),
+            str(vals.get("deadline", "—")),
+            str(vals.get("context", "—")),
+            str(vals.get("status", "—")),
         )
 
     return table
@@ -94,6 +119,7 @@ def main() -> None:
     if args.verbose:
         agent = CommitmentAgent()
         act_vs_ignore_scores: list[float] = []
+        metric_scores: list[float] = []
         for i, ex in enumerate(devset):
             pred = agent(**ex.inputs())
 
@@ -104,6 +130,7 @@ def main() -> None:
 
             avi = act_vs_ignore_metric(ex, pred)
             act_vs_ignore_scores.append(avi)
+            metric_scores.append(commitment_metric(ex, pred))
             avi_label = (
                 "[green]correctly ignored[/]"
                 if avi == 1.0 and len(ex.expected_commitments) == 0
@@ -121,11 +148,30 @@ def main() -> None:
             ))
             if mismatches and avi == 1.0:
                 console.print(_mismatch_table(mismatches))
+                if pred.commitments:
+                    console.print(_commitment_details(pred.commitments, "Actual", "red"))
+            elif pred.commitments:
+                console.print(_commitment_details(pred.commitments, "Actual", "green"))
             console.print()
         console.print()
 
         avi_score = sum(act_vs_ignore_scores) / len(act_vs_ignore_scores) if act_vs_ignore_scores else 0
-        console.print(f"[bold]Act/Ignore Score: {avi_score:.2f} ({sum(act_vs_ignore_scores)}/{len(act_vs_ignore_scores)})[/]\n")
+        console.print(f"[bold]Act/Ignore Score: {avi_score:.2f} ({sum(act_vs_ignore_scores)}/{len(act_vs_ignore_scores)})[/]")
+
+        total_expected = sum(len(ex.expected_commitments) for ex in devset)
+        total_matched = sum(s * len(ex.expected_commitments) for s, ex in zip(metric_scores, devset))
+        if total_expected > 0:
+            console.print(f"[bold]Commitment Metric: {total_matched:.0f}/{total_expected} ({total_matched / total_expected * 100:.1f}%)[/]\n")
+        else:
+            console.print(f"[bold]Commitment Metric: N/A (no expected commitments)[/]\n")
+
+        console.print(f"\n[bold]{'='*50}[/]")
+        if total_expected > 0:
+            console.print(f"[bold]Score: {total_matched / total_expected * 100:.1f}[/]")
+        else:
+            console.print(f"[bold]Score: N/A[/]")
+        console.print(f"[bold]{'='*50}[/]")
+        sys.exit(0)
 
     result = run_evaluation(devset=devset, display_table=not args.verbose)
     score = result.score if hasattr(result, "score") else result
