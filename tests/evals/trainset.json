@@ -1,0 +1,926 @@
+[
+  {
+    "category": "act_vs_ignore",
+    "scenario": "social_chat_ignore",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: hey how are you?\nGaddy: long time no see\nGaddy: let's catch up soon",
+    "expected_commitments": []
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "soft_social_future_ignore",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: let's grab coffee sometime",
+    "expected_commitments": []
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "explicit_self_commitment",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents by tomorrow\nGaddy: just need to finish the last page",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I will send the documents by tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "request_plus_acceptance",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: can you send me the report by Friday?\nBob: sure, I'll have it ready by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Send the report",
+        "deadline": "Friday",
+        "context": "Alice asked Bob to send the report by Friday, Bob agreed",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "waiting_external_party",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'm waiting for the bank to process the loan\nGaddy: nothing I can do until they respond",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "the bank",
+        "required_action": "Process the loan",
+        "deadline": null,
+        "context": "I'm waiting for the bank to process the loan",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "vague_action_unclear",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: we should probably do something about the project at some point",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": null,
+        "required_action": "Do something about the project",
+        "deadline": null,
+        "context": "we should probably do something about the project at some point",
+        "status": "unclear",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "generic_callback_ignore",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: let me think about it and get back to you",
+    "expected_commitments": []
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "generic_callback_with_topic_positive",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Dana: can you approve the quote?\nGaddy: let me think about the quote and get back to you tomorrow",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Get back to Dana about the quote",
+        "deadline": "tomorrow",
+        "context": "let me think about the quote and get back to you tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_deadline",
+    "scenario": "deadline_by_Friday",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "Friday",
+        "context": "I will send the documents by Friday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_deadline",
+    "scenario": "deadline_by_tomorrow",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents by tomorrow",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I will send the documents by tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_deadline",
+    "scenario": "deadline_next_Monday",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents next Monday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "next Monday",
+        "context": "I will send the documents next Monday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_deadline",
+    "scenario": "deadline_by_1700",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents by 17:00",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "by 17:00",
+        "context": "I will send the documents by 17:00",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_deadline",
+    "scenario": "deadline_by_July_15",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents by July 15",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "July 15",
+        "context": "I will send the documents by July 15",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_deadline",
+    "scenario": "deadline_soon",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents soon",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": null,
+        "context": "I will send the documents soon",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_deadline",
+    "scenario": "deadline_when_I_can",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents when I can",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": null,
+        "context": "I will send the documents when I can",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_deadline",
+    "scenario": "deadline_by_end_of_week",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents by end of week",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "end of week",
+        "context": "I will send the documents by end of week",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_party",
+    "scenario": "alice_asks_bob_bob_accepts",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: Bob, can you send me the report by Friday?\nBob: sure, I'll have it ready by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Send the report",
+        "deadline": "Friday",
+        "context": "Alice asked Bob to send the report by Friday, Bob agreed",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_party",
+    "scenario": "bob_asks_alice_alice_accepts",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Bob: Alice, can you send me the report by Friday?\nAlice: sure, I'll have it ready by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Alice",
+        "required_action": "Send the report",
+        "deadline": "Friday",
+        "context": "Bob asked Alice to send the report by Friday, Alice agreed",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_party",
+    "scenario": "external_party_waiting",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'm waiting for the bank to process the loan\nGaddy: nothing I can do until they respond",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "the bank",
+        "required_action": "Process the loan",
+        "deadline": null,
+        "context": "I'm waiting for the bank to process the loan",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_party",
+    "scenario": "unknown_party_unclear",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: someone needs to call the supplier about the order",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": null,
+        "required_action": "Call the supplier",
+        "deadline": null,
+        "context": "someone needs to call the supplier about the order",
+        "status": "unclear",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_party",
+    "scenario": "self_commitment_speaker",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will send the documents by tomorrow",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I will send the documents by tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_party",
+    "scenario": "third_party_named",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: Bob will send the documents by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Send the documents",
+        "deadline": "Friday",
+        "context": "Bob will send the documents by Friday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_party",
+    "scenario": "group_we_need_unclear",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: we need to send the documents to the client",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": null,
+        "required_action": "Send the documents to the client",
+        "deadline": null,
+        "context": "we need to send the documents to the client",
+        "status": "unclear",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_party",
+    "scenario": "alice_asks_bob_bob_refuses",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: Bob, can you send me the report by Friday?\nBob: sorry, I won't be able to do it this week",
+    "expected_commitments": []
+  },
+  {
+    "category": "args_required_action",
+    "scenario": "send_docs_forward",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'll forward the documents tomorrow",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I'll forward the documents tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_required_action",
+    "scenario": "send_docs_send_over",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'll send over the docs tomorrow",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I'll send over the docs tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_required_action",
+    "scenario": "send_docs_paperwork",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'll get the paperwork to you tomorrow",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I'll get the paperwork to you tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_required_action",
+    "scenario": "call_supplier_ring",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I need to ring the supplier about the order",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Call the supplier",
+        "deadline": null,
+        "context": "I need to ring the supplier about the order",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_required_action",
+    "scenario": "call_supplier_phone",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'll give the supplier a call about the order today",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Call the supplier",
+        "deadline": "today",
+        "context": "I'll give the supplier a call about the order today",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_required_action",
+    "scenario": "pay_invoice_take_care",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Dana: I'll take care of the invoice payment today",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Dana",
+        "required_action": "Pay the invoice",
+        "deadline": "today",
+        "context": "I'll take care of the invoice payment today",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_required_action",
+    "scenario": "pay_invoice_settle",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Dana: I'll settle the invoice by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Dana",
+        "required_action": "Pay the invoice",
+        "deadline": "Friday",
+        "context": "I'll settle the invoice by Friday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "args_required_action",
+    "scenario": "prepare_report",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'll have the report ready by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Prepare the report",
+        "deadline": "Friday",
+        "context": "I'll have the report ready by Friday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_completion",
+    "scenario": "existing_mark_done",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I sent the documents yesterday\nGaddy: they should have arrived",
+    "expected_commitments": [
+      {
+        "id": "abc-123",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I sent the documents yesterday",
+        "status": "done",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_completion",
+    "scenario": "past_tense_without_existing_ignore",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I sent the documents yesterday",
+    "expected_commitments": []
+  },
+  {
+    "category": "lifecycle_completion",
+    "scenario": "started_not_done",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I started working on the documents",
+    "expected_commitments": []
+  },
+  {
+    "category": "lifecycle_completion",
+    "scenario": "almost_done_not_done",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: almost done with the documents",
+    "expected_commitments": []
+  },
+  {
+    "category": "lifecycle_completion",
+    "scenario": "dismiss_existing",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-456\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Call the supplier\", \"deadline\": null, \"context\": \"Need to call the supplier about the order\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: forget about calling the supplier\nGaddy: I found another source",
+    "expected_commitments": [
+      {
+        "id": "abc-456",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Call the supplier",
+        "deadline": null,
+        "context": "forget about calling the supplier, I found another source",
+        "status": "dismissed",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_completion",
+    "scenario": "done_passive_voice",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: the documents were sent this morning",
+    "expected_commitments": [
+      {
+        "id": "abc-123",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "the documents were sent this morning",
+        "status": "done",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_completion",
+    "scenario": "dismiss_vague",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: never mind about the documents, we don't need them anymore",
+    "expected_commitments": [
+      {
+        "id": "abc-123",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "never mind about the documents, we don't need them anymore",
+        "status": "dismissed",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_completion",
+    "scenario": "future_promise_not_done",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I'll definitely send the documents tomorrow as promised",
+    "expected_commitments": [
+      {
+        "id": "abc-123",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I'll definitely send the documents tomorrow as promised",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_update_vs_new",
+    "scenario": "update_existing_deadline",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I won't manage tomorrow, I'll send the documents next Monday",
+    "expected_commitments": [
+      {
+        "id": "abc-123",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "next Monday",
+        "context": "I won't manage tomorrow, I'll send the documents next Monday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_update_vs_new",
+    "scenario": "new_unrelated_commitment",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I also need to call the supplier today",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Call the supplier",
+        "deadline": "today",
+        "context": "I also need to call the supplier today",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_update_vs_new",
+    "scenario": "same_existing_no_duplicate",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-456\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Call the supplier\", \"deadline\": null, \"context\": \"Need to call the supplier about the order\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I'll call the supplier later today",
+    "expected_commitments": [
+      {
+        "id": "abc-456",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Call the supplier",
+        "deadline": "today",
+        "context": "I'll call the supplier later today",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_update_vs_new",
+    "scenario": "party_handoff_update",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-200\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Alice\", \"required_action\": \"Send the documents\", \"deadline\": \"Friday\", \"context\": \"Alice will send the documents by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: actually Bob will handle it instead of Alice",
+    "expected_commitments": [
+      {
+        "id": "abc-200",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Send the documents",
+        "deadline": "Friday",
+        "context": "actually Bob will handle it instead of Alice",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_update_vs_new",
+    "scenario": "new_when_existing_different_action",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I need to prepare the report by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Prepare the report",
+        "deadline": "Friday",
+        "context": "I need to prepare the report by Friday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_update_vs_new",
+    "scenario": "update_existing_context_only",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I'll send the documents as soon as I get the signature",
+    "expected_commitments": [
+      {
+        "id": "abc-123",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I'll send the documents as soon as I get the signature",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_update_vs_new",
+    "scenario": "existing_unchanged_no_update",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: still planning to send the documents tomorrow",
+    "expected_commitments": [
+      {
+        "id": "abc-123",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "still planning to send the documents tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  },
+  {
+    "category": "lifecycle_update_vs_new",
+    "scenario": "multiple_existing_update_one",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}, {\"id\": \"abc-456\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Call the supplier\", \"deadline\": null, \"context\": \"Need to call the supplier about the order\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "messages": "Gaddy: I'll send the documents by Friday instead",
+    "expected_commitments": [
+      {
+        "id": "abc-123",
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "Friday",
+        "context": "I'll send the documents by Friday instead",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ]
+  }
+]

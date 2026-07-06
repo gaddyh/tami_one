@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 import dspy
@@ -22,6 +23,8 @@ _FIELDS = [
     "status",
     "notification",
 ]
+
+_REQUIRED_ACTION_F1_THRESHOLD = 0.75
 
 
 def commitment_metric(
@@ -56,6 +59,10 @@ def commitment_metric(
             av = act.get(field, "—")
             if field == "context":
                 if not _word_overlap(str(ev), str(av)):
+                    field_match = False
+                    break
+            elif field == "required_action":
+                if _token_f1(str(ev), str(av)) < _REQUIRED_ACTION_F1_THRESHOLD:
                     field_match = False
                     break
             elif ev != av:
@@ -105,6 +112,11 @@ def compare_commitments(
                     mismatches.append(
                         {"index": idx, "field": field, "expected": ev, "actual": av}
                     )
+            elif field == "required_action":
+                if _token_f1(str(ev), str(av)) < _REQUIRED_ACTION_F1_THRESHOLD:
+                    mismatches.append(
+                        {"index": idx, "field": field, "expected": ev, "actual": av}
+                    )
             elif ev != av:
                 mismatches.append(
                     {"index": idx, "field": field, "expected": ev, "actual": av}
@@ -141,6 +153,8 @@ def make_example(
     existing_commitments_json: str,
     messages: str,
     expected_commitments: list[Commitment],
+    category: str = "",
+    scenario: str = "",
 ) -> dspy.Example:
     return dspy.Example(
         chat_id=chat_id,
@@ -148,6 +162,8 @@ def make_example(
         existing_commitments_json=existing_commitments_json,
         messages=messages,
         expected_commitments=expected_commitments,
+        category=category,
+        scenario=scenario,
     ).with_inputs(
         "chat_id",
         "chat_name",
@@ -178,6 +194,8 @@ def build_devset(devset_path: Path | None = None) -> list[dspy.Example]:
                 existing_commitments_json=entry.get("existing_commitments_json", "[]"),
                 messages=entry["messages"],
                 expected_commitments=expected,
+                category=entry.get("category", ""),
+                scenario=entry.get("scenario", ""),
             )
         )
 
@@ -234,3 +252,29 @@ def _word_overlap(expected: str, actual: str, threshold: float = 0.8) -> bool:
         return True
     overlap = exp_words & act_words
     return len(overlap) / len(exp_words) >= threshold
+
+
+def _token_f1(expected: str, actual: str) -> float:
+    """Token-level F1 score between two strings.
+
+    Tokens are lowercased word matches. Returns 1.0 for identical strings,
+    0.0 for no overlap.
+    """
+    exp_tokens = re.findall(r"\w+", expected.lower())
+    act_tokens = re.findall(r"\w+", actual.lower())
+    if not exp_tokens and not act_tokens:
+        return 1.0
+    if not exp_tokens or not act_tokens:
+        return 0.0
+
+    exp_counts = Counter(exp_tokens)
+    act_counts = Counter(act_tokens)
+
+    common = exp_counts & act_counts
+    num_common = sum(common.values())
+    if num_common == 0:
+        return 0.0
+
+    precision = num_common / len(act_tokens)
+    recall = num_common / len(exp_tokens)
+    return 2 * precision * recall / (precision + recall)
