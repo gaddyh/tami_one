@@ -4,6 +4,7 @@ import logging
 from fastapi import FastAPI
 
 from app.config import settings
+from app.commitments.commitments_agent import configure_dspy
 from app.commitments.processor import drain_and_process
 from app.db import init_db, load_cache
 from app.routers import business_webhook, personal_webhook
@@ -31,6 +32,7 @@ async def _drain_loop() -> None:
 
 @app.on_event("startup")
 async def _on_startup() -> None:
+    configure_dspy(settings)
     init_db()
     load_cache()
     global _drain_task

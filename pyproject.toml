@@ -17,6 +17,7 @@ dependencies = [
     "langsmith==0.3.45",
     "sqlmodel>=0.0.22",
     "psycopg2-binary>=2.9",
+    "dspy-ai>=2.5.0",
 ]
 
 [project.scripts]
@@ -35,3 +36,6 @@ include = ["app*"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+    "integration: marks tests that make real LLM API calls (deselect with '-m \"not integration\"')",
+]
