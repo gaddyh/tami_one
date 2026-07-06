@@ -1,20 +1,50 @@
+import asyncio
 import logging
 
 from fastapi import FastAPI
 
 from app.config import settings
+from app.commitments.processor import drain_and_process
 from app.db import init_db, load_cache
 from app.routers import business_webhook, personal_webhook
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="360dialog Echo Bot")
+
+DRAIN_INTERVAL_SECONDS = 30 * 60
+_drain_task: asyncio.Task | None = None
+
+
+async def _drain_loop() -> None:
+    while True:
+        await asyncio.sleep(DRAIN_INTERVAL_SECONDS)
+        try:
+            results = await drain_and_process()
+            total = sum(len(v) for v in results.values())
+            logger.info("Drain cycle complete: %d commitment(s)", total)
+        except Exception:
+            logger.exception("Error in drain cycle")
 
 
 @app.on_event("startup")
-def _on_startup() -> None:
+async def _on_startup() -> None:
     init_db()
     load_cache()
+    global _drain_task
+    _drain_task = asyncio.create_task(_drain_loop())
+
+
+@app.on_event("shutdown")
+async def _on_shutdown() -> None:
+    if _drain_task:
+        _drain_task.cancel()
+        try:
+            await _drain_task
+        except asyncio.CancelledError:
+            pass
 
 
 @app.get("/")
