@@ -25,3 +25,7 @@ class Commitment(BaseModel):
         "daily_digest",
         "urgent",
     ] = "daily_digest"
+
+
+class CommitmentList(BaseModel):
+    commitments: list[Commitment]

@@ -1,6 +1,6 @@
 from openai import AsyncOpenAI
 from app.config import settings
-from app.commitments.models import Commitment
+from app.commitments.models import Commitment, CommitmentList
 
 client = AsyncOpenAI(api_key=settings.openai_api_key)
 
@@ -52,10 +52,10 @@ Messages:
 """,
             },
         ],
-        text_format=list[Commitment],
+        text_format=CommitmentList,
     )
 
-    return response.output_parsed
+    return response.output_parsed.commitments
 
 
 def _format_existing(existing: list[Commitment] | None) -> str:
