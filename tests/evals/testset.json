@@ -23,28 +23,6 @@
   },
   {
     "category": "act_vs_ignore",
-    "scenario": "request_without_acceptance_ignore",
-    "difficulty": "hard",
-    "chat_id": "972546610653@c.us",
-    "chat_name": "Gaddy",
-    "existing_commitments_json": "[]",
-    "messages": "Alice: can someone send me the report by Friday?",
-    "expected_commitments": [],
-    "policy_note": "A request with no acceptance or volunteer is not yet a commitment."
-  },
-  {
-    "category": "act_vs_ignore",
-    "scenario": "conditional_promise_untriggered_ignore",
-    "difficulty": "hard",
-    "chat_id": "972546610653@c.us",
-    "chat_name": "Gaddy",
-    "existing_commitments_json": "[]",
-    "messages": "Gaddy: if they send the quote, I'll approve it",
-    "expected_commitments": [],
-    "policy_note": "Conditional promise where condition has not been met → ignore, not a commitment yet."
-  },
-  {
-    "category": "act_vs_ignore",
     "scenario": "should_without_will_ignore",
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
@@ -53,6 +31,51 @@
     "messages": "Gaddy: we should really call the supplier about the delay",
     "expected_commitments": [],
     "policy_note": "'We should do X' is an opinion, not a commitment to act."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "rhetorical_question_ignore",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: who has time to prepare a full report by Friday?",
+    "expected_commitments": [],
+    "policy_note": "Rhetorical questions are not commitments, even if they mention an action."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "hedged_commitment_unclear",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I might be able to send the documents tomorrow, but I'm not sure",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Send the documents",
+        "deadline": "tomorrow",
+        "context": "I might be able to send the documents tomorrow, but I'm not sure",
+        "status": "unclear",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Hedged language ('might', 'maybe') with no clear commitment → unclear, not ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "past_tense_no_existing_ignore",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I already called the supplier yesterday and sorted it out",
+    "expected_commitments": [],
+    "policy_note": "Past-tense statements about completed actions without existing commitments → ignore."
   },
   {
     "category": "act_vs_ignore",

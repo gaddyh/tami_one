@@ -25,6 +25,7 @@ Usage:
 import argparse
 import json as _json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from rich.console import Console
@@ -42,7 +43,7 @@ from app.commitments.eval import (
     commitment_metric,
 )
 
-console = Console()
+console = Console(record=True)
 
 _DETAIL_FIELDS = ["committed_party", "required_action", "deadline", "context", "status"]
 
@@ -50,6 +51,7 @@ _SPLITS = {
     "train": "trainset.json",
     "dev": "devset.json",
     "test": "testset.json",
+    "challenge": "challenge_act_ignore.json",
 }
 
 
@@ -235,12 +237,22 @@ def _run_split(
     avi_score = sum(e["avi"] for e in per_example) / len(per_example) if per_example else 0
     commit_metric = total_matched / total_expected if total_expected > 0 else 0.0
 
+    expected_ignore = tn + fp
+    over_extraction_rate = fp / expected_ignore if expected_ignore > 0 else 0.0
+
     console.print(f"[bold]Act/Ignore Score: {avi_score:.2f} ({sum(e['avi'] for e in per_example):.0f}/{len(per_example)})[/]")
     if total_expected > 0:
         console.print(f"[bold]Commitment Metric: {total_matched:.0f}/{total_expected} ({commit_metric * 100:.1f}%)[/]")
     else:
         console.print(f"[bold]Commitment Metric: N/A[/]")
+    if expected_ignore > 0:
+        console.print(f"[bold]Over-Extraction Rate: {fp}/{expected_ignore} ({over_extraction_rate * 100:.0f}%)[/]")
+    else:
+        console.print(f"[bold]Over-Extraction Rate: N/A[/]")
     console.print()
+
+    # Print failure table
+    _print_failure_table(split, per_example)
 
     return {
         "split": split,
@@ -253,6 +265,7 @@ def _run_split(
         "commitment_metric": commit_metric,
         "total_expected": total_expected,
         "total_matched": total_matched,
+        "over_extraction_rate": over_extraction_rate,
         "per_example": per_example,
     }
 
@@ -438,6 +451,73 @@ def _print_category_difficulty_matrix(per_example: list[dict]) -> None:
     console.print()
 
 
+def _print_failure_table(split: str, per_example: list[dict]) -> None:
+    """Print a table of all failing examples: FP, FN, and TP with field mismatches."""
+    failures: list[dict] = []
+
+    for e in per_example:
+        conf = e["confusion"]
+        if conf == "fp":
+            failures.append({
+                "category": e["category"],
+                "difficulty": e["difficulty"],
+                "scenario": e["scenario"],
+                "error_type": "FALSE POSITIVE",
+                "detail": f"Expected: [] | Actual: {len(e['pred_commitments'])} commitment(s)",
+                "messages": e["messages"],
+            })
+        elif conf == "fn":
+            failures.append({
+                "category": e["category"],
+                "difficulty": e["difficulty"],
+                "scenario": e["scenario"],
+                "error_type": "FALSE NEGATIVE",
+                "detail": f"Expected: {len(e['expected_commitments'])} | Actual: []",
+                "messages": e["messages"],
+            })
+        elif conf == "tp" and e.get("mismatches"):
+            mismatch_fields = ", ".join(m["field"] for m in e["mismatches"])
+            failures.append({
+                "category": e["category"],
+                "difficulty": e["difficulty"],
+                "scenario": e["scenario"],
+                "error_type": "FIELD MISMATCH",
+                "detail": f"Fields: {mismatch_fields}",
+                "messages": e["messages"],
+            })
+
+    if not failures:
+        console.print("[green]No failures in this split.[/]")
+        console.print()
+        return
+
+    table = Table(
+        show_header=True,
+        header_style="bold",
+        title=f"{split.upper()} — Failures ({len(failures)})",
+        show_lines=True,
+    )
+    table.add_column("Error Type", style="bold red", width=16)
+    table.add_column("Category", width=22)
+    table.add_column("Difficulty", justify="center", width=10)
+    table.add_column("Scenario", width=30)
+    table.add_column("Detail", width=40)
+    table.add_column("Messages", style="dim", width=50)
+
+    for f in failures:
+        table.add_row(
+            f["error_type"],
+            f["category"],
+            f["difficulty"],
+            f["scenario"],
+            f["detail"],
+            f["messages"].replace("\n", " | "),
+        )
+
+    console.print(table)
+    console.print()
+
+
 def _print_field_accuracy(per_example: list[dict]) -> None:
     """Print per-field match accuracy for TP (true positive) examples."""
     tp_examples = [e for e in per_example if e["confusion"] == "tp"]
@@ -499,6 +579,7 @@ def _print_aggregated_table(results: list[dict]) -> None:
     table.add_column("Recall", justify="right", width=10)
     table.add_column("F1", justify="right", width=8)
     table.add_column("Accuracy", justify="right", width=10)
+    table.add_column("Over-Ext", justify="right", width=10)
 
     for r in results:
         tp, fp, fn, tn = r["tp"], r["fp"], r["fn"], r["tn"]
@@ -507,6 +588,8 @@ def _print_aggregated_table(results: list[dict]) -> None:
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
         f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
         accuracy = (tp + tn) / total if total > 0 else 0.0
+        expected_ignore = tn + fp
+        over_ext = fp / expected_ignore if expected_ignore > 0 else 0.0
 
         table.add_row(
             r["split"].upper(),
@@ -519,9 +602,44 @@ def _print_aggregated_table(results: list[dict]) -> None:
             f"{recall:.2f}",
             f"{f1:.2f}",
             f"{accuracy:.2f}",
+            f"[red]{over_ext:.0%}[/]" if expected_ignore > 0 else "—",
         )
 
     console.print(table)
+
+
+def _save_split_md(run_dir: Path, split: str, result: dict) -> None:
+    """Save a single split's recorded console output as a markdown file."""
+    text = console.export_text(clear=True, styles=False)
+    md = f"# {split.upper()} Split\n\n"
+    md += f"**N={result['n']}** | TP={result['tp']} FP={result['fp']} FN={result['fn']} TN={result['tn']}\n\n"
+    md += f"```\n{text}\n```\n"
+    (run_dir / f"{split}.md").write_text(md, encoding="utf-8")
+
+
+def _save_summary_md(run_dir: Path, run_id: str, results: list[dict], model: str) -> None:
+    """Save aggregated summary as a markdown file."""
+    text = console.export_text(clear=True, styles=False)
+    md = f"# Eval Run {run_id}\n\n"
+    md += f"**Model:** {model}\n\n"
+    md += f"**Timestamp:** {datetime.now().isoformat()}\n\n"
+    md += f"**Splits:** {', '.join(r['split'] for r in results)}\n\n"
+    md += f"```\n{text}\n```\n\n"
+    md += "## Per-Split Summary\n\n"
+    md += "| Split | N | TP | FP | FN | TN | Precision | Recall | F1 | Accuracy | Over-Ext |\n"
+    md += "|-------|---|----|----|----|----|-----------|--------|----|----------|----------|\n"
+    for r in results:
+        tp, fp, fn, tn = r["tp"], r["fp"], r["fn"], r["tn"]
+        total = tp + fp + fn + tn
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+        accuracy = (tp + tn) / total if total > 0 else 0.0
+        expected_ignore = tn + fp
+        over_ext = f"{fp / expected_ignore:.0%}" if expected_ignore > 0 else "—"
+        md += f"| {r['split'].upper()} | {r['n']} | {tp} | {fp} | {fn} | {tn} | {precision:.2f} | {recall:.2f} | {f1:.2f} | {accuracy:.2f} | {over_ext} |\n"
+    md += "\n"
+    (run_dir / "summary.md").write_text(md, encoding="utf-8")
 
 
 def main() -> None:
@@ -530,7 +648,7 @@ def main() -> None:
         "--split",
         type=str,
         default=None,
-        choices=["train", "dev", "test"],
+        choices=["train", "dev", "test", "challenge"],
         help="Which split to run (default: dev)",
     )
     parser.add_argument(
@@ -555,6 +673,11 @@ def main() -> None:
         action="store_true",
         help="Print actual vs expected for each example",
     )
+    parser.add_argument(
+        "--save",
+        action="store_true",
+        help="Save reports as markdown files under runs/<run_id>/",
+    )
     args = parser.parse_args()
 
     if args.model:
@@ -562,17 +685,33 @@ def main() -> None:
 
     configure_dspy(settings)
 
+    run_dir: Path | None = None
+    run_id: str | None = None
+    if args.save:
+        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_dir = Path(__file__).resolve().parent.parent / "runs" / run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        console.print(f"[bold green]Saving reports to: {run_dir}[/]\n")
+
     if args.all:
         results = []
         for split in ["train", "dev", "test"]:
             r = _run_split(split, limit=args.limit, verbose=args.verbose)
             results.append(r)
+            if run_dir:
+                _save_split_md(run_dir, split, r)
         console.print()
         _print_aggregated_table(results)
+        if run_dir:
+            _save_summary_md(run_dir, run_id, results, settings.openai_model)
+            console.print(f"\n[bold green]Reports saved to: {run_dir}/[/]")
         sys.exit(0)
 
     split = args.split or "dev"
-    _run_split(split, limit=args.limit, verbose=args.verbose)
+    r = _run_split(split, limit=args.limit, verbose=args.verbose)
+    if run_dir:
+        _save_split_md(run_dir, split, r)
+        console.print(f"\n[bold green]Report saved to: {run_dir}/{split}.md[/]")
 
 
 if __name__ == "__main__":

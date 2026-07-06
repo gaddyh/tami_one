@@ -17,12 +17,12 @@ Advisors run their business out of dozens of parallel WhatsApp threads — clien
   "committed_party": "me",
   "required_action": "Send the material",
   "deadline": "in one hour",
-  "status": "open",
+  "status": "waiting",
   "context": "Message: 'אני אשלח לך את החומר עוד שעה' ..."
 }
 ```
 
-This is the core proof-of-concept the project has already validated: given a real, mixed-Hebrew/English WhatsApp thread, the pipeline correctly separates a fulfilled promise (`status=DONE`) from a still-open one (`status=OPEN`), attributes each to the right party, and keeps a plain-language `context` trail for why.
+This is the core proof-of-concept the project has already validated: given a real, mixed-Hebrew/English WhatsApp thread, the pipeline correctly separates a fulfilled promise (`status=DONE`) from a still-waiting one (`status=waiting`), attributes each to the right party, and keeps a plain-language `context` trail for why.
 
 ---
 
@@ -44,9 +44,11 @@ app/
 │   ├── upsert.py                 # Insert-only Contact creation + buffering
 │   └── seed.py                   # Demo data seeding
 ├── commitments/
-│   ├── models.py                 # Commitment / CommitmentList (LLM output schema)
-│   ├── extractor.py               # OpenAI call: messages + existing commitments → commitments
-│   └── processor.py                # Drains buffer, calls extractor, upserts CommitmentItem rows
+│   ├── models.py                 # Canonical Commitment / CommitmentList schema
+│   ├── commitments_agent.py      # DSPy Signature + Module for commitment extraction
+│   ├── extractor.py              # Adapter: messages + existing commitments → DSPy agent
+│   ├── eval.py                   # DSPy eval scaffolding + token-F1 required_action metric
+│   └── processor.py              # Drains buffer, calls extractor, upserts CommitmentItem rows
 ├── agents/
 │   ├── core.py                    # OpenAI agent used by the 360dialog business bot
 │   └── memory.py                   # Per-thread in-memory conversation history
@@ -54,7 +56,9 @@ app/
     ├── whatsapp.py                 # 360dialog API client
     └── transcription.py             # Voice-note transcription via OpenAI
 scripts/seed.py                      # CLI seed entry point
-tests/                                 # upsert, webhook, commitment extraction tests
+scripts/smoke_eval.py                # Local commitment-extraction eval runner
+tests/evals/                         # Seed examples + generated train/dev/test JSON splits
+tests/                               # upsert, webhook, commitment extraction/eval tests
 ```
 
 ## How a message becomes a commitment
@@ -65,10 +69,76 @@ tests/                                 # upsert, webhook, commitment extraction 
    - Filters out chats with more distinct senders than `MAX_GROUP_PARTICIPANTS` (large groups are skipped — this is a 1:1/small-group tool, not a broadcast-list reader).
    - Appends the event to an **in-memory** `MessageBuffer`, keyed by `(tenant_id, chat_id)`.
 3. **Drain** — a background `asyncio` task inside the running app process wakes up every 10 minutes, atomically drains the whole buffer, and hands each chat's batch of messages to the commitment extractor.
-4. **Extract** — `extract_commitments()` sends the batch, plus that chat's currently-open commitments, to an OpenAI structured-output call. The model itself decides whether a message opens a new commitment, updates an existing one (matched by `id`), or changes nothing.
+4. **Extract** — `extract_commitments()` sends the batch, plus that chat's currently-open commitments, through a DSPy `CommitmentAgent` (`ExtractCommitments` signature + `dspy.Predict`). DSPy is configured at startup with `dspy.JSONAdapter()` so the extractor behaves like a structured-output call while staying measurable and optimizable.
 5. **Persist** — `CommitmentItem` rows are upserted into Postgres/SQLite, tagged with the `source_message_ids` that produced them.
 
 The 360dialog path (`/webhook/360dialog`) is unrelated to this flow — it's a direct reply bot for business-number customers, using `agents/core.py` for in-memory per-thread conversation and `services/transcription.py` for voice notes.
+
+
+## Commitment extraction evals
+
+The commitment extractor has been refactored from a one-off raw OpenAI `responses.parse` call into a DSPy `Signature + Module` pattern:
+
+- `Commitment` / `CommitmentList` remain the canonical domain schema in `app/commitments/models.py`.
+- `app/commitments/commitments_agent.py` defines `ExtractCommitments(dspy.Signature)` and `CommitmentAgent(dspy.Module)`.
+- `extract_commitments()` keeps the same public interface used by `processor.py`, but internally calls the DSPy agent and normalizes `chat_id` / `chat_name` after the LLM response.
+- `app/commitments/eval.py` contains a strict full-commitment metric, with token-F1 matching for `required_action` so small wording differences are not always counted as failures.
+
+The generated eval dataset is made of controlled probes rather than random examples. Each example is tagged by:
+
+| Dimension | Values |
+|---|---|
+| Category | `act_vs_ignore`, `args_party`, `args_deadline`, `args_required_action`, `lifecycle_update_vs_new`, `lifecycle_completion` |
+| Difficulty | `easy`, `medium`, `hard` |
+| Scenario | A specific contrastive case, such as `request_without_acceptance_ignore`, `almost_done_not_done`, or `party_implied_by_role` |
+
+The hand-written examples are preserved separately as `tests/evals/seed_examples.json`. The deterministic generator writes generated-only splits:
+
+```bash
+python tests/evals/generate_commitment_devset.py
+```
+
+Current generated split sizes:
+
+| Split | Examples |
+|---|---:|
+| Train | 40 |
+| Dev | 22 |
+| Test | 31 |
+| Total | 93 |
+
+### Latest smoke-eval results
+
+Command:
+
+```bash
+python scripts/smoke_eval.py --all
+```
+
+Latest run:
+
+| Split | N | TP | FP | FN | TN | Precision | Recall | F1 | Act/Ignore Accuracy | Full Commitment Metric | Over-Extraction |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Train | 40 | 28 | 3 | 4 | 5 | 0.90 | 0.88 | 0.89 | 0.82 | 43.8% | 38% |
+| Dev | 22 | 18 | 1 | 1 | 2 | 0.95 | 0.95 | 0.95 | 0.91 | 52.6% | 33% |
+| Test | 31 | 25 | 0 | 2 | 4 | 1.00 | 0.93 | 0.96 | 0.94 | 59.3% | 0% |
+
+Field accuracy on the test split, measured only on true-positive commitment detections:
+
+| Field | Accuracy |
+|---|---:|
+| `committed_party` | 100% |
+| `required_action` | 80% |
+| `deadline` | 76% |
+| `context` | 84% |
+| `status` | 96% |
+
+Interpretation:
+
+- The extractor is already strong at the binary decision of whether a message should produce a commitment (`Act/Ignore Accuracy = 0.94` on test).
+- The stricter full-object metric is intentionally harder (`59.3%` on test), because it requires the right party, action, deadline, context, status, and update/new behavior.
+- Current weaknesses are mostly around `required_action` wording, deadline phrasing, and lifecycle edge cases such as update-vs-new or conditional completion.
+- The eval now separates obvious examples from hard contrastive probes, so regressions show up by difficulty instead of being hidden by easy cases.
 
 ## Data model
 
@@ -132,7 +202,19 @@ curl -X POST https://your-app.onrender.com/admin/seed
 .venv/bin/python -m pytest tests/ -v
 ```
 
-Covers: Green API payload normalization, contact upsert + buffering, webhook handling, and commitment extraction against a real fixture payload (`tests/test_payload.json`).
+Covers: Green API payload normalization, contact upsert + buffering, webhook handling, commitment extraction helpers, and commitment-eval utilities.
+
+Run the commitment smoke eval separately:
+
+```bash
+python scripts/smoke_eval.py --all
+```
+
+Regenerate the deterministic train/dev/test eval splits:
+
+```bash
+python tests/evals/generate_commitment_devset.py
+```
 
 ## Deploy (Render)
 
@@ -160,8 +242,9 @@ Roughly in priority order:
 
 1. **Durable ingestion.** Persist `ChatMessage` rows on arrival (the table already exists) instead of relying solely on the in-memory buffer. This alone removes the "lose messages on restart" risk and gives you a permanent audit trail independent of what the LLM does with them.
 2. **Green API webhook auth is currently disabled** (`verify_green_api_authorization` is defined but commented out in `personal_webhook.py`). Re-enable before this is exposed on a public URL for real.
-3. **Commitment dedup relies entirely on the LLM's judgment** (matching by `id` inside one extraction call). There's no deterministic fallback if the model creates a near-duplicate commitment for something already tracked — worth a periodic dedup pass or a stricter matching heuristic.
-4. **`deadline` is free text** (`"in one hour"`), not a resolved timestamp — fine for display, not usable yet for urgency sorting or a scheduled digest.
-5. **`Contact.kind` (client/bank/lawyer/…) is modeled but not populated.** No classifier currently sets it, so nothing downstream can yet filter or route by relationship type.
-6. **No digest job yet.** The `CommitmentItem` data is now good enough to query; a scheduled per-tenant job that renders open commitments into a daily WhatsApp message is the natural next milestone.
-7. **`/admin/seed` has no auth of its own** — fine for a private dev deploy, worth gating before wider use.
+3. **Commitment dedup/update matching is still partly model-driven** (matching by `id` inside one extraction call). The eval now includes update-vs-new probes, but production should still add a deterministic fallback if the model creates a near-duplicate commitment.
+4. **`deadline` is free text** (`"in one hour"`, `"by Friday"`, `"next Monday"`), not a resolved timestamp. The latest eval shows deadline extraction is one of the weaker fields, so this should be normalized before urgency sorting or scheduled digests.
+5. **`required_action` wording is not yet stable enough.** The eval uses token-F1 instead of exact equality, but action normalization remains an important quality target.
+6. **`Contact.kind` (client/bank/lawyer/…) is modeled but not populated.** No classifier currently sets it, so nothing downstream can yet filter or route by relationship type.
+7. **No digest job yet.** The `CommitmentItem` data is now good enough to query; a scheduled per-tenant job that renders waiting commitments into a daily WhatsApp message is the natural next milestone.
+8. **`/admin/seed` has no auth of its own** — fine for a private dev deploy, worth gating before wider use.

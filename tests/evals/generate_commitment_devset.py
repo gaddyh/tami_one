@@ -99,7 +99,7 @@ def _existing(
     )
 
 
-# ─── A. Act vs Ignore (15) ─────────────────────────────────────────────
+# ─── A. Act vs Ignore (18) ─────────────────────────────────────────────
 
 
 def act_vs_ignore_examples() -> list[dict[str, Any]]:
@@ -214,6 +214,7 @@ def act_vs_ignore_examples() -> list[dict[str, Any]]:
             messages="Gaddy: what time is the meeting tomorrow?",
             expected_commitments=[],
         ),
+        # --- hard ---
         # Contrastive pair: generic callback without topic → ignore
         example(
             category="act_vs_ignore",
@@ -258,7 +259,6 @@ def act_vs_ignore_examples() -> list[dict[str, Any]]:
                 )
             ],
         ),
-        # --- new hard examples ---
         # Request without acceptance → ignore (no one agreed to do it)
         example(
             category="act_vs_ignore",
@@ -284,6 +284,42 @@ def act_vs_ignore_examples() -> list[dict[str, Any]]:
             difficulty="hard",
             policy_note="'We should do X' is an opinion, not a commitment to act.",
             messages="Gaddy: we should really call the supplier about the delay",
+            expected_commitments=[],
+        ),
+        # --- additional hard ignore examples ---
+        # Rhetorical question → ignore
+        example(
+            category="act_vs_ignore",
+            scenario="rhetorical_question_ignore",
+            difficulty="hard",
+            policy_note="Rhetorical questions are not commitments, even if they mention an action.",
+            messages="Gaddy: who has time to prepare a full report by Friday?",
+            expected_commitments=[],
+        ),
+        # Hedged commitment with no clear intent → unclear
+        example(
+            category="act_vs_ignore",
+            scenario="hedged_commitment_unclear",
+            difficulty="hard",
+            policy_note="Hedged language ('might', 'maybe') with no clear commitment → unclear, not ignore.",
+            messages="Gaddy: I might be able to send the documents tomorrow, but I'm not sure",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Send the documents",
+                    deadline="tomorrow",
+                    context="I might be able to send the documents tomorrow, but I'm not sure",
+                    status="unclear",
+                )
+            ],
+        ),
+        # Past tense completion without existing commitment → ignore
+        example(
+            category="act_vs_ignore",
+            scenario="past_tense_no_existing_ignore",
+            difficulty="hard",
+            policy_note="Past-tense statements about completed actions without existing commitments → ignore.",
+            messages="Gaddy: I already called the supplier yesterday and sorted it out",
             expected_commitments=[],
         ),
     ]
@@ -1574,6 +1610,463 @@ def build_examples() -> list[dict[str, Any]]:
     return examples
 
 
+# ─── Challenge Split: Act vs Ignore ────────────────────────────────────
+
+
+def challenge_act_ignore_examples() -> list[dict[str, Any]]:
+    """Dedicated challenge split focused on act vs ignore boundary.
+
+    ~36 examples, roughly 50% act / 50% ignore, mostly hard contrastive pairs.
+    """
+    return [
+        # --- IGNORE cases (hard) ---
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_request_no_acceptance",
+            difficulty="hard",
+            policy_note="Request with no acceptance or volunteer → ignore.",
+            messages="Alice: can someone prepare the slides for Monday?",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_conditional_untriggered",
+            difficulty="hard",
+            policy_note="Conditional promise, condition not met → ignore.",
+            messages="Gaddy: if the client approves the budget, I'll start the project",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_generic_callback",
+            difficulty="hard",
+            policy_note="Generic callback without topic or deadline → ignore.",
+            messages="Bob: I'll get back to you on that",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_should_not_will",
+            difficulty="hard",
+            policy_note="'Should' is opinion, not commitment → ignore.",
+            messages="Gaddy: we should really update the website at some point",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_rhetorical_question",
+            difficulty="hard",
+            policy_note="Rhetorical question mentioning action → ignore.",
+            messages="Gaddy: who has time to write a full proposal this week?",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_past_tense_no_existing",
+            difficulty="hard",
+            policy_note="Past-tense completion without existing commitment → ignore.",
+            messages="Gaddy: I already sent the email to the team yesterday",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_social_vague",
+            difficulty="hard",
+            policy_note="Vague social intent without specifics → ignore.",
+            messages="Gaddy: we should all hang out sometime soon",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_opinion_not_commitment",
+            difficulty="hard",
+            policy_note="Expressing opinion about what needs doing → ignore.",
+            messages="Gaddy: the report really needs to be more detailed",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_question_about_past",
+            difficulty="hard",
+            policy_note="Question about past events → ignore.",
+            messages="Alice: did anyone follow up with the vendor last week?",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_suggestion_not_promise",
+            difficulty="hard",
+            policy_note="Suggesting an approach is not committing to it → ignore.",
+            messages="Bob: maybe we could try reaching out to the new supplier",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_hope_not_commitment",
+            difficulty="hard",
+            policy_note="Expressing hope/wish is not a commitment → ignore.",
+            messages="Gaddy: I hope we can finish the migration by next month",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_report_status_no_action",
+            difficulty="hard",
+            policy_note="Reporting current status without committing to action → ignore.",
+            messages="Gaddy: the server is down again, looking into it",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_appreciation_not_commitment",
+            difficulty="hard",
+            policy_note="Thanking someone for future help is not a commitment → ignore.",
+            messages="Alice: thanks in advance for handling the client call",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_reminder_not_commitment",
+            difficulty="hard",
+            policy_note="Reminding someone else is not a commitment by the speaker → ignore.",
+            messages="Gaddy: don't forget Bob needs the data by Friday",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_worry_not_commitment",
+            difficulty="hard",
+            policy_note="Expressing concern is not a commitment → ignore.",
+            messages="Gaddy: I'm worried we won't meet the deadline for the launch",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_information_sharing",
+            difficulty="hard",
+            policy_note="Sharing information without action item → ignore.",
+            messages="Gaddy: the client said they'll review the proposal and get back to us next week",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_almost_done_no_existing",
+            difficulty="hard",
+            policy_note="Progress report without existing commitment → ignore.",
+            messages="Gaddy: I'm almost done with the presentation",
+            expected_commitments=[],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_started_no_existing",
+            difficulty="hard",
+            policy_note="Started working without existing commitment → ignore.",
+            messages="Gaddy: I started looking into the bug",
+            expected_commitments=[],
+        ),
+
+        # --- ACT cases (hard contrastive pairs) ---
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_request_with_acceptance",
+            difficulty="hard",
+            policy_note="Request + explicit acceptance → commitment.",
+            messages=(
+                "Alice: can you send me the slides by Monday?\n"
+                "Bob: sure, I'll send them by Monday"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="Bob",
+                    required_action="Send the slides",
+                    deadline="Monday",
+                    context="Alice asked Bob to send the slides by Monday, Bob agreed",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_generic_callback_with_topic",
+            difficulty="hard",
+            policy_note="Contrastive pair: generic callback but WITH topic + deadline → commitment.",
+            messages=(
+                "Alice: what about the budget?\n"
+                "Bob: let me review the budget and get back to you tomorrow"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="Bob",
+                    required_action="Get back to Alice about the budget",
+                    deadline="tomorrow",
+                    context="let me review the budget and get back to you tomorrow",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_explicit_self_promise",
+            difficulty="hard",
+            policy_note="Explicit 'I will' with specific action and deadline → commitment.",
+            messages="Gaddy: I will definitely call the client before noon",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Call the client",
+                    deadline="before noon",
+                    context="I will definitely call the client before noon",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_volunteer",
+            difficulty="hard",
+            policy_note="Volunteering to do something specific → commitment.",
+            messages=(
+                "Alice: we need someone to handle the vendor registration\n"
+                "Bob: I'll take care of the vendor registration by Wednesday"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="Bob",
+                    required_action="Handle the vendor registration",
+                    deadline="Wednesday",
+                    context="I'll take care of the vendor registration by Wednesday",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_conditional_triggered",
+            difficulty="hard",
+            policy_note="Conditional promise where condition IS satisfied → commitment.",
+            messages=(
+                "Alice: the client just approved the budget!\n"
+                "Gaddy: great, I'll start the project tomorrow then"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Start the project",
+                    deadline="tomorrow",
+                    context="the client approved the budget, I'll start the project tomorrow",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_will_with_specific_action",
+            difficulty="hard",
+            policy_note="'I will' with concrete action but no deadline → commitment without deadline.",
+            messages="Gaddy: I'll prepare the quarterly report",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Prepare the quarterly report",
+                    deadline=None,
+                    context="I'll prepare the quarterly report",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_third_party_commits",
+            difficulty="hard",
+            policy_note="Speaker asserts someone else will do something → commitment with that party.",
+            messages="Gaddy: Dana will send the contract to the client by Friday",
+            expected_commitments=[
+                commitment(
+                    committed_party="Dana",
+                    required_action="Send the contract to the client",
+                    deadline="Friday",
+                    context="Dana will send the contract to the client by Friday",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_hedged_unclear",
+            difficulty="hard",
+            policy_note="Hedged commitment → unclear status, not ignore.",
+            messages="Gaddy: I might be able to review the code tomorrow, but I'm not sure",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Review the code",
+                    deadline="tomorrow",
+                    context="I might be able to review the code tomorrow, but I'm not sure",
+                    status="unclear",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_multi_message_commitment",
+            difficulty="hard",
+            policy_note="Commitment built across multiple messages → commitment.",
+            messages=(
+                "Gaddy: I need to deal with the invoice\n"
+                "Gaddy: I'll pay it by end of week"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Pay the invoice",
+                    deadline="end of week",
+                    context="I'll pay it by end of week",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_implicit_acceptance",
+            difficulty="hard",
+            policy_note="Request followed by action-oriented response → commitment.",
+            messages=(
+                "Alice: can you update the spreadsheet?\n"
+                "Bob: on it"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="Bob",
+                    required_action="Update the spreadsheet",
+                    deadline=None,
+                    context="Alice asked Bob to update the spreadsheet, Bob said 'on it'",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_waiting_external",
+            difficulty="hard",
+            policy_note="Waiting for external party to act → commitment with external party.",
+            messages=(
+                "Gaddy: I submitted the application last week\n"
+                "Gaddy: now just waiting for the city to approve the permit"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="the city",
+                    required_action="Approve the permit",
+                    deadline=None,
+                    context="waiting for the city to approve the permit",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_let_me_with_action",
+            difficulty="hard",
+            policy_note="'Let me X' with specific action → commitment.",
+            messages="Gaddy: let me check with the accountant and I'll update you today",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Check with the accountant and update",
+                    deadline="today",
+                    context="let me check with the accountant and I'll update you today",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_responsibility_claim",
+            difficulty="hard",
+            policy_note="Claiming responsibility for a task → commitment.",
+            messages="Gaddy: I'll handle the client meeting on Thursday",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Handle the client meeting",
+                    deadline="Thursday",
+                    context="I'll handle the client meeting on Thursday",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_need_to_with_intent",
+            difficulty="hard",
+            policy_note="'I need to X' with clear intent to act → commitment.",
+            messages="Gaddy: I need to call the bank about the fees today",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Call the bank about the fees",
+                    deadline="today",
+                    context="I need to call the bank about the fees today",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_confirm_and_commit",
+            difficulty="hard",
+            policy_note="Confirming a task and committing to deadline → commitment.",
+            messages=(
+                "Alice: did you confirm the venue?\n"
+                "Bob: not yet, I'll call them this afternoon"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="Bob",
+                    required_action="Call the venue to confirm",
+                    deadline="this afternoon",
+                    context="not yet, I'll call them this afternoon",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_plan_with_action",
+            difficulty="hard",
+            policy_note="Stating a plan with specific action and timing → commitment.",
+            messages="Gaddy: I'm going to submit the proposal by Friday end of day",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Submit the proposal",
+                    deadline="Friday end of day",
+                    context="I'm going to submit the proposal by Friday end of day",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_offer_help",
+            difficulty="hard",
+            policy_note="Offering to do something specific → commitment.",
+            messages="Gaddy: I can review the contract and send comments by tomorrow",
+            expected_commitments=[
+                commitment(
+                    committed_party="Gaddy",
+                    required_action="Review the contract and send comments",
+                    deadline="tomorrow",
+                    context="I can review the contract and send comments by tomorrow",
+                )
+            ],
+        ),
+        example(
+            category="act_vs_ignore",
+            scenario="challenge_commit_after_question",
+            difficulty="hard",
+            policy_note="Question followed by commitment to act → commitment.",
+            messages=(
+                "Alice: has anyone followed up with the vendor?\n"
+                "Bob: not yet, I'll email them today"
+            ),
+            expected_commitments=[
+                commitment(
+                    committed_party="Bob",
+                    required_action="Email the vendor",
+                    deadline="today",
+                    context="not yet, I'll email them today",
+                )
+            ],
+        ),
+    ]
+
+
 def main() -> None:
     all_examples = build_examples()
 
@@ -1606,6 +2099,7 @@ def main() -> None:
         ("trainset.json", train),
         ("devset.json", dev),
         ("testset.json", test),
+        ("challenge_act_ignore.json", challenge_act_ignore_examples()),
     ]:
         path = output_dir / name
         path.write_text(
@@ -1614,10 +2108,14 @@ def main() -> None:
         )
 
     # Summary
+    challenge = challenge_act_ignore_examples()
+    challenge_ignore = sum(1 for e in challenge if not e["expected_commitments"])
+    challenge_act = len(challenge) - challenge_ignore
     print(f"Total: {len(all_examples)} examples")
     print(f"  train: {len(train)}")
     print(f"  dev:   {len(dev)}")
     print(f"  test:  {len(test)}")
+    print(f"  challenge: {len(challenge)} ({challenge_act} act / {challenge_ignore} ignore)")
     print()
 
     # Per-category × difficulty summary

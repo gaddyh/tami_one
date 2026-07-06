@@ -1,0 +1,614 @@
+[
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_request_no_acceptance",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: can someone prepare the slides for Monday?",
+    "expected_commitments": [],
+    "policy_note": "Request with no acceptance or volunteer → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_conditional_untriggered",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: if the client approves the budget, I'll start the project",
+    "expected_commitments": [],
+    "policy_note": "Conditional promise, condition not met → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_generic_callback",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Bob: I'll get back to you on that",
+    "expected_commitments": [],
+    "policy_note": "Generic callback without topic or deadline → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_should_not_will",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: we should really update the website at some point",
+    "expected_commitments": [],
+    "policy_note": "'Should' is opinion, not commitment → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_rhetorical_question",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: who has time to write a full proposal this week?",
+    "expected_commitments": [],
+    "policy_note": "Rhetorical question mentioning action → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_past_tense_no_existing",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I already sent the email to the team yesterday",
+    "expected_commitments": [],
+    "policy_note": "Past-tense completion without existing commitment → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_social_vague",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: we should all hang out sometime soon",
+    "expected_commitments": [],
+    "policy_note": "Vague social intent without specifics → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_opinion_not_commitment",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: the report really needs to be more detailed",
+    "expected_commitments": [],
+    "policy_note": "Expressing opinion about what needs doing → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_question_about_past",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: did anyone follow up with the vendor last week?",
+    "expected_commitments": [],
+    "policy_note": "Question about past events → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_suggestion_not_promise",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Bob: maybe we could try reaching out to the new supplier",
+    "expected_commitments": [],
+    "policy_note": "Suggesting an approach is not committing to it → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_hope_not_commitment",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I hope we can finish the migration by next month",
+    "expected_commitments": [],
+    "policy_note": "Expressing hope/wish is not a commitment → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_report_status_no_action",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: the server is down again, looking into it",
+    "expected_commitments": [],
+    "policy_note": "Reporting current status without committing to action → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_appreciation_not_commitment",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: thanks in advance for handling the client call",
+    "expected_commitments": [],
+    "policy_note": "Thanking someone for future help is not a commitment → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_reminder_not_commitment",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: don't forget Bob needs the data by Friday",
+    "expected_commitments": [],
+    "policy_note": "Reminding someone else is not a commitment by the speaker → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_worry_not_commitment",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'm worried we won't meet the deadline for the launch",
+    "expected_commitments": [],
+    "policy_note": "Expressing concern is not a commitment → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_information_sharing",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: the client said they'll review the proposal and get back to us next week",
+    "expected_commitments": [],
+    "policy_note": "Sharing information without action item → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_almost_done_no_existing",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'm almost done with the presentation",
+    "expected_commitments": [],
+    "policy_note": "Progress report without existing commitment → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_started_no_existing",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I started looking into the bug",
+    "expected_commitments": [],
+    "policy_note": "Started working without existing commitment → ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_request_with_acceptance",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: can you send me the slides by Monday?\nBob: sure, I'll send them by Monday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Send the slides",
+        "deadline": "Monday",
+        "context": "Alice asked Bob to send the slides by Monday, Bob agreed",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Request + explicit acceptance → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_generic_callback_with_topic",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: what about the budget?\nBob: let me review the budget and get back to you tomorrow",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Get back to Alice about the budget",
+        "deadline": "tomorrow",
+        "context": "let me review the budget and get back to you tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Contrastive pair: generic callback but WITH topic + deadline → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_explicit_self_promise",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I will definitely call the client before noon",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Call the client",
+        "deadline": "before noon",
+        "context": "I will definitely call the client before noon",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Explicit 'I will' with specific action and deadline → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_volunteer",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: we need someone to handle the vendor registration\nBob: I'll take care of the vendor registration by Wednesday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Handle the vendor registration",
+        "deadline": "Wednesday",
+        "context": "I'll take care of the vendor registration by Wednesday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Volunteering to do something specific → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_conditional_triggered",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: the client just approved the budget!\nGaddy: great, I'll start the project tomorrow then",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Start the project",
+        "deadline": "tomorrow",
+        "context": "the client approved the budget, I'll start the project tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Conditional promise where condition IS satisfied → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_will_with_specific_action",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'll prepare the quarterly report",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Prepare the quarterly report",
+        "deadline": null,
+        "context": "I'll prepare the quarterly report",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "'I will' with concrete action but no deadline → commitment without deadline."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_third_party_commits",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: Dana will send the contract to the client by Friday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Dana",
+        "required_action": "Send the contract to the client",
+        "deadline": "Friday",
+        "context": "Dana will send the contract to the client by Friday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Speaker asserts someone else will do something → commitment with that party."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_hedged_unclear",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I might be able to review the code tomorrow, but I'm not sure",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Review the code",
+        "deadline": "tomorrow",
+        "context": "I might be able to review the code tomorrow, but I'm not sure",
+        "status": "unclear",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Hedged commitment → unclear status, not ignore."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_multi_message_commitment",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I need to deal with the invoice\nGaddy: I'll pay it by end of week",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Pay the invoice",
+        "deadline": "end of week",
+        "context": "I'll pay it by end of week",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Commitment built across multiple messages → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_implicit_acceptance",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: can you update the spreadsheet?\nBob: on it",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Update the spreadsheet",
+        "deadline": null,
+        "context": "Alice asked Bob to update the spreadsheet, Bob said 'on it'",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Request followed by action-oriented response → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_waiting_external",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I submitted the application last week\nGaddy: now just waiting for the city to approve the permit",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "the city",
+        "required_action": "Approve the permit",
+        "deadline": null,
+        "context": "waiting for the city to approve the permit",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Waiting for external party to act → commitment with external party."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_let_me_with_action",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: let me check with the accountant and I'll update you today",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Check with the accountant and update",
+        "deadline": "today",
+        "context": "let me check with the accountant and I'll update you today",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "'Let me X' with specific action → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_responsibility_claim",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'll handle the client meeting on Thursday",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Handle the client meeting",
+        "deadline": "Thursday",
+        "context": "I'll handle the client meeting on Thursday",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Claiming responsibility for a task → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_need_to_with_intent",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I need to call the bank about the fees today",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Call the bank about the fees",
+        "deadline": "today",
+        "context": "I need to call the bank about the fees today",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "'I need to X' with clear intent to act → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_confirm_and_commit",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: did you confirm the venue?\nBob: not yet, I'll call them this afternoon",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Call the venue to confirm",
+        "deadline": "this afternoon",
+        "context": "not yet, I'll call them this afternoon",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Confirming a task and committing to deadline → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_plan_with_action",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I'm going to submit the proposal by Friday end of day",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Submit the proposal",
+        "deadline": "Friday end of day",
+        "context": "I'm going to submit the proposal by Friday end of day",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Stating a plan with specific action and timing → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_offer_help",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: I can review the contract and send comments by tomorrow",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Gaddy",
+        "required_action": "Review the contract and send comments",
+        "deadline": "tomorrow",
+        "context": "I can review the contract and send comments by tomorrow",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Offering to do something specific → commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "challenge_commit_after_question",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Alice: has anyone followed up with the vendor?\nBob: not yet, I'll email them today",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": "Bob",
+        "required_action": "Email the vendor",
+        "deadline": "today",
+        "context": "not yet, I'll email them today",
+        "status": "waiting",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Question followed by commitment to act → commitment."
+  }
+]

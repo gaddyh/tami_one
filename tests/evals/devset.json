@@ -11,26 +11,25 @@
   },
   {
     "category": "act_vs_ignore",
-    "scenario": "vague_action_unclear",
+    "scenario": "request_without_acceptance_ignore",
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
     "existing_commitments_json": "[]",
-    "messages": "Gaddy: we should probably do something about the project at some point",
-    "expected_commitments": [
-      {
-        "id": null,
-        "chat_id": "972546610653@c.us",
-        "chat_name": "Gaddy",
-        "committed_party": null,
-        "required_action": "Do something about the project",
-        "deadline": null,
-        "context": "we should probably do something about the project at some point",
-        "status": "unclear",
-        "notification": "none"
-      }
-    ],
-    "policy_note": "Vague action with no clear owner or deadline → unclear status, not ignored."
+    "messages": "Alice: can someone send me the report by Friday?",
+    "expected_commitments": [],
+    "policy_note": "A request with no acceptance or volunteer is not yet a commitment."
+  },
+  {
+    "category": "act_vs_ignore",
+    "scenario": "conditional_promise_untriggered_ignore",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: if they send the quote, I'll approve it",
+    "expected_commitments": [],
+    "policy_note": "Conditional promise where condition has not been met → ignore, not a commitment yet."
   },
   {
     "category": "act_vs_ignore",

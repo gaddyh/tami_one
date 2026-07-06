@@ -77,6 +77,29 @@
   },
   {
     "category": "act_vs_ignore",
+    "scenario": "vague_action_unclear",
+    "difficulty": "hard",
+    "chat_id": "972546610653@c.us",
+    "chat_name": "Gaddy",
+    "existing_commitments_json": "[]",
+    "messages": "Gaddy: we should probably do something about the project at some point",
+    "expected_commitments": [
+      {
+        "id": null,
+        "chat_id": "972546610653@c.us",
+        "chat_name": "Gaddy",
+        "committed_party": null,
+        "required_action": "Do something about the project",
+        "deadline": null,
+        "context": "we should probably do something about the project at some point",
+        "status": "unclear",
+        "notification": "none"
+      }
+    ],
+    "policy_note": "Vague action with no clear owner or deadline → unclear status, not ignored."
+  },
+  {
+    "category": "act_vs_ignore",
     "scenario": "soft_social_future_ignore",
     "difficulty": "medium",
     "chat_id": "972546610653@c.us",

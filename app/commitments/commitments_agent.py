@@ -24,6 +24,25 @@ class ExtractCommitments(dspy.Signature):
       return that commitment with the same id and updated fields.
     - For brand-new commitments, set id to null.
     - chat_id and chat_name must match the provided inputs.
+
+    Act vs Ignore rules (critical — do NOT over-extract):
+    - A request without acceptance is NOT a commitment. Someone must explicitly
+      agree, volunteer, or state intent to act.
+    - "We should do X" is an opinion, NOT a commitment. Look for "I will" or
+      "I'll" or explicit acceptance.
+    - Generic social intent ("let's catch up", "we should hang out") is NOT a
+      commitment. There must be a specific action, topic, or deadline.
+    - A conditional promise ("if X, I'll do Y") is NOT a commitment unless the
+      condition is clearly satisfied in the messages.
+    - A rhetorical question is NOT a commitment, even if it mentions an action.
+    - "I hope", "I'm worried", "maybe we could" are NOT commitments.
+    - Past-tense statements about completed actions are NOT new commitments
+      unless they match an existing commitment (use status='done' in that case).
+    - "Started", "almost done", "working on it" are progress reports, NOT
+      completions. Do not mark existing commitments as done.
+    - Reminding someone else to do something is NOT a commitment by the speaker.
+    - Sharing information ("the client will get back to us") is NOT a commitment
+      unless the speaker is the one who will act.
     """
 
     chat_id: str = dspy.InputField()
