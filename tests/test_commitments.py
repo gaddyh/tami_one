@@ -55,6 +55,9 @@ def _make_event(
     chat_name: str | None = "Gaddy",
     text: str | None = "hello",
     provider_message_id: str = "msg-1",
+    direction: MessageDirection = MessageDirection.INBOUND,
+    sender: str | None = "972546610653@c.us",
+    sender_name: str | None = "Gaddy",
 ) -> MessageEvent:
     return MessageEvent(
         provider_message_id=provider_message_id,
@@ -62,7 +65,9 @@ def _make_event(
         wId=None,
         chat_id=chat_id,
         chat_name=chat_name,
-        direction=MessageDirection.INBOUND,
+        sender=sender,
+        sender_name=sender_name,
+        direction=direction,
         message_type="textMessage",
         message_time=datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
         text=text,
@@ -89,14 +94,36 @@ def test_format_messages_maps_fields():
     event = _make_event(
         chat_id="group@c.us",
         chat_name="Family Group",
+        sender="972555555555@c.us",
+        sender_name="Alice",
         text="send the report by Friday",
         provider_message_id="msg-99",
     )
     result = format_messages_for_llm([event])
-    assert result[0]["senderName"] == "Family Group"
-    assert result[0]["senderId"] == "group@c.us"
+    assert result[0]["senderName"] == "Alice"
+    assert result[0]["senderId"] == "972555555555@c.us"
     assert result[0]["textMessage"] == "send the report by Friday"
     assert result[0]["messageId"] == "msg-99"
+
+
+def test_format_messages_outbound_shows_me():
+    event = _make_event(
+        text="I will send it tomorrow",
+        direction=MessageDirection.OUTBOUND,
+        sender_name=None,
+    )
+    result = format_messages_for_llm([event])
+    assert result[0]["senderName"] == "me"
+
+
+def test_format_messages_falls_back_to_chat_name():
+    event = _make_event(
+        chat_name="אקו",
+        sender_name=None,
+        sender=None,
+    )
+    result = format_messages_for_llm([event])
+    assert result[0]["senderName"] == "אקו"
 
 
 # ─── _format_existing ─────────────────────────────────────────────────

@@ -77,6 +77,8 @@ def _make_event(
         wId=None,
         chat_id=chat_id,
         chat_name=chat_name,
+        sender="972546610653@c.us",
+        sender_name=chat_name,
         direction=MessageDirection.INBOUND,
         message_type="textMessage",
         message_time=message_time or datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc),

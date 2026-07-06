@@ -36,6 +36,8 @@ class MessageEvent:
     wId: str | None
     chat_id: str
     chat_name: str | None
+    sender: str | None
+    sender_name: str | None
     direction: MessageDirection
     message_type: str | None
     message_time: datetime
@@ -70,6 +72,8 @@ def normalize_green_api_message_event(
         wId=payload.get("instanceData", {}).get("wid"),
         chat_id=chat_id,
         chat_name=get_chat_name(payload),
+        sender=get_sender(payload),
+        sender_name=get_sender_name(payload),
         direction=direction,
         message_type=get_message_type(payload),
         message_time=get_message_time(payload),
@@ -121,6 +125,16 @@ def get_chat_id(payload: dict[str, Any]) -> str | None:
 def get_chat_name(payload: dict[str, Any]) -> str | None:
     sender_data = payload.get("senderData") or {}
     return sender_data.get("chatName")
+
+
+def get_sender(payload: dict[str, Any]) -> str | None:
+    sender_data = payload.get("senderData") or {}
+    return sender_data.get("sender")
+
+
+def get_sender_name(payload: dict[str, Any]) -> str | None:
+    sender_data = payload.get("senderData") or {}
+    return sender_data.get("senderName")
 
 
 def get_message_data(payload: dict[str, Any]) -> dict[str, Any]:

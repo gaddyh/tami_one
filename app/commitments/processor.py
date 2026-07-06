@@ -11,7 +11,7 @@ from app.commitments.models import Commitment
 from app.db.cache import ChatBufferKey, message_buffer
 from app.db.engine import engine
 from app.db.models import CommitmentItem, CommitmentItemStatus, CommitmentNotification
-from app.routers.green_api import MessageEvent
+from app.routers.green_api import MessageDirection, MessageEvent
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +20,8 @@ def format_messages_for_llm(events: list[MessageEvent]) -> list[dict]:
     """Convert MessageEvent objects into the dict shape the extractor expects."""
     return [
         {
-            "senderName": e.chat_name,
-            "senderId": e.chat_id,
+            "senderName": "me" if e.direction == MessageDirection.OUTBOUND else (e.sender_name or e.chat_name or e.sender or "unknown"),
+            "senderId": e.sender or e.chat_id,
             "textMessage": e.text,
             "messageId": e.provider_message_id,
         }
