@@ -10,6 +10,8 @@ from uuid import uuid4
 from sqlmodel import SQLModel, Field
 from sqlalchemy import JSON, Column, UniqueConstraint
 
+from app.commitments.models import CommitmentStatus, NotificationType
+
 
 def new_id() -> str:
     return str(uuid4())
@@ -90,20 +92,6 @@ class WaitingItemStatus(StrEnum):
     DONE = "done"
     SNOOZED = "snoozed"
     DISMISSED = "dismissed"
-
-
-class CommitmentItemStatus(StrEnum):
-    OPEN = "open"
-    DONE = "done"
-    WAITING = "waiting"
-    UNCLEAR = "unclear"
-    DISMISSED = "dismissed"
-
-
-class CommitmentNotification(StrEnum):
-    NONE = "none"
-    DAILY_DIGEST = "daily_digest"
-    URGENT = "urgent"
 
 
 class FeedbackAction(StrEnum):
@@ -228,8 +216,8 @@ class CommitmentItem(SQLModel, table=True):
     deadline: Optional[str] = None
     context: str
 
-    status: CommitmentItemStatus = CommitmentItemStatus.OPEN
-    notification: CommitmentNotification = CommitmentNotification.DAILY_DIGEST
+    status: CommitmentStatus = CommitmentStatus.WAITING
+    notification: NotificationType = NotificationType.NONE
 
     source_message_ids: list[str] = Field(default_factory=list, sa_column=Column(JSON))
 

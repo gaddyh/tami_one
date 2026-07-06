@@ -11,13 +11,11 @@ import pytest
 from sqlmodel import Session, SQLModel, create_engine, select
 
 from app.commitments.commitments_agent import format_existing_commitments, normalize_commitments
-from app.commitments.models import Commitment
+from app.commitments.models import Commitment, CommitmentStatus, NotificationType
 from app.commitments.processor import drain_and_process, format_messages_for_llm
 from app.db.cache import message_buffer
 from app.db.models import (
     CommitmentItem,
-    CommitmentItemStatus,
-    CommitmentNotification,
     Tenant,
     TenantKind,
 )
@@ -416,7 +414,7 @@ def test_format_existing_commitments_lists_items():
             required_action="Send report",
             deadline="Friday",
             context="Team meeting",
-            status="open",
+            status="waiting",
         ),
     ]
     result = format_existing_commitments(commitments)
@@ -426,7 +424,7 @@ def test_format_existing_commitments_lists_items():
     assert parsed[0]["id"] == "abc-123"
     assert parsed[0]["committed_party"] == "Alice"
     assert parsed[0]["required_action"] == "Send report"
-    assert parsed[0]["status"] == "open"
+    assert parsed[0]["status"] == "waiting"
 
 
 # ─── normalize_commitments ────────────────────────────────────────────
@@ -441,7 +439,7 @@ def test_normalize_commitments_overwrites_chat_id_and_name():
             committed_party="Alice",
             required_action="Send report",
             context="Team meeting",
-            status="open",
+            status="waiting",
         ),
     ]
     result = normalize_commitments(
@@ -508,7 +506,7 @@ async def test_drain_inserts_new_commitments(test_engine):
             required_action="Send the documents",
             deadline="tomorrow",
             context="I will send the documents by tomorrow",
-            status="open",
+            status="waiting",
         ),
     ]
 
@@ -533,7 +531,7 @@ async def test_drain_inserts_new_commitments(test_engine):
         assert len(items) == 1
         assert items[0].committed_party == "Gaddy"
         assert items[0].required_action == "Send the documents"
-        assert items[0].status == CommitmentItemStatus.OPEN
+        assert items[0].status == CommitmentStatus.WAITING
         assert items[0].source_message_ids == ["msg-1"]
 
 
@@ -548,8 +546,8 @@ async def test_drain_updates_existing_commitment(test_engine):
             required_action="Send the documents",
             deadline="tomorrow",
             context="I will send the documents by tomorrow",
-            status=CommitmentItemStatus.OPEN,
-            notification=CommitmentNotification.DAILY_DIGEST,
+            status=CommitmentStatus.WAITING,
+            notification=NotificationType.DAILY_DIGEST,
             source_message_ids=["msg-1"],
         )
         session.add(existing_item)
@@ -592,7 +590,7 @@ async def test_drain_updates_existing_commitment(test_engine):
         ).all()
         assert len(items) == 1
         assert items[0].id == existing_id
-        assert items[0].status == CommitmentItemStatus.DONE
+        assert items[0].status == CommitmentStatus.DONE
         assert "msg-2" in items[0].source_message_ids
 
 
@@ -677,7 +675,7 @@ async def test_drain_passes_existing_to_extractor(test_engine):
             required_action="Pay invoice",
             deadline="Monday",
             context="Pay the invoice by Monday",
-            status=CommitmentItemStatus.OPEN,
+            status=CommitmentStatus.WAITING,
         )
         session.add(existing_item)
         session.commit()
@@ -713,7 +711,7 @@ async def test_drain_does_not_fetch_dismissed_commitments(test_engine):
             required_action="Old task",
             deadline=None,
             context="outdated",
-            status=CommitmentItemStatus.DISMISSED,
+            status=CommitmentStatus.DISMISSED,
         )
         session.add(dismissed)
         session.commit()
@@ -833,7 +831,7 @@ async def test_dspy_agent_real_call_outbound_commitment(_dspy_configured):
         assert isinstance(c, Commitment)
         assert c.chat_id == "972507674593@c.us"
         assert c.required_action
-        assert c.status in ("open", "waiting", "unclear", "done", "dismissed")
+        assert c.status in list(CommitmentStatus)
 
 
 @pytest.mark.integration
@@ -863,4 +861,4 @@ async def test_dspy_agent_real_call_volunteer_message(_dspy_configured):
         assert isinstance(c, Commitment)
         assert c.chat_id == "120363402798412519@g.us"
         assert c.required_action
-        assert c.status in ("open", "waiting", "unclear", "done", "dismissed")
+        assert c.status in list(CommitmentStatus)

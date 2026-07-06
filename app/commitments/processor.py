@@ -7,10 +7,10 @@ import logging
 from sqlmodel import Session, select
 
 from app.commitments.extractor import extract_commitments
-from app.commitments.models import Commitment
+from app.commitments.models import Commitment, CommitmentStatus, NotificationType
 from app.db.cache import ChatBufferKey, message_buffer
 from app.db.engine import engine
-from app.db.models import CommitmentItem, CommitmentItemStatus, CommitmentNotification
+from app.db.models import CommitmentItem
 from app.routers.green_api import MessageDirection, MessageEvent
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ async def drain_and_process() -> dict[ChatBufferKey, list[CommitmentItem]]:
                 select(CommitmentItem).where(
                     CommitmentItem.tenant_id == tenant_id,
                     CommitmentItem.chat_id == chat_id,
-                    CommitmentItem.status != CommitmentItemStatus.DISMISSED,
+                    CommitmentItem.status != CommitmentStatus.DISMISSED,
                 )
             ).all()
 
@@ -68,8 +68,8 @@ async def drain_and_process() -> dict[ChatBufferKey, list[CommitmentItem]]:
                     required_action=r.required_action,
                     deadline=r.deadline,
                     context=r.context,
-                    status=r.status.value,
-                    notification=r.notification.value,
+                    status=r.status,
+                    notification=r.notification,
                 )
                 for r in existing_rows
             ]
@@ -103,8 +103,8 @@ async def drain_and_process() -> dict[ChatBufferKey, list[CommitmentItem]]:
                         existing_item.required_action = c.required_action
                         existing_item.deadline = c.deadline
                         existing_item.context = c.context
-                        existing_item.status = CommitmentItemStatus(c.status)
-                        existing_item.notification = CommitmentNotification(c.notification)
+                        existing_item.status = CommitmentStatus(c.status)
+                        existing_item.notification = NotificationType(c.notification)
                         existing_item.source_message_ids = source_message_ids
                         session.add(existing_item)
                         items.append(existing_item)

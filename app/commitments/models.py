@@ -1,21 +1,19 @@
-from typing import Literal
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-CommitmentStatus = Literal[
-    "open",
-    "done",
-    "waiting",
-    "unclear",
-    "dismissed",
-]
+class CommitmentStatus(StrEnum):
+    WAITING = "waiting"
+    DONE = "done"
+    UNCLEAR = "unclear"
+    DISMISSED = "dismissed"
 
-NotificationType = Literal[
-    "none",
-    "daily_digest",
-    "urgent",
-]
+
+class NotificationType(StrEnum):
+    NONE = "none"
+    DAILY_DIGEST = "daily_digest"
+    URGENT = "urgent"
 
 
 class Commitment(BaseModel):
@@ -47,12 +45,12 @@ class Commitment(BaseModel):
     )
 
     status: CommitmentStatus = Field(
-        default="open",
-        description="waiting/open for active commitments; done if completed; dismissed if cancelled; unclear if vague.",
+        default=CommitmentStatus.WAITING,
+        description="waiting for active commitments; done if completed; dismissed if cancelled; unclear if vague.",
     )
 
     notification: NotificationType = Field(
-        default="none",
+        default=NotificationType.NONE,
         description="none unless the commitment should appear in a daily digest or urgent notification.",
     )
 

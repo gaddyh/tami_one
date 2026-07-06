@@ -8,11 +8,50 @@ import dspy
 import pytest
 
 from app.commitments.eval import (
+    act_vs_ignore_metric,
     build_devset,
     commitment_metric,
     make_example,
 )
 from app.commitments.models import Commitment
+
+
+def test_act_vs_ignore_correctly_ignored():
+    example = dspy.Example(expected_commitments=[]).with_inputs()
+    prediction = dspy.Prediction(commitments=[])
+    assert act_vs_ignore_metric(example, prediction) == 1.0
+
+
+def test_act_vs_ignore_false_positive():
+    example = dspy.Example(expected_commitments=[]).with_inputs()
+    prediction = dspy.Prediction(commitments=[
+        Commitment(
+            id=None, chat_id="c@c.us", required_action="test", context="test",
+        ),
+    ])
+    assert act_vs_ignore_metric(example, prediction) == 0.0
+
+
+def test_act_vs_ignore_false_negative():
+    expected = [
+        Commitment(
+            id=None, chat_id="c@c.us", required_action="test", context="test",
+        ),
+    ]
+    example = dspy.Example(expected_commitments=expected).with_inputs()
+    prediction = dspy.Prediction(commitments=[])
+    assert act_vs_ignore_metric(example, prediction) == 0.0
+
+
+def test_act_vs_ignore_correctly_acted():
+    expected = [
+        Commitment(
+            id=None, chat_id="c@c.us", required_action="test", context="test",
+        ),
+    ]
+    example = dspy.Example(expected_commitments=expected).with_inputs()
+    prediction = dspy.Prediction(commitments=expected)
+    assert act_vs_ignore_metric(example, prediction) == 1.0
 
 
 def test_commitment_metric_match():
@@ -24,7 +63,7 @@ def test_commitment_metric_match():
             required_action="Send report",
             deadline="Friday",
             context="Alice will send the report by Friday",
-            status="open",
+            status="waiting",
         ),
     ]
     example = dspy.Example(expected_commitments=expected).with_inputs()
@@ -43,7 +82,7 @@ def test_commitment_metric_no_match():
             required_action="Send report",
             deadline="Friday",
             context="Alice will send the report by Friday",
-            status="open",
+            status="waiting",
         ),
     ]
     actual = [
@@ -54,7 +93,7 @@ def test_commitment_metric_no_match():
             required_action="Send invoice",
             deadline=None,
             context="Bob will send the invoice",
-            status="open",
+            status="waiting",
         ),
     ]
     example = dspy.Example(expected_commitments=expected).with_inputs()
