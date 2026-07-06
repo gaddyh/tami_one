@@ -165,6 +165,7 @@ def _run_split(
             "index": i,
             "category": getattr(ex, "category", "—") or "—",
             "scenario": getattr(ex, "scenario", "—") or "—",
+            "difficulty": getattr(ex, "difficulty", "—") or "—",
             "expected_empty": expected_empty,
             "actual_empty": actual_empty,
             "confusion": confusion,
@@ -218,6 +219,12 @@ def _run_split(
 
     # Print per-category breakdown
     _print_category_breakdown(per_example)
+
+    # Print per-difficulty breakdown
+    _print_difficulty_breakdown(per_example)
+
+    # Print category × difficulty matrix
+    _print_category_difficulty_matrix(per_example)
 
     # Print per-field accuracy for TP cases
     _print_field_accuracy(per_example)
@@ -329,6 +336,102 @@ def _print_category_breakdown(per_example: list[dict]) -> None:
             f"[red]{c['fn']}[/]" if c["fn"] else "0",
             f"[green]{c['tn']}[/]" if c["tn"] else "0",
             str(total),
+        )
+
+    console.print(table)
+    console.print()
+
+
+def _print_difficulty_breakdown(per_example: list[dict]) -> None:
+    """Print per-difficulty TP/FP/FN/TN breakdown with precision/recall/F1/accuracy."""
+    difficulties: dict[str, dict[str, int]] = {}
+    for e in per_example:
+        diff = e.get("difficulty", "—")
+        difficulties.setdefault(diff, {"tp": 0, "fp": 0, "fn": 0, "tn": 0})
+        difficulties[diff][e["confusion"]] += 1
+
+    table = Table(
+        show_header=True,
+        header_style="bold",
+        title="Per-Difficulty Breakdown",
+    )
+    table.add_column("Difficulty", style="bold", width=12)
+    table.add_column("TP", justify="center", width=5)
+    table.add_column("FP", justify="center", width=5)
+    table.add_column("FN", justify="center", width=5)
+    table.add_column("TN", justify="center", width=5)
+    table.add_column("Precision", justify="right", width=10)
+    table.add_column("Recall", justify="right", width=8)
+    table.add_column("F1", justify="right", width=8)
+    table.add_column("Accuracy", justify="right", width=10)
+
+    for diff in ("easy", "medium", "hard", "—"):
+        if diff not in difficulties:
+            continue
+        c = difficulties[diff]
+        total = c["tp"] + c["fp"] + c["fn"] + c["tn"]
+        precision = c["tp"] / (c["tp"] + c["fp"]) if (c["tp"] + c["fp"]) > 0 else 0.0
+        recall = c["tp"] / (c["tp"] + c["fn"]) if (c["tp"] + c["fn"]) > 0 else 0.0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+        accuracy = (c["tp"] + c["tn"]) / total if total > 0 else 0.0
+        color = "green" if accuracy >= 0.8 else "yellow" if accuracy >= 0.5 else "red"
+        table.add_row(
+            diff,
+            f"[green]{c['tp']}[/]" if c["tp"] else "0",
+            f"[red]{c['fp']}[/]" if c["fp"] else "0",
+            f"[red]{c['fn']}[/]" if c["fn"] else "0",
+            f"[green]{c['tn']}[/]" if c["tn"] else "0",
+            f"{precision:.2f}",
+            f"{recall:.2f}",
+            f"{f1:.2f}",
+            f"[{color}]{accuracy:.2f}[/{color}]",
+        )
+
+    console.print(table)
+    console.print()
+
+
+def _print_category_difficulty_matrix(per_example: list[dict]) -> None:
+    """Print category × difficulty matrix with counts and hard accuracy."""
+    matrix: dict[str, dict[str, int]] = {}
+    hard_correct: dict[str, int] = {}
+    hard_total: dict[str, int] = {}
+
+    for e in per_example:
+        cat = e.get("category", "—")
+        diff = e.get("difficulty", "—")
+        matrix.setdefault(cat, {"easy": 0, "medium": 0, "hard": 0, "—": 0})
+        matrix[cat][diff] = matrix[cat].get(diff, 0) + 1
+        if diff == "hard":
+            hard_total.setdefault(cat, 0)
+            hard_total[cat] += 1
+            if e["confusion"] in ("tp", "tn"):
+                hard_correct.setdefault(cat, 0)
+                hard_correct[cat] += 1
+
+    table = Table(
+        show_header=True,
+        header_style="bold",
+        title="Category × Difficulty",
+    )
+    table.add_column("Category", style="bold", width=28)
+    table.add_column("Easy", justify="center", width=6)
+    table.add_column("Medium", justify="center", width=7)
+    table.add_column("Hard", justify="center", width=6)
+    table.add_column("Hard Accuracy", justify="right", width=14)
+
+    for cat in sorted(matrix):
+        row = matrix[cat]
+        h_total = hard_total.get(cat, 0)
+        h_correct = hard_correct.get(cat, 0)
+        h_acc = h_correct / h_total if h_total > 0 else 0.0
+        color = "green" if h_acc >= 0.8 else "yellow" if h_acc >= 0.5 else "red"
+        table.add_row(
+            cat,
+            str(row.get("easy", 0)),
+            str(row.get("medium", 0)),
+            str(row.get("hard", 0)),
+            f"[{color}]{h_acc:.0%}[/{color}]" if h_total > 0 else "—",
         )
 
     console.print(table)

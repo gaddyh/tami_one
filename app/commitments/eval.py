@@ -155,6 +155,7 @@ def make_example(
     expected_commitments: list[Commitment],
     category: str = "",
     scenario: str = "",
+    difficulty: str = "",
 ) -> dspy.Example:
     return dspy.Example(
         chat_id=chat_id,
@@ -164,6 +165,7 @@ def make_example(
         expected_commitments=expected_commitments,
         category=category,
         scenario=scenario,
+        difficulty=difficulty,
     ).with_inputs(
         "chat_id",
         "chat_name",
@@ -196,6 +198,7 @@ def build_devset(devset_path: Path | None = None) -> list[dspy.Example]:
                 expected_commitments=expected,
                 category=entry.get("category", ""),
                 scenario=entry.get("scenario", ""),
+                difficulty=entry.get("difficulty", ""),
             )
         )
 

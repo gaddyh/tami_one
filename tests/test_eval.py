@@ -166,12 +166,13 @@ def test_build_devset_loads_all_examples():
     devset_path = Path(__file__).parent / "evals" / "devset.json"
     examples = build_devset(devset_path)
 
-    assert len(examples) == 10
+    assert len(examples) == 21
     for ex in examples:
         assert isinstance(ex, dspy.Example)
         assert hasattr(ex, "chat_id")
         assert hasattr(ex, "messages")
         assert hasattr(ex, "expected_commitments")
+        assert hasattr(ex, "difficulty")
 
 
 def test_build_devset_examples_have_inputs():
