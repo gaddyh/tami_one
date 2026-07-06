@@ -8,7 +8,7 @@ from typing import Optional
 from uuid import uuid4
 
 from sqlmodel import SQLModel, Field
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import JSON, Column, UniqueConstraint
 
 
 def new_id() -> str:
@@ -90,6 +90,20 @@ class WaitingItemStatus(StrEnum):
     DONE = "done"
     SNOOZED = "snoozed"
     DISMISSED = "dismissed"
+
+
+class CommitmentItemStatus(StrEnum):
+    OPEN = "open"
+    DONE = "done"
+    WAITING = "waiting"
+    UNCLEAR = "unclear"
+    DISMISSED = "dismissed"
+
+
+class CommitmentNotification(StrEnum):
+    NONE = "none"
+    DAILY_DIGEST = "daily_digest"
+    URGENT = "urgent"
 
 
 class FeedbackAction(StrEnum):
@@ -201,3 +215,23 @@ class ChatMessage(SQLModel, table=True):
     received_at: datetime = Field(default_factory=utc_now)
 
     created_at: datetime = Field(default_factory=utc_now)
+
+
+class CommitmentItem(SQLModel, table=True):
+    id: str = Field(default_factory=new_id, primary_key=True)
+
+    tenant_id: str = Field(index=True, foreign_key="tenant.id")
+    chat_id: str = Field(index=True)
+
+    committed_party: Optional[str] = None
+    required_action: str
+    deadline: Optional[str] = None
+    context: str
+
+    status: CommitmentItemStatus = CommitmentItemStatus.OPEN
+    notification: CommitmentNotification = CommitmentNotification.DAILY_DIGEST
+
+    source_message_ids: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
