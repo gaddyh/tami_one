@@ -15,12 +15,15 @@ from sqlmodel import Session
 
 from app.db.cache import (
     accounts_by_instance,
+    chat_senders,
     contacts_by_tenant_chat_id,
+    large_chats,
     message_buffer,
 )
 from app.db.engine import engine
 from app.db.models import Contact
-from app.routers.green_api import MessageEvent
+from app.routers.green_api import MessageDirection, MessageEvent
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +74,36 @@ async def upsert_contact_and_chat(event: MessageEvent, session: Session | None =
             created_contact = True
             logger.info("Created Contact: %s (%s)", contact.id, chat_id)
             session.commit()
+
+        # --- Large chat filter ---
+        if chat_id in large_chats:
+            logger.info("Skipping large chat %s", chat_id)
+            return {
+                "ok": True,
+                "contact_id": contact.id,
+                "created_contact": created_contact,
+                "skipped_large_chat": True,
+            }
+
+        if event.direction == MessageDirection.INBOUND:
+            sender_id = event.sender or event.sender_name or chat_id
+            senders = chat_senders.setdefault(chat_id, set())
+            senders.add(sender_id)
+            if len(senders) > settings.max_group_participants:
+                large_chats.add(chat_id)
+                logger.info(
+                    "Marked chat %s as large: %d distinct senders (max %d)",
+                    chat_id,
+                    len(senders),
+                    settings.max_group_participants,
+                )
+                return {
+                    "ok": True,
+                    "contact_id": contact.id,
+                    "created_contact": created_contact,
+                    "skipped_large_chat": True,
+                    "sender_count": len(senders),
+                }
 
         # --- Buffer message for later processing ---
         await message_buffer.append(tenant_id=tenant_id, event=event)

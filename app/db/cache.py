@@ -21,6 +21,12 @@ accounts_by_instance: dict[str, WhatsAppAccount] = {}
 # (tenant_id, chat_id) -> Contact
 contacts_by_tenant_chat_id: dict[tuple[str, str | None], Contact] = {}
 
+# chat_id -> set of distinct inbound sender identifiers
+chat_senders: dict[str, set[str]] = {}
+
+# chat_ids that have been marked as too large (exceed max_group_participants)
+large_chats: set[str] = set()
+
 
 ChatBufferKey = tuple[str, str]  # tenant_id, chat_id
 

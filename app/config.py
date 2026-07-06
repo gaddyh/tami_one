@@ -25,6 +25,7 @@ class Settings:
     allowed_chat_ids: list[str]
     database_path: str
     database_url: str
+    max_group_participants: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -60,6 +61,7 @@ class Settings:
             allowed_chat_ids=[chat_id.strip() for chat_id in os.getenv("ALLOWED_CHAT_IDS", "").split(",") if chat_id.strip()],
             database_path=os.getenv("DATABASE_PATH", "tami.db"),
             database_url=os.getenv("DATABASE_URL", "").strip(),
+            max_group_participants=int(os.getenv("MAX_GROUP_PARTICIPANTS", "3")),
         )
 
 settings = Settings.from_env()

@@ -11,7 +11,9 @@ from sqlmodel import Session, SQLModel, create_engine, select
 
 from app.db.cache import (
     accounts_by_instance,
+    chat_senders,
     contacts_by_tenant_chat_id,
+    large_chats,
     message_buffer,
 )
 from app.db.models import (
@@ -70,16 +72,20 @@ def _make_event(
     chat_name: str | None = "Gaddy",
     id_instance: str | None = "7700673764",
     message_time: datetime | None = None,
+    direction: MessageDirection = MessageDirection.INBOUND,
+    sender: str | None = "972546610653@c.us",
+    sender_name: str | None = "Gaddy",
+    provider_message_id: str = "msg-123",
 ) -> MessageEvent:
     return MessageEvent(
-        provider_message_id="msg-123",
+        provider_message_id=provider_message_id,
         idInstance=id_instance,
         wId=None,
         chat_id=chat_id,
         chat_name=chat_name,
-        sender="972546610653@c.us",
-        sender_name=chat_name,
-        direction=MessageDirection.INBOUND,
+        sender=sender,
+        sender_name=sender_name,
+        direction=direction,
         message_type="textMessage",
         message_time=message_time or datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
         text="hello",
@@ -176,3 +182,88 @@ async def test_different_chats_create_separate_contacts_and_queues(db_session):
     drained = await message_buffer.drain()
     assert len(drained[(tenant.id, "972500000001@c.us")]) == 1
     assert len(drained[(tenant.id, "972500000002@c.us")]) == 1
+
+
+async def test_fourth_distinct_sender_marks_chat_large(db_session):
+    session, tenant, _ = db_session
+    chat_id = "group@c.us"
+    chat_senders.clear()
+    large_chats.clear()
+
+    senders = [
+        ("972500000001@c.us", "Alice"),
+        ("972500000002@c.us", "Bob"),
+        ("972500000003@c.us", "Carol"),
+    ]
+    for sender, name in senders:
+        event = _make_event(
+            chat_id=chat_id,
+            chat_name="Test Group",
+            sender=sender,
+            sender_name=name,
+            provider_message_id=f"msg-{sender}",
+        )
+        await upsert_contact_and_chat(event, session=session)
+
+    drained = await message_buffer.drain()
+    assert len(drained[(tenant.id, chat_id)]) == 3
+
+    event = _make_event(
+        chat_id=chat_id,
+        chat_name="Test Group",
+        sender="972500000004@c.us",
+        sender_name="Dave",
+        provider_message_id="msg-dave",
+    )
+    result = await upsert_contact_and_chat(event, session=session)
+
+    assert result["ok"] is True
+    assert result["skipped_large_chat"] is True
+    assert result["sender_count"] == 4
+
+    drained = await message_buffer.drain()
+    assert (tenant.id, chat_id) not in drained
+
+
+async def test_already_marked_chat_skips_immediately(db_session):
+    session, tenant, _ = db_session
+    chat_id = "marked-group@c.us"
+    chat_senders.clear()
+    large_chats.clear()
+    large_chats.add(chat_id)
+
+    event = _make_event(
+        chat_id=chat_id,
+        chat_name="Marked Group",
+        sender="972500000001@c.us",
+        sender_name="Alice",
+    )
+    result = await upsert_contact_and_chat(event, session=session)
+
+    assert result["ok"] is True
+    assert result["skipped_large_chat"] is True
+
+    drained = await message_buffer.drain()
+    assert (tenant.id, chat_id) not in drained
+
+
+async def test_outbound_messages_dont_count_as_senders(db_session):
+    session, tenant, _ = db_session
+    chat_id = "small-group@c.us"
+    chat_senders.clear()
+    large_chats.clear()
+
+    for i in range(5):
+        event = _make_event(
+            chat_id=chat_id,
+            chat_name="Small Group",
+            sender="972546610653@c.us",
+            sender_name="me",
+            direction=MessageDirection.OUTBOUND,
+            provider_message_id=f"out-{i}",
+        )
+        await upsert_contact_and_chat(event, session=session)
+
+    drained = await message_buffer.drain()
+    assert len(drained[(tenant.id, chat_id)]) == 5
+    assert chat_id not in large_chats
