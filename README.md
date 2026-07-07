@@ -1,10 +1,28 @@
 # Tami One
 
-A WhatsApp-native assistant for a mortgage/loan advisor. It watches the advisor's real WhatsApp conversations (personal number, via Green API) and automatically extracts **commitments** — who owes whom what, and by when — so the advisor never has to re-read a thread to remember what's still open.
+A WhatsApp-native assistant for a mortgage/loan advisor. It reads the advisor's real WhatsApp conversations (personal number, via Green API) and automatically extracts **commitments** — who owes whom what, and by when — so the advisor never has to re-read a thread to remember what's still open.
 
-Separately, it can run as a **360dialog-based business bot** that replies to customers directly with an OpenAI agent (text + voice notes).
+Separately, it can run as a **360dialog-based business bot** that replies to customers directly with an OpenAI agent (text + voice notes). The two capabilities share one FastAPI app and one database but don't otherwise interact.
 
-These are two independent capabilities sharing one FastAPI app and one database.
+**Status:** active prototype, ~3 days old (first commit 2026-07-05). The commitment-extraction pipeline is validated against a 93-example eval set; it has not been run against real production traffic yet, and there are two known reliability gaps before it should be (see [Known Limitations](#known-limitations--roadmap)).
+
+---
+
+## Contents
+
+- [Why this exists](#why-this-exists)
+- [How a message becomes a commitment](#how-a-message-becomes-a-commitment)
+- [Project layout](#project-layout)
+- [Commitment extraction & evals](#commitment-extraction--evals)
+- [Data model](#data-model)
+- [Setup](#setup)
+- [Configuration](#configuration)
+- [Run locally](#run-locally)
+- [Seed the database](#seed-the-database)
+- [Tests](#tests)
+- [Deploy (Render)](#deploy-render)
+- [Endpoints](#endpoints)
+- [Known limitations / roadmap](#known-limitations--roadmap)
 
 ---
 
@@ -22,197 +40,190 @@ Advisors run their business out of dozens of parallel WhatsApp threads — clien
 }
 ```
 
-This is the core proof-of-concept the project has already validated: given a real, mixed-Hebrew/English WhatsApp thread, the pipeline correctly separates a fulfilled promise (`status=DONE`) from a still-waiting one (`status=waiting`), attributes each to the right party, and keeps a plain-language `context` trail for why.
-
----
-
-## Architecture
-
-```
-app/
-├── main.py                    # FastAPI app; startup wires init_db + load_cache
-│                               # + a background drain loop (every 10 min)
-├── config.py                  # Settings, loaded from env vars at import time
-├── routers/
-│   ├── green_api.py            # Green API payload → normalized MessageEvent
-│   ├── personal_webhook.py     # POST /webhook/green-api, /admin/seed, /debug/settings
-│   └── business_webhook.py     # POST /webhook/360dialog — agent-driven customer replies
-├── db/
-│   ├── engine.py                # SQLAlchemy engine (Postgres or SQLite)
-│   ├── models.py                # SQLModel tables (see below)
-│   ├── cache.py                 # In-memory account/contact cache + MessageBuffer
-│   ├── upsert.py                 # Insert-only Contact creation + buffering
-│   └── seed.py                   # Demo data seeding
-├── commitments/
-│   ├── models.py                 # Canonical Commitment / CommitmentList schema
-│   ├── commitments_agent.py      # DSPy Signature + Module for commitment extraction
-│   ├── extractor.py              # Adapter: messages + existing commitments → DSPy agent
-│   └── processor.py              # Drains buffer, calls extractor, upserts CommitmentItem rows
-├── eval/
-│   ├── metrics.py                # DSPy eval metrics: commitment_metric, act_vs_ignore, token-F1
-│   ├── dataset.py                # Example construction + devset loading
-│   └── localize.py               # Failure localization: root cause + subcause + priority scoring
-├── agents/
-│   ├── core.py                    # OpenAI agent used by the 360dialog business bot
-│   └── memory.py                   # Per-thread in-memory conversation history
-└── services/
-    ├── whatsapp.py                 # 360dialog API client
-    └── transcription.py             # Voice-note transcription via OpenAI
-scripts/seed.py                      # CLI seed entry point
-scripts/eval_runner.py               # Local commitment-extraction eval runner
-tests/evals/
-├── data/                             # YAML example definitions (6 categories + challenge + schema)
-│   ├── _schema.yaml                  # Shared constants: chat_id, chat_name, defaults
-│   ├── act_vs_ignore.yaml            # Category A: act vs ignore boundary (18 examples)
-│   ├── args_party.yaml               # Category B: committed_party extraction (15)
-│   ├── args_deadline.yaml            # Category C: deadline extraction (15)
-│   ├── args_required_action.yaml     # Category D: required_action extraction (15)
-│   ├── lifecycle_update_vs_new.yaml  # Category E: update vs new commitment (15)
-│   ├── lifecycle_completion.yaml     # Category F: done/dismissed status (15)
-│   └── challenge_act_ignore.yaml     # Challenge split: hard act/ignore pairs (36)
-├── generate_devset.py                # Data-driven generator: YAML → train/dev/test JSON splits
-├── seed_examples.json                # Legacy hand-written reference examples
-├── trainset.json                     # Generated (40 examples)
-├── devset.json                       # Generated (22 examples)
-├── testset.json                      # Generated (31 examples)
-└── challenge_act_ignore.json         # Generated challenge split (36 examples)
-tests/                               # upsert, webhook, commitment extraction/eval tests
-```
+Given a real, mixed-Hebrew/English WhatsApp thread, the pipeline correctly separates a fulfilled promise (`status=done`) from a still-waiting one (`status=waiting`), attributes each to the right party, and keeps a plain-language `context` trail for why. That's the core proof-of-concept the project has validated so far.
 
 ## How a message becomes a commitment
 
 1. **Ingest** — Green API POSTs to `/webhook/green-api`. `normalize_green_api_message_event()` turns the raw payload into a `MessageEvent` (chat id, sender, direction, text, timestamp).
 2. **Upsert + buffer** — `upsert_contact_and_chat()`:
    - Creates a `Contact` row if this `(tenant_id, chat_id)` hasn't been seen before (insert-only; existing contacts are never updated).
-   - Filters out chats with more distinct senders than `MAX_GROUP_PARTICIPANTS` (large groups are skipped — this is a 1:1/small-group tool, not a broadcast-list reader).
+   - Skips chats with more distinct senders than `MAX_GROUP_PARTICIPANTS` (this is a 1:1/small-group tool, not a broadcast-list reader).
    - Appends the event to an **in-memory** `MessageBuffer`, keyed by `(tenant_id, chat_id)`.
-3. **Drain** — a background `asyncio` task inside the running app process wakes up every 10 minutes, atomically drains the whole buffer, and hands each chat's batch of messages to the commitment extractor.
-4. **Extract** — `extract_commitments()` sends the batch, plus that chat's currently-open commitments, through a DSPy `CommitmentAgent` (`ExtractCommitments` signature + `dspy.Predict`). DSPy is configured at startup with `dspy.JSONAdapter()` so the extractor behaves like a structured-output call while staying measurable and optimizable.
+3. **Drain** — a background `asyncio` task inside the running app process wakes up every 2 minutes, atomically drains the whole buffer, and hands each chat's batch of messages to the commitment extractor.
+4. **Extract** — `extract_commitments()` sends the batch, plus that chat's currently-open commitments, through a DSPy `CommitmentAgent` (`ExtractCommitments` signature + `dspy.Predict`), configured at startup with `dspy.JSONAdapter()` so it behaves like a structured-output call while staying measurable and optimizable.
 5. **Persist** — `CommitmentItem` rows are upserted into Postgres/SQLite, tagged with the `source_message_ids` that produced them.
 
 The 360dialog path (`/webhook/360dialog`) is unrelated to this flow — it's a direct reply bot for business-number customers, using `agents/core.py` for in-memory per-thread conversation and `services/transcription.py` for voice notes.
 
+## Project layout
 
-## Commitment extraction evals
+```
+app/
+├── main.py                 # FastAPI app; startup wires init_db + load_cache + drain loop
+├── config.py                # Settings, loaded from env vars at import time
+├── routers/
+│   ├── green_api.py          # Green API payload → normalized MessageEvent
+│   ├── personal_webhook.py   # POST /webhook/green-api, /admin/seed, /debug/settings
+│   └── business_webhook.py   # POST /webhook/360dialog — agent-driven customer replies
+├── db/
+│   ├── engine.py              # SQLAlchemy engine (Postgres or SQLite)
+│   ├── models.py              # SQLModel tables
+│   ├── cache.py                # In-memory account/contact cache + MessageBuffer
+│   ├── upsert.py                # Insert-only Contact creation + buffering
+│   └── seed.py                  # Demo data seeding
+├── commitments/
+│   ├── models.py                 # Canonical Commitment / CommitmentList schema
+│   ├── commitments_agent.py       # DSPy Signature + Module for commitment extraction
+│   ├── extractor.py                # Adapter: messages + existing commitments → DSPy agent
+│   └── processor.py                 # Drains buffer, calls extractor, upserts CommitmentItem rows
+├── agents/
+│   ├── core.py                       # OpenAI agent used by the 360dialog business bot
+│   └── memory.py                      # Per-thread in-memory conversation history
+└── services/
+    ├── whatsapp.py                     # 360dialog API client
+    └── transcription.py                 # Voice-note transcription via OpenAI
+eval/
+├── dataset.py               # Example construction + devset loading
+├── metrics.py                # commitment_metric, act_vs_ignore_metric, token-F1, word-overlap
+└── localize.py                # Failure → root cause / subcause / repair-type / priority scoring
+scripts/
+├── seed.py                    # CLI seed entry point
+└── eval_runner.py               # Local commitment-extraction eval runner (train/dev/test/challenge)
+tests/
+├── evals/
+│   ├── data/*.yaml             # Hand-authored example definitions, 6 categories + challenge split
+│   ├── generate_devset.py       # YAML → train/dev/test JSON splits
+│   ├── trainset.json / devset.json / testset.json / challenge_act_ignore.json
+│   └── localize_cases/           # Fixtures for testing the localizer itself
+└── test_*.py                    # upsert, webhook, commitment extraction/eval, localizer
+```
 
-The commitment extractor has been refactored from a one-off raw OpenAI `responses.parse` call into a DSPy `Signature + Module` pattern:
+## Commitment extraction & evals
 
-- `Commitment` / `CommitmentList` remain the canonical domain schema in `app/commitments/models.py`.
-- `app/commitments/commitments_agent.py` defines `ExtractCommitments(dspy.Signature)` and `CommitmentAgent(dspy.Module)`.
-- `extract_commitments()` keeps the same public interface used by `processor.py`, but internally calls the DSPy agent and normalizes `chat_id` / `chat_name` after the LLM response.
-- `eval/metrics.py` contains a strict full-commitment metric, with token-F1 matching for `required_action` so small wording differences are not always counted as failures.
-- `eval/dataset.py` handles example construction and devset loading.
+The extractor is a DSPy `Signature + Module`, not a one-off prompt string:
 
-The generated eval dataset is made of controlled probes rather than random examples. Each example is tagged by:
+- `Commitment` / `CommitmentList` (`app/commitments/models.py`) are the canonical domain schema.
+- `ExtractCommitments(dspy.Signature)` in `app/commitments/commitments_agent.py` encodes the extraction rules directly in the docstring — most importantly a set of **act-vs-ignore rules** ("we should do X" is an opinion, not a commitment; a request needs explicit acceptance; "started"/"almost done" are progress reports, not completions).
+- `eval/metrics.py` scores predictions against a hand-labeled devset: exact match on structured fields, token-F1 on `required_action` (so `settle the invoice` vs `pay the invoice` isn't an automatic fail), and word-overlap on `context`.
+- `eval/dataset.py` builds train/dev/test splits from YAML fixtures in `tests/evals/data/`, each tagged by category (`act_vs_ignore`, `args_party`, `args_deadline`, `args_required_action`, `lifecycle_update_vs_new`, `lifecycle_completion`), difficulty (`easy`/`medium`/`hard`), and a specific contrastive scenario name.
 
-| Dimension | Values |
-|---|---|
-| Category | `act_vs_ignore`, `args_party`, `args_deadline`, `args_required_action`, `lifecycle_update_vs_new`, `lifecycle_completion` |
-| Difficulty | `easy`, `medium`, `hard` |
-| Scenario | A specific contrastive case, such as `request_without_acceptance_ignore`, `almost_done_not_done`, or `party_implied_by_role` |
-
-The hand-written examples are preserved separately as `tests/evals/seed_examples.json` (a legacy reference dataset, not used by the eval runner). The data-driven generator reads YAML definitions from `tests/evals/data/` and writes JSON splits:
+Current split sizes: **train 40 · dev 22 · test 31** (93 total), generated with:
 
 ```bash
 python tests/evals/generate_devset.py
 ```
 
-Current generated split sizes:
+### Latest eval run
 
-| Split | Examples |
-|---|---:|
-| Train | 40 |
-| Dev | 22 |
-| Test | 31 |
-| Total | 93 |
-
-### Latest eval results
-
-Command:
+Model: `gpt-5.4-mini`, run `20260707_023551`.
 
 ```bash
 python scripts/eval_runner.py --all
 ```
 
-Latest run (model: `gpt-5.4-mini`, 2026-07-07):
-
-| Split | N | TP | FP | FN | TN | Precision | Recall | F1 | Act/Ignore Accuracy | Full Commitment Metric | Over-Extraction |
+| Split | N | TP | FP | FN | TN | Precision | Recall | F1 | Act/Ignore Acc. | Full-Commitment | Over-Extraction |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Train | 40 | 28 | 3 | 4 | 5 | 0.90 | 0.88 | 0.89 | 0.82 | 43.8% | 38% |
-| Dev | 22 | 18 | 1 | 1 | 2 | 0.95 | 0.95 | 0.95 | 0.91 | 57.9% | 33% |
-| Test | 31 | 25 | 0 | 2 | 4 | 1.00 | 0.93 | 0.96 | 0.94 | 48.1% | 0% |
+| Train | 40 | 28 | 3 | 4 | 5 | 0.90 | 0.88 | 0.89 | 0.82 | 50.0% (16/32) | 38% |
+| Dev | 22 | 18 | 1 | 1 | 2 | 0.95 | 0.95 | 0.95 | 0.91 | 52.6% (10/19) | 33% |
+| Test | 31 | 25 | 0 | 2 | 4 | 1.00 | 0.93 | 0.96 | 0.94 | 48.1% (13/27) | 0% |
 
-Field accuracy on the test split, measured only on true-positive commitment detections:
+Field accuracy, measured only on true-positive commitment detections:
 
-| Field | Accuracy |
-|---|---:|
-| `committed_party` | 96% |
-| `required_action` | 76% |
-| `deadline` | 80% |
-| `context` | 84% |
-| `status` | 96% |
+| Field | Train | Dev | Test |
+|---|---:|---:|---:|
+| `committed_party` | 100% | 94% | 96% |
+| `required_action` | 71% | 78% | 76% |
+| `deadline` | 86% | 78% | 80% |
+| `context` | 82% | 89% | 84% |
+| `status` | 100% | 100% | 96% |
 
-Interpretation:
-
-- The extractor is already strong at the binary decision of whether a message should produce a commitment (`Act/Ignore Accuracy = 0.94` on test).
-- The stricter full-object metric is intentionally harder (`48.1%` on test), because it requires the right party, action, deadline, context, status, and update/new behavior.
-- Current weaknesses are mostly around `required_action` wording, deadline phrasing, and lifecycle edge cases such as update-vs-new or conditional completion.
-- The eval now separates obvious examples from hard contrastive probes, so regressions show up by difficulty instead of being hidden by easy cases.
+**Reading these numbers:** the binary act-vs-ignore decision (should this message produce a commitment at all?) is solid across all three splits. The full-commitment metric is intentionally much stricter — it requires the right party, action, deadline, context, and status simultaneously — and sits around 50% everywhere, which is the real signal on where to invest next.
 
 ### Failure localization
 
-After each eval run, `eval/localize.py` classifies every failure into a root cause with a subcause and computes a priority score (`impact * confidence / cost`) to rank suggested repairs.
+`eval/localize.py` takes the `failures.jsonl` from an eval run and buckets every failure into a root cause, subcause, repair type, and a `priority = impact × confidence / cost` score, so effort goes to the highest-leverage fix first rather than the loudest one:
 
 ```bash
-python -m eval.localize runs/20260707_023551/failures.jsonl          # rich table
-python -m eval.localize runs/20260707_023551/failures.jsonl --json   # JSON output
+python scripts/eval_runner.py --all --save        # writes runs/<run_id>/{train,dev,test,summary}.md + failures.jsonl
+python -m eval.localize runs/<run_id>/failures.jsonl          # rich table
+python -m eval.localize runs/<run_id>/failures.jsonl --json    # machine-readable
 ```
 
-Top 2 suggested repairs from the latest run:
+Across all 45 failures in the latest run:
 
-| # | Root Cause | Failures | Priority | Repair |
-|---|---|---:|---:|---|
-| 1 | `required_action_normalization` | 15 | 6.8 | Normalize/match action semantically |
-| 2 | `context_metric_noise` | 7 | 6.3 | Soften context match (word overlap, not exact) |
+| Root Cause | Count | Top Subcause | Repair Type | Priority |
+|---|---:|---|---|---:|
+| `required_action_normalization` | 15 | verb/object too specific vs. expected | metric/postprocess | 6.8 |
+| `context_metric_noise` | 7 | paraphrase, same meaning | metric | 6.3 |
+| `deadline_normalization` | 7 | missing/extra `by` prefix | metric/postprocess | 3.1 |
+| `under_extraction_policy` | 6 | external party / group obligation | signature rule | 1.7 |
+| `update_vs_new_matching` | 4 | new commitment mismatched to existing one | postprocess | 1.5 |
+| `over_extraction_policy` | 2 | refusal read as acceptance | signature rule | 0.6 |
+| `lifecycle_policy` | 2 | "started"/"almost done" read as done | signature rule | 0.6 |
+| `party_resolution` | 2 | third-party obligation implied by role | signature rule | 0.6 |
 
-The localizer is validated with 16 deterministic tests (`tests/test_localize.py`) using controlled fake failures in `tests/evals/localize_cases/`.
+The top two repairs are both about **normalization, not the model's judgment** — `required_action` and `context` mismatches are usually semantically correct but worded differently than the reference (`send over the docs` vs `send the documents`), which the current exact/near-exact matching penalizes. That's cheap to fix in the metric or a postprocessing step, before touching the prompt at all.
+
+One pattern worth calling out even though it scores lower on priority: several `under_extraction_policy` and `party_resolution` misses across *all three* splits are the same shape — a commitment implied by someone's role or an external party rather than stated directly (*"I'm waiting for the bank to process the loan"*, *"we need to send the documents"*, *"the contractor needs to finish by next week"*). These recur often enough that they're a real, cross-split gap even though today's failure count per category is small.
+
+The localizer is validated with 16 deterministic tests (`tests/test_localize.py`) against fixed fake failures in `tests/evals/localize_cases/`, so its scoring logic isn't just eyeballed.
 
 ## Data model
 
 | Table | Status | Notes |
 |---|---|---|
 | `Tenant` | in use | multi-tenant root |
-| `WhatsAppAccount` | in use | one row per Green API instance / 360dialog number |
-| `Contact` | in use | one row per `(tenant_id, chat_id)`; `kind` field (`client`/`bank`/`lawyer`/`internal`/`family`/`unknown`) exists but isn't populated by any classifier yet |
+| `WhatsAppAccount` | in use | one row per Green API instance / 360dialog number; stores `provider` + `provider_instance_id`, **not** API credentials |
+| `Contact` | in use | one row per `(tenant_id, chat_id)`; `kind` field (`client`/`bank`/`lawyer`/`internal`/`family`/`unknown`) exists but nothing populates it yet |
 | `CommitmentItem` | in use | the actual product surface — party, action, deadline, status, context, source message ids |
-| `Chat`, `ChatMessage` | **defined, not yet wired up** | raw per-message history is not currently persisted anywhere; messages only exist transiently in the in-memory buffer until drained, then are discarded once extraction runs |
-| `WaitingStatus`, `WaitingParty`, `Urgency`, `WaitingItemStatus` enums | **defined, no table yet** | scaffolding for a more general waiting/urgency model beyond commitments |
+| `Chat`, `ChatMessage` | **defined, not wired up** | raw per-message history is not persisted anywhere; messages only exist transiently in the in-memory buffer until drained, then are discarded once extraction runs |
+| `WaitingStatus`, `WaitingParty`, `Urgency`, `WaitingItemStatus` enums | **defined, no table** | scaffolding for a more general waiting/urgency model beyond commitments |
 
 **In-memory only (lost on process restart):**
-- `accounts_by_instance`, `contacts_by_tenant_chat_id` — rebuilt from DB on startup via `load_cache()`, so these are safe.
-- `MessageBuffer._messages_by_chat` — **not** rebuilt from anywhere. Any message ingested but not yet drained when the process restarts (deploy, crash, autoscale) is gone permanently, and there's no raw-message table to recover it from either.
+- `accounts_by_instance`, `contacts_by_tenant_chat_id` — rebuilt from the DB on startup via `load_cache()`, so these are safe.
+- `MessageBuffer._messages_by_chat` — **not** rebuilt from anywhere. Any message ingested but not yet drained when the process restarts (deploy, crash, autoscale) is gone permanently, and there's no raw-message table to recover it from either. This is the single biggest reliability gap right now.
+
+**Also unwired:** `app/services/green_api_client.py` defines a `GreenApiClient` (get chats / group data / chat history) but nothing in the app instantiates it, and `WhatsAppAccount` has no field to store the per-instance token it would need anyway — this is scaffolding for a future feature (e.g. backfilling chat history), not a bug in the current flow.
 
 ## Setup
 
+There's no `requirements.txt` — dependencies are pinned in `pyproject.toml` / `uv.lock`.
+
 ```bash
+# recommended (uv.lock is committed, so this is reproducible)
+uv sync
+
+# or with plain pip
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e ".[dev]"
+
 cp example.env .env
 ```
 
-Edit `.env` (see `example.env` for the full list). Notably:
+## Configuration
 
-| Var | Purpose |
-|---|---|
-| `DATABASE_URL` | Postgres connection string — takes priority over SQLite when set |
-| `DATABASE_PATH` | SQLite file path for local dev (default `tami.db`) |
-| `OPENAI_API_KEY` | required — both the commitment extractor and the 360dialog agent use it |
-| `OPENAI_MODEL` | model used for commitment extraction / agent replies |
-| `D360_API_KEY` | required to start the app at all — `Settings.from_env()` raises if missing, even if you're only using the Green API path |
-| `WEBHOOK_AUTH_MODE` | `none` / `bearer` / `basic` — protects `/webhook/360dialog` only |
-| `ALLOWED_CHAT_IDS` | whitelist, referenced in settings (not currently enforced in the Green API webhook handler) |
-| `MAX_GROUP_PARTICIPANTS` | group chats with more distinct senders than this are skipped entirely |
+Edit `.env` (`example.env` currently only lists a subset of these — worth syncing it up):
+
+| Var | Required | Default | Purpose |
+|---|---|---|---|
+| `D360_API_KEY` | **yes** — app raises on startup without it | — | needed even if you're only using the Green API path |
+| `D360_API_BASE_URL` | no | `https://waba-v2.360dialog.io` | use the sandbox URL for testing |
+| `OPENAI_API_KEY` | yes, for either pipeline to function | — | used by both the commitment extractor and the 360dialog agent |
+| `OPENAI_MODEL` | no | `gpt-5.4-mini` | model for commitment extraction and agent replies |
+| `OPENAI_TRANSCRIBE_MODEL` | no | `gpt-4o-transcribe` | voice-note transcription |
+| `WEBHOOK_AUTH_MODE` | no | `none` | `none` / `bearer` / `basic` — protects `/webhook/360dialog` only, not `/webhook/green-api` |
+| `WEBHOOK_BEARER_TOKEN` | if `bearer` mode | — | |
+| `WEBHOOK_BASIC_USER` / `WEBHOOK_BASIC_PASS` | if `basic` mode | — | |
+| `MAX_GROUP_PARTICIPANTS` | no | `3` | group chats with more distinct senders than this are skipped entirely |
+| `ALLOWED_CHAT_IDS` | no | empty (no filter) | parsed into settings and exposed via `/debug/settings`, but **not currently enforced** in the Green API webhook handler |
+| `DATABASE_PATH` | no | `tami.db` | SQLite file, used when `DATABASE_URL` is unset |
+| `DATABASE_URL` | no | — | Postgres URL; takes priority over `DATABASE_PATH` when set |
+| `LOG_LEVEL` | no | `INFO` | |
+| `LANGSMITH_TRACING_V2` / `LANGSMITH_API_KEY` / `LANGSMITH_PROJECT` | no | tracing off | optional observability |
+| `CONVERSATION_MAX_MESSAGES` | no | `20` | per-thread history cap for the 360dialog agent |
+
+`GREEN_API_BASE_URL` / `GREEN_API_TOKEN` currently appear in `example.env` but aren't read anywhere in the code — Green API credentials live in the `WhatsAppAccount` table lookup path, not a global env var. Safe to ignore or remove.
 
 ## Run locally
 
@@ -231,7 +242,7 @@ DATABASE_URL="postgresql://user:password@host:5432/dbname" .venv/bin/python scri
 curl -X POST https://your-app.onrender.com/admin/seed
 ```
 
-⚠️ `run_seed(overwrite=True)` drops the entire `public` schema before recreating tables. The `/admin/seed` route currently calls it with `overwrite=False`, but the route has no auth of its own — treat it as sensitive and don't leave it reachable on a public URL longer than you need to.
+⚠️ `run_seed(overwrite=True)` drops the entire `public` schema before recreating tables. The `/admin/seed` route currently calls it with `overwrite=False`, but the route has no auth of its own — don't leave it reachable on a public URL longer than you need to.
 
 ## Tests
 
@@ -239,29 +250,24 @@ curl -X POST https://your-app.onrender.com/admin/seed
 .venv/bin/python -m pytest tests/ -v
 ```
 
-Covers: Green API payload normalization, contact upsert + buffering, webhook handling, commitment extraction helpers, commitment-eval utilities, and failure localization (16 deterministic tests in `tests/test_localize.py`).
+Covers Green API payload normalization, contact upsert + buffering, webhook handling, commitment extraction helpers, commitment-eval utilities, and the failure localizer (16 deterministic tests).
 
-Run the commitment eval separately:
+Run the commitment eval separately, and regenerate the deterministic train/dev/test splits if the YAML fixtures change:
 
 ```bash
 python scripts/eval_runner.py --all
-```
-
-Regenerate the deterministic train/dev/test eval splits:
-
-```bash
 python tests/evals/generate_devset.py
 ```
 
 ## Deploy (Render)
 
 1. Connect the repo.
-2. Set env vars (`DATABASE_URL`, `D360_API_KEY`, `OPENAI_API_KEY`, etc.).
-3. Build: `pip install -r requirements.txt`
+2. Set env vars (`D360_API_KEY`, `OPENAI_API_KEY`, `DATABASE_URL`, etc. — see [Configuration](#configuration)).
+3. Build: `pip install -e .`
 4. Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 5. Seed once: `curl -X POST https://your-app.onrender.com/admin/seed`
 
-Because the drain loop and message buffer live inside the app process, **any redeploy or restart on a 10-minute drain cycle can lose buffered-but-undrained messages.** This is the single biggest reliability gap right now — see below.
+Because the drain loop and message buffer live inside the app process, **any redeploy or restart between ingestion and the 2-minute drain cycle loses buffered-but-undrained messages**, and Render's free tier spinning an idle instance down has the same effect. This is the top item in the roadmap below.
 
 ## Endpoints
 
@@ -273,15 +279,16 @@ Because the drain loop and message buffer live inside the app process, **any red
 | `GET /health` | — | Health check |
 | `GET /debug/settings` | — | Dev debug info (no secrets) |
 
-## Known limitations / next up
+## Known limitations / roadmap
 
 Roughly in priority order:
 
-1. **Durable ingestion.** Persist `ChatMessage` rows on arrival (the table already exists) instead of relying solely on the in-memory buffer. This alone removes the "lose messages on restart" risk and gives you a permanent audit trail independent of what the LLM does with them.
-2. **Green API webhook auth is currently disabled** (`verify_green_api_authorization` is defined but commented out in `personal_webhook.py`). Re-enable before this is exposed on a public URL for real.
-3. **Commitment dedup/update matching is still partly model-driven** (matching by `id` inside one extraction call). The eval now includes update-vs-new probes, but production should still add a deterministic fallback if the model creates a near-duplicate commitment.
-4. **`deadline` is free text** (`"in one hour"`, `"by Friday"`, `"next Monday"`), not a resolved timestamp. The localizer flags 7 deadline-normalization failures (priority 3.1) — mostly missing `by` prefix or relative phrasing. Should be normalized before urgency sorting or scheduled digests.
-5. **`required_action` wording is not yet stable enough.** The localizer flags 15 failures (priority 6.8, the top repair target) — mostly verb synonyms (`settle` vs `pay`) and over-specific phrasing (`send over the docs` vs `send the documents`). The eval uses token-F1 instead of exact equality, but action normalization remains the highest-impact quality target.
-6. **`Contact.kind` (client/bank/lawyer/…) is modeled but not populated.** No classifier currently sets it, so nothing downstream can yet filter or route by relationship type.
-7. **No digest job yet.** The `CommitmentItem` data is now good enough to query; a scheduled per-tenant job that renders waiting commitments into a daily WhatsApp message is the natural next milestone.
-8. **`/admin/seed` has no auth of its own** — fine for a private dev deploy, worth gating before wider use.
+1. **Durable ingestion.** Persist `ChatMessage` rows on arrival (the table already exists) instead of relying solely on the in-memory buffer. This removes the "lose messages on restart" risk and gives a permanent audit trail independent of what the LLM does with them.
+2. **Green API webhook auth is disabled** (`verify_green_api_authorization` is defined but commented out in `personal_webhook.py`). Re-enable before this is exposed on a public URL for real.
+3. **`required_action` and `context` wording drive most eval failures** (15 + 7 of 45, see [Failure localization](#failure-localization)) — mostly verb/object synonyms and paraphrasing that the current metric treats as wrong even when semantically correct. Highest-leverage fix available, and it's in the metric/postprocessing layer, not the prompt.
+4. **`deadline` is free text** (`"in one hour"`, `"by Friday"`), not a resolved timestamp — 7 failures trace to missing/extra `by`-style phrasing. Needs normalizing before it can drive urgency sorting or scheduled digests.
+5. **Commitment dedup/update matching is still partly model-driven** (matching by `id` inside one extraction call); 4 failures are the model creating a near-duplicate instead of updating the existing row. Worth a deterministic fallback matcher.
+6. **Under-extraction on implied/external-party commitments** — "waiting on the bank," "the contractor needs to," "we need to" — recurs across all three splits. Loosening the act-vs-ignore rule for implied-party cases is the natural next prompt change.
+7. **`Contact.kind` (client/bank/lawyer/…) is modeled but not populated.** No classifier sets it yet, so nothing downstream can filter or route by relationship type.
+8. **No digest job yet.** `CommitmentItem` data is good enough to query; a scheduled per-tenant job rendering waiting commitments into a daily WhatsApp message is the natural next milestone.
+9. **`/admin/seed` has no auth of its own** — fine for a private dev deploy, worth gating before wider use.
