@@ -133,28 +133,28 @@ Command:
 python scripts/eval_runner.py --all
 ```
 
-Latest run:
+Latest run (model: `gpt-5.4-mini`, 2026-07-07):
 
 | Split | N | TP | FP | FN | TN | Precision | Recall | F1 | Act/Ignore Accuracy | Full Commitment Metric | Over-Extraction |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | Train | 40 | 28 | 3 | 4 | 5 | 0.90 | 0.88 | 0.89 | 0.82 | 43.8% | 38% |
-| Dev | 22 | 18 | 1 | 1 | 2 | 0.95 | 0.95 | 0.95 | 0.91 | 52.6% | 33% |
-| Test | 31 | 25 | 0 | 2 | 4 | 1.00 | 0.93 | 0.96 | 0.94 | 59.3% | 0% |
+| Dev | 22 | 18 | 1 | 1 | 2 | 0.95 | 0.95 | 0.95 | 0.91 | 57.9% | 33% |
+| Test | 31 | 25 | 0 | 2 | 4 | 1.00 | 0.93 | 0.96 | 0.94 | 48.1% | 0% |
 
 Field accuracy on the test split, measured only on true-positive commitment detections:
 
 | Field | Accuracy |
 |---|---:|
-| `committed_party` | 100% |
-| `required_action` | 80% |
-| `deadline` | 76% |
+| `committed_party` | 96% |
+| `required_action` | 76% |
+| `deadline` | 80% |
 | `context` | 84% |
 | `status` | 96% |
 
 Interpretation:
 
 - The extractor is already strong at the binary decision of whether a message should produce a commitment (`Act/Ignore Accuracy = 0.94` on test).
-- The stricter full-object metric is intentionally harder (`59.3%` on test), because it requires the right party, action, deadline, context, status, and update/new behavior.
+- The stricter full-object metric is intentionally harder (`48.1%` on test), because it requires the right party, action, deadline, context, status, and update/new behavior.
 - Current weaknesses are mostly around `required_action` wording, deadline phrasing, and lifecycle edge cases such as update-vs-new or conditional completion.
 - The eval now separates obvious examples from hard contrastive probes, so regressions show up by difficulty instead of being hidden by easy cases.
 
