@@ -158,6 +158,24 @@ Interpretation:
 - Current weaknesses are mostly around `required_action` wording, deadline phrasing, and lifecycle edge cases such as update-vs-new or conditional completion.
 - The eval now separates obvious examples from hard contrastive probes, so regressions show up by difficulty instead of being hidden by easy cases.
 
+### Failure localization
+
+After each eval run, `eval/localize.py` classifies every failure into a root cause with a subcause and computes a priority score (`impact * confidence / cost`) to rank suggested repairs.
+
+```bash
+python -m eval.localize runs/20260707_023551/failures.jsonl          # rich table
+python -m eval.localize runs/20260707_023551/failures.jsonl --json   # JSON output
+```
+
+Top 2 suggested repairs from the latest run:
+
+| # | Root Cause | Failures | Priority | Repair |
+|---|---|---:|---:|---|
+| 1 | `required_action_normalization` | 15 | 6.8 | Normalize/match action semantically |
+| 2 | `context_metric_noise` | 7 | 6.3 | Soften context match (word overlap, not exact) |
+
+The localizer is validated with 16 deterministic tests (`tests/test_localize.py`) using controlled fake failures in `tests/evals/localize_cases/`.
+
 ## Data model
 
 | Table | Status | Notes |
