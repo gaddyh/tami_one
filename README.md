@@ -14,6 +14,7 @@ Separately, it can run as a **360dialog-based business bot** that replies to cus
 - [How a message becomes a commitment](#how-a-message-becomes-a-commitment)
 - [Project layout](#project-layout)
 - [Commitment extraction & evals](#commitment-extraction--evals)
+- [Interactive failure inspector](#interactive-failure-inspector)
 - [Data model](#data-model)
 - [Setup](#setup)
 - [Configuration](#configuration)
@@ -90,6 +91,7 @@ eval/
 scripts/
 ├── seed.py                    # CLI seed entry point
 ├── eval_runner.py               # Local commitment-extraction eval runner (train/dev/test/challenge)
+├── eval_inspector.py             # Interactive CLI for examining eval failures (load or run fresh, then REPL)
 └── compare_runs.py             # Compare two eval runs side by side
 tests/
 ├── evals/
@@ -184,6 +186,44 @@ python scripts/compare_runs.py runs/<run_a> runs/<run_b>
 ```
 
 Output is a rich console table (summary, per-category, per-scenario diff) saved as markdown to `runs/compares/<run_a>_vs_<run_b>.md`.
+
+## Interactive failure inspector
+
+`scripts/eval_inspector.py` is an interactive CLI agent that either loads an existing run or runs a fresh eval, then drops into a REPL for examining each failure without leaving the terminal:
+
+```bash
+# Load an existing run (interactive picker lists recent runs)
+python scripts/eval_inspector.py
+
+# Load a specific run directly
+python scripts/eval_inspector.py --run 20260707_183434-judge
+
+# Run a fresh eval on a split, then enter inspector
+python scripts/eval_inspector.py --split dev
+python scripts/eval_inspector.py --split dev --limit 5 --llm-judge
+```
+
+When loading an existing run, the inspector joins `failures.jsonl` with `predictions.jsonl` (on `split + category + scenario`) to recover the original inputs (`chat_id`, `current_datetime`, `existing_commitments_json`) needed for re-runs.
+
+### REPL commands
+
+| Command | Description |
+|---|---|
+| `list` / `ls` | Numbered table of all failures (or filtered subset) |
+| `<N>` | Show full detail for failure #N: input messages, expected vs actual side-by-side diff, root-cause localization |
+| `next` / `prev` | Navigate to next/previous failure from detail view |
+| `filter <key>=<value>` | Filter by `error_type`, `category`, `difficulty`, `split`, or `field` |
+| `filter clear` | Clear all filters |
+| `filters` | Show active filters |
+| `localize` | Run failure localization on the current (filtered) failure set — shows root-cause summary table + top suggested repairs |
+| `rerun <N>` | Re-run failure #N through a fresh `CommitmentAgent` — shows pass/fail, what was fixed, what's still wrong, and any new problems |
+| `summary` | Aggregate counts by error type, category, and difficulty |
+| `help` / `h` | Show available commands |
+| `quit` / `q` | Exit |
+
+The detail view shows three sections: (1) the input messages and metadata, (2) a field-by-field expected vs actual diff table with ✓/✗/~ indicators, and (3) root cause, subcause, repair type, confidence, and suggested repair text from the localizer.
+
+The `rerun` command is useful after making code changes — it re-runs a single failing example through a fresh agent instance and shows whether the fix worked, without re-running the entire eval set.
 
 ## Data model
 
