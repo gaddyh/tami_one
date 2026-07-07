@@ -75,14 +75,23 @@ def _copy_dataset_to_run(run_dir: Path, splits: list[str]) -> None:
             _shutil.copy2(src, dest / src.name)
 
 
-def _save_run_meta(run_dir: Path, run_id: str, model: str, use_llm_judge: bool) -> None:
-    """Write run metadata (git SHA, dspy version, model) for reproducibility."""
+def _save_run_meta(
+    run_dir: Path,
+    run_id: str,
+    model: str,
+    use_llm_judge: bool,
+    splits: list[str] | None = None,
+    limit: int | None = None,
+) -> None:
+    """Write run metadata (git SHA, dspy version, model, splits, limit) for reproducibility."""
     import subprocess
 
     meta = {
         "run_id": run_id,
         "model": model,
         "llm_judge": use_llm_judge,
+        "splits": splits or [],
+        "limit": limit,
         "created_at": _json.dumps(datetime.now(), default=str),
     }
     try:
@@ -867,7 +876,7 @@ def main() -> None:
             _save_failures_jsonl(run_dir, results)
             _save_predictions_jsonl(run_dir, results, run_id=run_id or "", agent_model=settings.openai_model)
             _copy_dataset_to_run(run_dir, ["train", "dev", "test"])
-            _save_run_meta(run_dir, run_id or "", settings.openai_model, args.llm_judge)
+            _save_run_meta(run_dir, run_id or "", settings.openai_model, args.llm_judge, splits=["train", "dev", "test"], limit=args.limit)
             if args.freeze_judge:
                 save_judge_verdicts(run_dir / "judge_verdicts.jsonl")
                 console.print(f"[dim]Judge verdicts saved to: {run_dir}/judge_verdicts.jsonl[/]")
@@ -882,7 +891,7 @@ def main() -> None:
         _save_failures_jsonl(run_dir, [r])
         _save_predictions_jsonl(run_dir, [r], run_id=run_id or "", agent_model=settings.openai_model)
         _copy_dataset_to_run(run_dir, [split])
-        _save_run_meta(run_dir, run_id or "", settings.openai_model, args.llm_judge)
+        _save_run_meta(run_dir, run_id or "", settings.openai_model, args.llm_judge, splits=[split], limit=args.limit)
         if args.freeze_judge:
             save_judge_verdicts(run_dir / "judge_verdicts.jsonl")
             console.print(f"[dim]Judge verdicts saved to: {run_dir}/judge_verdicts.jsonl[/]")
