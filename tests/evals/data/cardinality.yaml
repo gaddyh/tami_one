@@ -1,0 +1,480 @@
+# Scenario names are stable IDs — do not rename, only add new ones.
+- category: cardinality
+  scenario: two_new_different_actions
+  difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  messages: 'Gaddy: I''ll send the documents by tomorrow
+
+    Gaddy: I also need to pay the rent by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: null
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I also need to pay the rent by Friday
+- category: cardinality
+  scenario: two_new_different_parties
+  difficulty: easy
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
+  messages: 'Alice: Bob, can you send the report by Friday?
+
+    Alice: Charlie, can you review the slides by Monday?'
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Send the report
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - can you send the report by Friday?
+  - id: null
+    committed_party: Charlie
+    required_action: Review the slides
+    deadline: '2025-01-06'
+    status: waiting
+    notification: none
+    context_fragments:
+    - can you review the slides by Monday?
+- category: cardinality
+  scenario: two_new_one_message
+  difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  messages: 'Gaddy: I''ll send the documents tomorrow and pay the invoice by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents tomorrow
+  - id: null
+    committed_party: Gaddy
+    required_action: Pay the invoice
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - pay the invoice by Friday
+- category: cardinality
+  scenario: multiple_existing_update_one
+  difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  allow_similar_to:
+  - lifecycle_update_vs_new/multiple_existing_update_one
+  messages: 'Gaddy: I''ll send the documents by Friday instead'
+  policy_note: With multiple existing commitments, only update the one that changed.
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the rent by Friday
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by Friday instead
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the rent by Friday
+- category: cardinality
+  scenario: multiple_existing_new_unrelated
+  difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  messages: 'Gaddy: I also need to submit the application by Wednesday'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the rent by Friday
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the rent by Friday
+  - id: null
+    committed_party: Gaddy
+    required_action: Submit the application
+    deadline: '2025-01-08'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I also need to submit the application by Wednesday
+- category: cardinality
+  scenario: dismiss_one_keep_other
+  difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  messages: 'Gaddy: forget about paying the rent, I already handled it'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the rent by Friday
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: dismissed
+    notification: none
+    context_fragments:
+    - forget about paying the rent, I already handled it
+- category: cardinality
+  scenario: complete_one_keep_other
+  difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  messages: 'Gaddy: I sent the documents yesterday, they should have arrived
+
+    Gaddy: still need to pay the rent by Friday'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the rent by Friday
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: done
+    notification: none
+    context_fragments:
+    - I sent the documents yesterday
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - still need to pay the rent by Friday
+- category: cardinality
+  scenario: one_existing_two_new
+  difficulty: hard
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
+  messages: 'Gaddy: I''ll book the meeting room for Tuesday
+
+    Gaddy: Dana, can you order the supplies by Wednesday?
+
+    Dana: sure, I''ll order them by Wednesday'
+  existing_commitments:
+  - id: abc-789
+    committed_party: Gaddy
+    required_action: Submit the budget report
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll submit the budget report by Friday
+  expected_commitments:
+  - id: abc-789
+    committed_party: Gaddy
+    required_action: Submit the budget report
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll submit the budget report by Friday
+  - id: null
+    committed_party: Gaddy
+    required_action: Book the meeting room
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll book the meeting room for Tuesday
+  - id: null
+    committed_party: Dana
+    required_action: Order the supplies
+    deadline: '2025-01-08'
+    status: waiting
+    notification: none
+    context_fragments:
+    - sure, I'll order them by Wednesday
+- category: cardinality
+  scenario: dismiss_both
+  difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  messages: 'Gaddy: forget about sending the documents and paying the rent
+
+    Gaddy: we don''t need either anymore'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the rent by Friday
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: dismissed
+    notification: none
+    context_fragments:
+    - forget about sending the documents
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: dismissed
+    notification: none
+    context_fragments:
+    - and paying the rent
+- category: cardinality
+  scenario: update_one_dismiss_other
+  difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  messages: 'Gaddy: I''ll send the documents by Friday instead of tomorrow
+
+    Gaddy: forget about paying the rent, I found a cheaper place'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the rent by Friday
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by Friday instead of tomorrow
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Pay the rent
+    deadline: '2025-01-10'
+    status: dismissed
+    notification: none
+    context_fragments:
+    - forget about paying the rent, I found a cheaper place
+- category: cardinality
+  scenario: two_volunteers_one_chat
+  difficulty: medium
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
+  messages: 'Gaddy: someone needs to book the meeting room for Tuesday
+
+    Gaddy: and someone should order the supplies by Wednesday
+
+    Dana: I''ll book the room
+
+    Bob: I''ll order the supplies'
+  expected_commitments:
+  - id: null
+    committed_party: Dana
+    required_action: Book the meeting room
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll book the room
+  - id: null
+    committed_party: Bob
+    required_action: Order the supplies
+    deadline: '2025-01-08'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll order the supplies
+- category: cardinality
+  scenario: complete_both
+  difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
+  messages: 'Bob: I sent the report this morning
+
+    Dana: and I paid the invoice yesterday'
+  existing_commitments:
+  - id: abc-300
+    committed_party: Bob
+    required_action: Send the report
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the report by Friday
+  - id: abc-400
+    committed_party: Dana
+    required_action: Pay the invoice
+    deadline: '2025-01-06'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll pay the invoice by Monday
+  expected_commitments:
+  - id: abc-300
+    committed_party: Bob
+    required_action: Send the report
+    deadline: '2025-01-10'
+    status: done
+    notification: none
+    context_fragments:
+    - I sent the report this morning
+  - id: abc-400
+    committed_party: Dana
+    required_action: Pay the invoice
+    deadline: '2025-01-06'
+    status: done
+    notification: none
+    context_fragments:
+    - and I paid the invoice yesterday
+- category: cardinality
+  scenario: new_while_updating_existing
+  difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  messages: 'Gaddy: I''ll send the documents by Friday instead of tomorrow
+
+    Gaddy: also, I need to schedule the meeting for next week'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-07'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: '2025-01-10'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I'll send the documents by Friday instead of tomorrow
+  - id: null
+    committed_party: Gaddy
+    required_action: Schedule the meeting
+    deadline: '2025-01-13'
+    status: waiting
+    notification: none
+    context_fragments:
+    - I need to schedule the meeting for next week

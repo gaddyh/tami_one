@@ -3,171 +3,187 @@
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents by Friday'
+  allow_similar_to:
+  - cardinality/multiple_existing_update_one
+  messages: 'Gaddy: I''ll send the documents by Friday'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-10'
-    context: I will send the documents by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by Friday
 - category: args_deadline
   scenario: deadline_by_tomorrow
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents by tomorrow'
+  messages: 'Gaddy: I''ll send the documents by tomorrow'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
 - category: args_deadline
   scenario: deadline_today
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents today'
+  messages: 'Gaddy: I''ll send the documents today'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-06'
-    context: I will send the documents today
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents today
 - category: args_deadline
   scenario: deadline_next_Monday
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents next Monday'
+  messages: 'Gaddy: I''ll send the documents next Monday'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-13'
-    context: I will send the documents next Monday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents next Monday
 - category: args_deadline
   scenario: deadline_by_5pm
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents by 5pm'
+  messages: 'Gaddy: I''ll send the documents by 5pm'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-06T17:00:00'
-    context: I will send the documents by 5pm
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by 5pm
 - category: args_deadline
   scenario: deadline_by_1700
   difficulty: medium
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents by 17:00'
+  messages: 'Gaddy: I''ll send the documents by 17:00'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-06T17:00:00'
-    context: I will send the documents by 17:00
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by 17:00
 - category: args_deadline
   scenario: deadline_by_July_15
   difficulty: medium
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents by July 15'
+  messages: 'Gaddy: I''ll send the documents by July 15'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-07-15'
-    context: I will send the documents by July 15
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by July 15
 - category: args_deadline
   scenario: deadline_by_end_of_week
   difficulty: medium
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents by end of week'
+  messages: 'Gaddy: I''ll send the documents by end of week'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-10'
-    context: I will send the documents by end of week
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by end of week
 - category: args_deadline
   scenario: deadline_next_week
   difficulty: medium
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents next week'
+  messages: 'Gaddy: I''ll send the documents next week'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-13'
-    context: I will send the documents next week
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents next week
 - category: args_deadline
   scenario: deadline_soon
   difficulty: hard
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents soon'
+  allow_similar_to:
+  - args_deadline/deadline_none
+  messages: 'Gaddy: I''ll send the documents soon'
   policy_note: '''soon'' is not a concrete deadline → null.'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: null
-    context: I will send the documents soon
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents soon
 - category: args_deadline
   scenario: deadline_when_I_can
   difficulty: hard
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents when I can'
+  messages: 'Gaddy: I''ll send the documents when I can'
   policy_note: '''when I can'' is not a concrete deadline → null.'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: null
-    context: I will send the documents when I can
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents when I can
 - category: args_deadline
   scenario: deadline_none
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents'
+  messages: 'Gaddy: I''ll send the documents'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: null
-    context: I will send the documents
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents
 - category: args_deadline
   scenario: deadline_relative_context
   difficulty: hard
@@ -180,24 +196,27 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-03-31'
-    context: I'll send the documents by end of the quarter
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by end of the quarter
 - category: args_deadline
   scenario: deadline_implied_from_event
   difficulty: hard
   chat_id: 972501111111@c.us
   chat_name: Rachel
   messages: 'Gaddy: I''ll send the documents before the meeting'
-  policy_note: Deadline implied by an event ('before the meeting') is a valid explicit deadline.
+  policy_note: Deadline implied by an event is valid in principle, but no meeting time
+    is specified so it cannot be computed → null.
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: null
-    context: I'll send the documents before the meeting
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents before the meeting
 - category: args_deadline
   scenario: deadline_conflicting_multi_message
   difficulty: hard
@@ -212,6 +231,7 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: actually, let me send them by tomorrow instead
     status: waiting
     notification: none
+    context_fragments:
+    - actually, let me send them by tomorrow instead

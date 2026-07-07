@@ -232,7 +232,7 @@
         "committed_party": "Bob",
         "required_action": "Send the slides",
         "deadline": "2025-01-06",
-        "context": "Alice asked Bob to send the slides by Monday, Bob agreed",
+        "context": "sure, I'll send them by Monday",
         "status": "waiting",
         "notification": "none"
       }
@@ -271,7 +271,7 @@
     "chat_name": "Rachel",
     "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
-    "messages": "Gaddy: I will definitely call the client before noon",
+    "messages": "Gaddy: I'll definitely call the client before noon",
     "expected_commitments": [
       {
         "id": null,
@@ -280,7 +280,7 @@
         "committed_party": "Gaddy",
         "required_action": "Call the client",
         "deadline": "2025-01-06T12:00:00",
-        "context": "I will definitely call the client before noon",
+        "context": "I'll definitely call the client before noon",
         "status": "waiting",
         "notification": "none"
       }
@@ -328,7 +328,7 @@
         "committed_party": "Gaddy",
         "required_action": "Start the project",
         "deadline": "2025-01-07",
-        "context": "the client approved the budget, I'll start the project tomorrow",
+        "context": "I'll start the project tomorrow then",
         "status": "waiting",
         "notification": "none"
       }
@@ -448,7 +448,7 @@
         "committed_party": "Bob",
         "required_action": "Update the spreadsheet",
         "deadline": null,
-        "context": "Alice asked Bob to update the spreadsheet, Bob said 'on it'",
+        "context": "on it",
         "status": "waiting",
         "notification": "none"
       }
@@ -531,16 +531,16 @@
     "category": "act_vs_ignore",
     "scenario": "challenge_need_to_with_intent",
     "difficulty": "hard",
-    "chat_id": "972504444444@c.us",
-    "chat_name": "David (Bank Leumi)",
+    "chat_id": "972501111111@c.us",
+    "chat_name": "Rachel",
     "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I need to call the bank about the fees today",
     "expected_commitments": [
       {
         "id": null,
-        "chat_id": "972504444444@c.us",
-        "chat_name": "David (Bank Leumi)",
+        "chat_id": "972501111111@c.us",
+        "chat_name": "Rachel",
         "committed_party": "Gaddy",
         "required_action": "Call the bank about the fees",
         "deadline": "2025-01-06",

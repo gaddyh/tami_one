@@ -11,17 +11,20 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
   expected_commitments:
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I sent the documents yesterday
     status: done
     notification: none
+    context_fragments:
+    - I sent the documents yesterday
+  verified: true
 - category: lifecycle_completion
   scenario: past_tense_without_existing_ignore
   difficulty: easy
@@ -32,8 +35,8 @@
 - category: lifecycle_completion
   scenario: dismiss_existing
   difficulty: easy
-  chat_id: 972503333333@c.us
-  chat_name: Supplier - Mike
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: forget about calling the supplier
 
     Gaddy: I found another source'
@@ -42,17 +45,20 @@
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: null
-    context: Need to call the supplier about the order
     status: waiting
     notification: none
+    context_fragments: &id001
+    - forget about calling the supplier
+    - I found another source
   expected_commitments:
   - id: abc-456
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: null
-    context: forget about calling the supplier, I found another source
     status: dismissed
     notification: none
+    context_fragments: *id001
+  verified: true
 - category: lifecycle_completion
   scenario: done_short_confirmation
   difficulty: easy
@@ -64,17 +70,19 @@
     committed_party: Dana
     required_action: Pay the invoice
     deadline: '2025-01-06'
-    context: Dana will pay the invoice by Monday
     status: waiting
     notification: none
+    context_fragments:
+    - Dana will pay the invoice by Monday
   expected_commitments:
   - id: abc-400
     committed_party: Dana
     required_action: Pay the invoice
     deadline: '2025-01-06'
-    context: done, the invoice is paid
     status: done
     notification: none
+    context_fragments:
+    - done, the invoice is paid
 - category: lifecycle_completion
   scenario: done_passive_voice
   difficulty: medium
@@ -86,17 +94,19 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
   expected_commitments:
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: the documents were sent this morning
     status: done
     notification: none
+    context_fragments:
+    - the documents were sent this morning
 - category: lifecycle_completion
   scenario: dismiss_vague
   difficulty: medium
@@ -108,17 +118,19 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
   expected_commitments:
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: never mind about the documents, we don't need them anymore
     status: dismissed
     notification: none
+    context_fragments:
+    - never mind about the documents, we don't need them anymore
 - category: lifecycle_completion
   scenario: future_promise_not_done
   difficulty: medium
@@ -130,17 +142,19 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
   expected_commitments:
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I'll definitely send the documents tomorrow as promised
     status: waiting
     notification: none
+    context_fragments:
+    - I'll definitely send the documents tomorrow as promised
 - category: lifecycle_completion
   scenario: done_by_different_party
   difficulty: medium
@@ -152,17 +166,19 @@
     committed_party: Bob
     required_action: Prepare the report
     deadline: '2025-01-10'
-    context: Bob will prepare the report by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - Bob will prepare the report by Friday
   expected_commitments:
   - id: abc-300
     committed_party: Bob
     required_action: Prepare the report
     deadline: '2025-01-10'
-    context: Bob finished the report and submitted it
     status: done
     notification: none
+    context_fragments:
+    - Bob finished the report and submitted it
 - category: lifecycle_completion
   scenario: started_not_done
   difficulty: hard
@@ -175,9 +191,10 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
   expected_commitments: []
 - category: lifecycle_completion
   scenario: almost_done_not_done
@@ -191,50 +208,55 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
   expected_commitments: []
 - category: lifecycle_completion
   scenario: dismiss_then_new_same_action
   difficulty: hard
-  chat_id: 972503333333@c.us
-  chat_name: Supplier - Mike
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: forget about the old supplier order
 
     Gaddy: I need to call a new supplier about a different order'
-  policy_note: Dismiss old + new commitment with same action but different target → new only.
+  policy_note: Dismiss old + new commitment with same action but different target
+    → new only.
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Call a new supplier
     deadline: null
-    context: I need to call a new supplier about a different order
     status: waiting
     notification: none
+    context_fragments:
+    - I need to call a new supplier about a different order
 - category: lifecycle_completion
   scenario: will_do_not_done
   difficulty: hard
   chat_id: 972503333333@c.us
   chat_name: Supplier - Mike
-  messages: 'Gaddy: I''ll do it, I''ll call the supplier today'
+  messages: 'Gaddy: I''ll do it, I''ll call you today'
   policy_note: '''Will do'' is a future promise, not a completion.'
   existing_commitments:
   - id: abc-456
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: null
-    context: Need to call the supplier about the order
     status: waiting
     notification: none
+    context_fragments:
+    - Need to call the supplier about the order
   expected_commitments:
   - id: abc-456
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: '2025-01-06'
-    context: I'll do it, I'll call the supplier today
     status: waiting
     notification: none
+    context_fragments:
+    - I'll do it, I'll call you today
 - category: lifecycle_completion
   scenario: third_party_completion_report
   difficulty: hard
@@ -247,60 +269,68 @@
     committed_party: Bob
     required_action: Prepare the report
     deadline: '2025-01-10'
-    context: Bob will prepare the report by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - Bob will prepare the report by Friday
   expected_commitments:
   - id: abc-300
     committed_party: Bob
     required_action: Prepare the report
     deadline: '2025-01-10'
-    context: Alice told me Bob submitted the report yesterday
     status: done
     notification: none
+    context_fragments:
+    - Alice told me Bob submitted the report yesterday
 - category: lifecycle_completion
   scenario: dismiss_with_condition
   difficulty: hard
-  chat_id: 972503333333@c.us
-  chat_name: Supplier - Mike
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: forget about calling the supplier unless they respond today'
-  policy_note: Conditional dismiss ('unless they respond today') → keep waiting, update deadline.
+  policy_note: Conditional dismiss ('unless they respond today') → keep waiting, update
+    deadline.
   existing_commitments:
   - id: abc-456
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: null
-    context: Need to call the supplier about the order
     status: waiting
     notification: none
+    context_fragments:
+    - Need to call the supplier about the order
   expected_commitments:
   - id: abc-456
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: '2025-01-06'
-    context: forget about calling the supplier unless they respond today
     status: waiting
     notification: none
+    context_fragments:
+    - forget about calling the supplier unless they respond today
 - category: lifecycle_completion
   scenario: partial_completion_not_done
   difficulty: hard
   chat_id: 972501111111@c.us
   chat_name: Rachel
   messages: 'Gaddy: I sent 3 out of the 5 documents, will send the rest tomorrow'
-  policy_note: Partial completion ('sent 3 out of 5 documents') → not done, still waiting.
+  policy_note: Partial completion ('sent 3 out of 5 documents') → not done, still
+    waiting.
   existing_commitments:
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
   expected_commitments:
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I sent 3 out of the 5 documents, will send the rest tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I sent 3 out of the 5 documents, will send the rest tomorrow

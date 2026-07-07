@@ -11,9 +11,10 @@
     committed_party: Bob
     required_action: Send the report
     deadline: '2025-01-10'
-    context: Alice asked Bob to send the report by Friday, Bob agreed
     status: waiting
     notification: none
+    context_fragments:
+    - sure, I'll have it ready by Friday
 - category: args_party
   scenario: bob_asks_alice_alice_accepts
   difficulty: easy
@@ -27,23 +28,28 @@
     committed_party: Alice
     required_action: Send the report
     deadline: '2025-01-10'
-    context: Bob asked Alice to send the report by Friday, Alice agreed
     status: waiting
     notification: none
+    context_fragments:
+    - sure, I'll have it ready by Friday
 - category: args_party
   scenario: self_commitment_speaker
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents by tomorrow'
+  allow_similar_to:
+  - args_required_action/send_docs_forward
+  - args_deadline/deadline_by_tomorrow
+  messages: 'Gaddy: I''ll send the documents by tomorrow'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
 - category: args_party
   scenario: third_party_named
   difficulty: easy
@@ -55,14 +61,15 @@
     committed_party: Bob
     required_action: Send the documents
     deadline: '2025-01-10'
-    context: Bob will send the documents by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - Bob will send the documents by Friday
 - category: args_party
   scenario: external_party_waiting
   difficulty: medium
-  chat_id: 972504444444@c.us
-  chat_name: David (Bank Leumi)
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''m waiting for the bank to process the loan
 
     Gaddy: nothing I can do until they respond'
@@ -71,9 +78,10 @@
     committed_party: the bank
     required_action: Process the loan
     deadline: null
-    context: I'm waiting for the bank to process the loan
     status: waiting
     notification: none
+    context_fragments:
+    - I'm waiting for the bank to process the loan
 - category: args_party
   scenario: alice_asks_bob_bob_refuses
   difficulty: medium
@@ -98,9 +106,10 @@
     committed_party: Charlie
     required_action: Prepare the report
     deadline: '2025-01-10'
-    context: Alice asked for someone to prepare the report, Charlie volunteered
     status: waiting
     notification: none
+    context_fragments:
+    - I'll do it, I'll have it ready by Friday
 - category: args_party
   scenario: request_to_group_one_volunteers
   difficulty: medium
@@ -114,9 +123,10 @@
     committed_party: Dana
     required_action: Book the meeting room
     deadline: '2025-01-07'
-    context: Gaddy asked someone to book the meeting room, Dana volunteered
     status: waiting
     notification: none
+    context_fragments:
+    - I'll book it
 - category: args_party
   scenario: unknown_party_unclear
   difficulty: hard
@@ -129,9 +139,10 @@
     committed_party: null
     required_action: Call the supplier
     deadline: null
-    context: someone needs to call the supplier about the order
     status: unclear
     notification: none
+    context_fragments:
+    - someone needs to call the supplier about the order
 - category: args_party
   scenario: group_we_need_unclear
   difficulty: hard
@@ -144,9 +155,10 @@
     committed_party: null
     required_action: Send the documents to the client
     deadline: null
-    context: we need to send the documents to the client
     status: unclear
     notification: none
+    context_fragments:
+    - we need to send the documents to the client
 - category: args_party
   scenario: party_handoff_update
   difficulty: hard
@@ -159,37 +171,41 @@
     committed_party: Alice
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: Alice will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - Alice will send the documents by tomorrow
   expected_commitments:
   - id: abc-100
     committed_party: Bob
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: actually Bob will handle it instead of Alice
     status: waiting
     notification: none
+    context_fragments:
+    - actually Bob will handle it instead of Alice
 - category: args_party
   scenario: speaker_commits_for_other_named
   difficulty: hard
   chat_id: 120363000003@g.us
   chat_name: Report Review
   messages: 'Gaddy: Alice will send the documents, I''ll make sure of it'
-  policy_note: Speaker asserts another person will do it → commitment with that person as party.
+  policy_note: Speaker asserts another person will do it → commitment with that person
+    as party.
   expected_commitments:
   - id: null
     committed_party: Alice
     required_action: Send the documents
     deadline: null
-    context: Alice will send the documents, I'll make sure of it
     status: waiting
     notification: none
+    context_fragments:
+    - Alice will send the documents, I'll make sure of it
 - category: args_party
   scenario: party_implied_by_role
   difficulty: hard
-  chat_id: 972506666666@c.us
-  chat_name: Contractor - Yossi
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: the contractor needs to finish the renovation by next week'
   policy_note: Party implied by role title, not a named person.
   expected_commitments:
@@ -197,25 +213,27 @@
     committed_party: the contractor
     required_action: Finish the renovation
     deadline: '2025-01-13'
-    context: the contractor needs to finish the renovation by next week
     status: waiting
     notification: none
+    context_fragments:
+    - the contractor needs to finish the renovation by next week
 - category: args_party
   scenario: speaker_volunteers_other_without_confirmation
   difficulty: hard
   chat_id: 120363000003@g.us
   chat_name: Report Review
   messages: 'Gaddy: Dana will handle the invoice payment by Friday'
-  policy_note: Speaker names someone else as responsible without their confirmation → commitment with
-    named person as party.
+  policy_note: Speaker names someone else as responsible without their confirmation
+    → commitment with named person as party.
   expected_commitments:
   - id: null
     committed_party: Dana
     required_action: Handle the invoice payment
     deadline: '2025-01-10'
-    context: Dana will handle the invoice payment by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - Dana will handle the invoice payment by Friday
 - category: args_party
   scenario: implicit_party_from_context
   difficulty: hard
@@ -224,13 +242,14 @@
   messages: 'Alice: I talked to the lawyer yesterday
 
     Alice: he said he''ll file the motion by Wednesday'
-  policy_note: Party must be inferred from conversational context, not explicitly named in the commitment
-    sentence.
+  policy_note: Party must be inferred from conversational context, not explicitly
+    named in the commitment sentence.
   expected_commitments:
   - id: null
     committed_party: the lawyer
     required_action: File the motion
     deadline: '2025-01-08'
-    context: he said he'll file the motion by Wednesday
     status: waiting
     notification: none
+    context_fragments:
+    - he said he'll file the motion by Wednesday

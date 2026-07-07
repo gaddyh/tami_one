@@ -3,29 +3,34 @@
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
+  allow_similar_to:
+  - args_deadline/deadline_by_tomorrow
+  - lifecycle_update_vs_new/new_when_no_existing
   messages: 'Gaddy: I''ll send the documents tomorrow'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I'll send the documents tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents tomorrow
 - category: args_required_action
   scenario: call_supplier_ring
   difficulty: easy
   chat_id: 972503333333@c.us
   chat_name: Supplier - Mike
-  messages: 'Gaddy: I need to call the supplier about the order'
+  messages: 'Gaddy: I need to call you about the order'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: null
-    context: I need to call the supplier about the order
     status: waiting
     notification: none
+    context_fragments:
+    - I need to call you about the order
 - category: args_required_action
   scenario: prepare_report
   difficulty: easy
@@ -37,9 +42,10 @@
     committed_party: Gaddy
     required_action: Prepare the report
     deadline: '2025-01-10'
-    context: I'll have the report ready by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll have the report ready by Friday
 - category: args_required_action
   scenario: book_meeting_room_reserve
   difficulty: easy
@@ -51,9 +57,10 @@
     committed_party: Gaddy
     required_action: Book the meeting room
     deadline: '2025-01-07'
-    context: I'll reserve the meeting room for Tuesday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll reserve the meeting room for Tuesday
 - category: args_required_action
   scenario: upload_signed_form
   difficulty: easy
@@ -65,9 +72,10 @@
     committed_party: Gaddy
     required_action: Upload the signed form
     deadline: '2025-01-08'
-    context: I'll upload the signed form by Wednesday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll upload the signed form by Wednesday
 - category: args_required_action
   scenario: send_docs_send_over
   difficulty: medium
@@ -79,9 +87,10 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I'll send over the docs tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send over the docs tomorrow
 - category: args_required_action
   scenario: send_docs_paperwork
   difficulty: medium
@@ -93,23 +102,25 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I'll get the paperwork to you tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll get the paperwork to you tomorrow
 - category: args_required_action
   scenario: call_supplier_phone
   difficulty: medium
   chat_id: 972503333333@c.us
   chat_name: Supplier - Mike
-  messages: 'Gaddy: I''ll give the supplier a call about the order today'
+  messages: 'Gaddy: I''ll give you a ring about the order today'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: '2025-01-06'
-    context: I'll give the supplier a call about the order today
     status: waiting
     notification: none
+    context_fragments:
+    - I'll give you a ring about the order today
 - category: args_required_action
   scenario: pay_invoice_take_care
   difficulty: medium
@@ -121,9 +132,10 @@
     committed_party: Dana
     required_action: Pay the invoice
     deadline: '2025-01-06'
-    context: I'll take care of the invoice payment today
     status: waiting
     notification: none
+    context_fragments:
+    - I'll take care of the invoice payment today
 - category: args_required_action
   scenario: pay_invoice_settle
   difficulty: medium
@@ -135,9 +147,10 @@
     committed_party: Dana
     required_action: Pay the invoice
     deadline: '2025-01-10'
-    context: I'll settle the invoice by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll settle the invoice by Friday
 - category: args_required_action
   scenario: prepare_report_draft
   difficulty: medium
@@ -149,14 +162,15 @@
     committed_party: Gaddy
     required_action: Prepare the report
     deadline: '2025-01-10'
-    context: I'll draft the report by end of week
     status: waiting
     notification: none
+    context_fragments:
+    - I'll draft the report by end of week
 - category: args_required_action
   scenario: process_loan
   difficulty: hard
-  chat_id: 972504444444@c.us
-  chat_name: David (Bank Leumi)
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: the bank needs to process the loan application'
   policy_note: External party as committed_party with action inferred from context.
   expected_commitments:
@@ -164,39 +178,44 @@
     committed_party: the bank
     required_action: Process the loan
     deadline: null
-    context: the bank needs to process the loan application
     status: waiting
     notification: none
+    context_fragments:
+    - the bank needs to process the loan application
 - category: args_required_action
   scenario: very_indirect_action
   difficulty: hard
   chat_id: 972501111111@c.us
   chat_name: Rachel
   messages: 'Gaddy: I''ll make sure the invoice is taken care of by Friday'
-  policy_note: Vague indirect action ('make sure it's taken care of') → extract the underlying action.
+  policy_note: Vague indirect action ('make sure it's taken care of') → extract the
+    underlying action.
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Take care of the invoice
     deadline: '2025-01-10'
-    context: I'll make sure the invoice is taken care of by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll make sure the invoice is taken care of by Friday
 - category: args_required_action
   scenario: multi_step_action
   difficulty: hard
   chat_id: 972508888888@c.us
   chat_name: Notary - Sarah
   messages: 'Gaddy: I''ll review the contract, sign it, and send it back by tomorrow'
-  policy_note: Multi-step action described in one message → single commitment with combined action.
+  policy_note: Multi-step action described in one message → single commitment with
+    combined action.
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Review, sign, and send back the contract
     deadline: '2025-01-07'
-    context: I'll review the contract, sign it, and send it back by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll review the contract, sign it, and send it back by tomorrow
 - category: args_required_action
   scenario: action_split_across_messages
   difficulty: hard
@@ -207,12 +226,15 @@
     Gaddy: specifically the vendor registration forms
 
     Gaddy: I''ll do it by Wednesday'
-  policy_note: Action details split across multiple messages → single commitment combining the information.
+  policy_note: Action details split across multiple messages → single commitment combining
+    the information.
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Handle the vendor registration forms
     deadline: '2025-01-08'
-    context: I need to handle the paperwork, specifically the vendor registration forms
     status: waiting
     notification: none
+    context_fragments:
+    - I need to handle the paperwork
+    - specifically the vendor registration forms

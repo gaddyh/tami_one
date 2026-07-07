@@ -123,7 +123,8 @@
   difficulty: hard
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: the client said they''ll review the proposal and get back to us next week'
+  messages: 'Gaddy: the client said they''ll review the proposal and get back to us
+    next week'
   policy_note: Sharing information without action item → ignore.
   expected_commitments: []
 - category: act_vs_ignore
@@ -156,9 +157,10 @@
     committed_party: Bob
     required_action: Send the slides
     deadline: '2025-01-06'
-    context: Alice asked Bob to send the slides by Monday, Bob agreed
     status: waiting
     notification: none
+    context_fragments:
+    - sure, I'll send them by Monday
 - category: act_vs_ignore
   scenario: challenge_generic_callback_with_topic
   difficulty: hard
@@ -173,24 +175,26 @@
     committed_party: Bob
     required_action: Get back to Alice about the budget
     deadline: '2025-01-07'
-    context: let me review the budget and get back to you tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - let me review the budget and get back to you tomorrow
 - category: act_vs_ignore
   scenario: challenge_explicit_self_promise
   difficulty: hard
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will definitely call the client before noon'
+  messages: 'Gaddy: I''ll definitely call the client before noon'
   policy_note: Explicit 'I will' with specific action and deadline → commitment.
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Call the client
     deadline: '2025-01-06T12:00:00'
-    context: I will definitely call the client before noon
     status: waiting
     notification: none
+    context_fragments:
+    - I'll definitely call the client before noon
 - category: act_vs_ignore
   scenario: challenge_volunteer
   difficulty: hard
@@ -205,9 +209,10 @@
     committed_party: Bob
     required_action: Handle the vendor registration
     deadline: '2025-01-08'
-    context: I'll take care of the vendor registration by Wednesday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll take care of the vendor registration by Wednesday
 - category: act_vs_ignore
   scenario: challenge_conditional_triggered
   difficulty: hard
@@ -222,39 +227,44 @@
     committed_party: Gaddy
     required_action: Start the project
     deadline: '2025-01-07'
-    context: the client approved the budget, I'll start the project tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll start the project tomorrow then
 - category: act_vs_ignore
   scenario: challenge_will_with_specific_action
   difficulty: hard
   chat_id: 972501111111@c.us
   chat_name: Rachel
   messages: 'Gaddy: I''ll prepare the quarterly report'
-  policy_note: '''I will'' with concrete action but no deadline → commitment without deadline.'
+  policy_note: '''I will'' with concrete action but no deadline → commitment without
+    deadline.'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Prepare the quarterly report
     deadline: null
-    context: I'll prepare the quarterly report
     status: waiting
     notification: none
+    context_fragments:
+    - I'll prepare the quarterly report
 - category: act_vs_ignore
   scenario: challenge_third_party_commits
   difficulty: hard
   chat_id: 120363000003@g.us
   chat_name: Report Review
   messages: 'Gaddy: Dana will send the contract to the client by Friday'
-  policy_note: Speaker asserts someone else will do something → commitment with that party.
+  policy_note: Speaker asserts someone else will do something → commitment with that
+    party.
   expected_commitments:
   - id: null
     committed_party: Dana
     required_action: Send the contract to the client
     deadline: '2025-01-10'
-    context: Dana will send the contract to the client by Friday
     status: waiting
     notification: none
+    context_fragments:
+    - Dana will send the contract to the client by Friday
 - category: act_vs_ignore
   scenario: challenge_hedged_unclear
   difficulty: hard
@@ -267,9 +277,10 @@
     committed_party: Gaddy
     required_action: Review the code
     deadline: '2025-01-07'
-    context: I might be able to review the code tomorrow, but I'm not sure
     status: unclear
     notification: none
+    context_fragments:
+    - I might be able to review the code tomorrow, but I'm not sure
 - category: act_vs_ignore
   scenario: challenge_multi_message_commitment
   difficulty: hard
@@ -284,9 +295,10 @@
     committed_party: Gaddy
     required_action: Pay the invoice
     deadline: '2025-01-10'
-    context: I'll pay it by end of week
     status: waiting
     notification: none
+    context_fragments:
+    - I'll pay it by end of week
 - category: act_vs_ignore
   scenario: challenge_implicit_acceptance
   difficulty: hard
@@ -301,9 +313,10 @@
     committed_party: Bob
     required_action: Update the spreadsheet
     deadline: null
-    context: Alice asked Bob to update the spreadsheet, Bob said 'on it'
     status: waiting
     notification: none
+    context_fragments:
+    - on it
 - category: act_vs_ignore
   scenario: challenge_waiting_external
   difficulty: hard
@@ -318,9 +331,10 @@
     committed_party: the city
     required_action: Approve the permit
     deadline: null
-    context: waiting for the city to approve the permit
     status: waiting
     notification: none
+    context_fragments:
+    - waiting for the city to approve the permit
 - category: act_vs_ignore
   scenario: challenge_let_me_with_action
   difficulty: hard
@@ -333,9 +347,10 @@
     committed_party: Gaddy
     required_action: Check with the accountant and update
     deadline: '2025-01-06'
-    context: let me check with the accountant and I'll update you today
     status: waiting
     notification: none
+    context_fragments:
+    - let me check with the accountant and I'll update you today
 - category: act_vs_ignore
   scenario: challenge_responsibility_claim
   difficulty: hard
@@ -348,14 +363,15 @@
     committed_party: Gaddy
     required_action: Handle the client meeting
     deadline: '2025-01-09'
-    context: I'll handle the client meeting on Thursday
     status: waiting
     notification: none
+    context_fragments:
+    - I'll handle the client meeting on Thursday
 - category: act_vs_ignore
   scenario: challenge_need_to_with_intent
   difficulty: hard
-  chat_id: 972504444444@c.us
-  chat_name: David (Bank Leumi)
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I need to call the bank about the fees today'
   policy_note: '''I need to X'' with clear intent to act → commitment.'
   expected_commitments:
@@ -363,9 +379,10 @@
     committed_party: Gaddy
     required_action: Call the bank about the fees
     deadline: '2025-01-06'
-    context: I need to call the bank about the fees today
     status: waiting
     notification: none
+    context_fragments:
+    - I need to call the bank about the fees today
 - category: act_vs_ignore
   scenario: challenge_confirm_and_commit
   difficulty: hard
@@ -380,9 +397,10 @@
     committed_party: Bob
     required_action: Call the venue to confirm
     deadline: '2025-01-06T14:00:00'
-    context: not yet, I'll call them this afternoon
     status: waiting
     notification: none
+    context_fragments:
+    - not yet, I'll call them this afternoon
 - category: act_vs_ignore
   scenario: challenge_plan_with_action
   difficulty: hard
@@ -395,9 +413,10 @@
     committed_party: Gaddy
     required_action: Submit the proposal
     deadline: '2025-01-10T17:00:00'
-    context: I'm going to submit the proposal by Friday end of day
     status: waiting
     notification: none
+    context_fragments:
+    - I'm going to submit the proposal by Friday end of day
 - category: act_vs_ignore
   scenario: challenge_offer_help
   difficulty: hard
@@ -410,9 +429,10 @@
     committed_party: Gaddy
     required_action: Review the contract and send comments
     deadline: '2025-01-07'
-    context: I can review the contract and send comments by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I can review the contract and send comments by tomorrow
 - category: act_vs_ignore
   scenario: challenge_commit_after_question
   difficulty: hard
@@ -427,6 +447,7 @@
     committed_party: Bob
     required_action: Email the vendor
     deadline: '2025-01-06'
-    context: not yet, I'll email them today
     status: waiting
     notification: none
+    context_fragments:
+    - not yet, I'll email them today

@@ -6,6 +6,7 @@ from pathlib import Path
 
 import dspy
 import pytest
+import yaml
 
 from eval.dataset import (
     build_devset,
@@ -16,6 +17,60 @@ from eval.metrics import (
     commitment_metric,
 )
 from app.commitments.models import Commitment
+
+_DATA_DIR = Path(__file__).parent / "evals" / "data"
+
+
+def _count_yaml_examples() -> int:
+    """Count total examples across all category YAML files (excluding challenge)."""
+    category_files = [
+        "act_vs_ignore.yaml",
+        "args_party.yaml",
+        "args_deadline.yaml",
+        "args_required_action.yaml",
+        "lifecycle_update_vs_new.yaml",
+        "lifecycle_completion.yaml",
+        "cardinality.yaml",
+    ]
+    total = 0
+    for filename in category_files:
+        with (_DATA_DIR / filename).open() as f:
+            total += len(yaml.safe_load(f))
+    return total
+
+
+def _count_yaml_dev_examples() -> int:
+    """Count examples that hash to dev split."""
+    import hashlib
+    layer_map = {
+        "act_vs_ignore": 1, "args_party": 2, "args_deadline": 2,
+        "args_required_action": 2, "lifecycle_update_vs_new": 3,
+        "lifecycle_completion": 3, "cardinality": 4,
+    }
+    category_files = [
+        "act_vs_ignore.yaml", "args_party.yaml", "args_deadline.yaml",
+        "args_required_action.yaml", "lifecycle_update_vs_new.yaml",
+        "lifecycle_completion.yaml", "cardinality.yaml",
+    ]
+    dev_count = 0
+    for filename in category_files:
+        with (_DATA_DIR / filename).open() as f:
+            for raw in yaml.safe_load(f):
+                eid = f"{raw['category']}/{raw['scenario']}"
+                if raw.get("split"):
+                    split = raw["split"]
+                else:
+                    layer = layer_map.get(raw.get("category", ""), 3)
+                    h = hashlib.sha256(eid.encode()).hexdigest()
+                    bucket = int(h[:8], 16) % 100
+                    if layer == 1: split = "train" if bucket < 60 else ("dev" if bucket < 80 else "test")
+                    elif layer == 2: split = "train" if bucket < 50 else ("dev" if bucket < 75 else "test")
+                    elif layer == 3: split = "train" if bucket < 35 else ("dev" if bucket < 65 else "test")
+                    elif layer == 4: split = "train" if bucket < 25 else ("dev" if bucket < 50 else "test")
+                    else: split = "test"
+                if split == "dev":
+                    dev_count += 1
+    return dev_count
 
 
 def test_act_vs_ignore_correctly_ignored():
@@ -171,7 +226,8 @@ def test_build_devset_loads_all_examples():
     devset_path = Path(__file__).parent / "evals" / "devset.json"
     examples = build_devset(devset_path)
 
-    assert len(examples) == 22
+    expected_count = _count_yaml_dev_examples()
+    assert len(examples) == expected_count
     for ex in examples:
         assert isinstance(ex, dspy.Example)
         assert hasattr(ex, "chat_id")
@@ -190,3 +246,46 @@ def test_build_devset_examples_have_inputs():
         assert "chat_id" in input_keys
         assert "messages" in input_keys
         assert "current_datetime" in input_keys
+
+
+def test_validators_pass_on_current_yaml():
+    """All validators should pass against the current YAML files."""
+    import importlib.util
+    gen_path = Path(__file__).parent / "evals" / "generate_devset.py"
+    spec = importlib.util.spec_from_file_location("generate_devset", gen_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    raw = mod.load_raw_examples()
+    challenge = mod.load_raw_challenge_examples()
+    split_map = mod._load_raw_split_map(raw)
+    errors, _ = mod.run_validators(raw, challenge, split_map)
+    assert errors == [], f"Validation errors: {errors}"
+
+
+def test_deterministic_splits():
+    """Same YAML input should produce same split assignment across runs."""
+    import importlib.util
+    gen_path = Path(__file__).parent / "evals" / "generate_devset.py"
+    spec = importlib.util.spec_from_file_location("generate_devset", gen_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    raw = mod.load_raw_examples()
+    split_map_1 = mod._load_raw_split_map(raw)
+    split_map_2 = mod._load_raw_split_map(raw)
+    assert split_map_1 == split_map_2
+
+
+def test_cardinality_category_in_pool():
+    """Cardinality examples should exist in the YAML pool."""
+    cardinality_path = _DATA_DIR / "cardinality.yaml"
+    assert cardinality_path.exists()
+    with cardinality_path.open() as f:
+        examples = yaml.safe_load(f)
+    assert len(examples) >= 12, f"Expected >=12 cardinality examples, got {len(examples)}"
+    for ex in examples:
+        assert ex["category"] == "cardinality"
+        assert len(ex.get("expected_commitments", [])) >= 2, (
+            f"Cardinality example {ex['scenario']} should have 2+ expected commitments"
+        )

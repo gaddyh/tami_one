@@ -9,12 +9,13 @@
 
     Gaddy: let''s catch up soon'
   expected_commitments: []
+  verified: true
 - category: act_vs_ignore
   scenario: explicit_self_commitment
   difficulty: easy
   chat_id: 972501111111@c.us
   chat_name: Rachel
-  messages: 'Gaddy: I will send the documents by tomorrow
+  messages: 'Gaddy: I''ll send the documents by tomorrow
 
     Gaddy: just need to finish the last page'
   expected_commitments:
@@ -22,9 +23,11 @@
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I will send the documents by tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - I'll send the documents by tomorrow
+  verified: true
 - category: act_vs_ignore
   scenario: thanks_only_ignore
   difficulty: easy
@@ -36,6 +39,7 @@
 
     Gaddy: have a great day'
   expected_commitments: []
+  verified: true
 - category: act_vs_ignore
   scenario: motivational_ignore
   difficulty: easy
@@ -48,15 +52,16 @@
   difficulty: easy
   chat_id: 972503333333@c.us
   chat_name: Supplier - Mike
-  messages: 'Gaddy: I''ll call the supplier today'
+  messages: 'Gaddy: I''ll call you today about the invoice'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Call the supplier
     deadline: '2025-01-06'
-    context: I'll call the supplier today
     status: waiting
     notification: none
+    context_fragments:
+    - I'll call you today about the invoice
 - category: act_vs_ignore
   scenario: soft_social_future_ignore
   difficulty: medium
@@ -69,6 +74,8 @@
   difficulty: medium
   chat_id: 120363000001@g.us
   chat_name: Project Team
+  allow_similar_to:
+  - args_party/alice_asks_bob_bob_accepts
   messages: 'Alice: can you send me the report by Friday?
 
     Bob: sure, I''ll have it ready by Friday'
@@ -77,14 +84,18 @@
     committed_party: Bob
     required_action: Send the report
     deadline: '2025-01-10'
-    context: Alice asked Bob to send the report by Friday, Bob agreed
     status: waiting
     notification: none
+    context_fragments:
+    - sure, I'll have it ready by Friday
+  verified: true
 - category: act_vs_ignore
   scenario: waiting_external_party
   difficulty: medium
-  chat_id: 972504444444@c.us
-  chat_name: David (Bank Leumi)
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
+  allow_similar_to:
+  - args_party/external_party_waiting
   messages: 'Gaddy: I''m waiting for the bank to process the loan
 
     Gaddy: nothing I can do until they respond'
@@ -93,9 +104,11 @@
     committed_party: the bank
     required_action: Process the loan
     deadline: null
-    context: I'm waiting for the bank to process the loan
     status: waiting
     notification: none
+    context_fragments:
+    - I'm waiting for the bank to process the loan
+  verified: true
 - category: act_vs_ignore
   scenario: question_only_ignore
   difficulty: medium
@@ -111,6 +124,7 @@
   messages: 'Gaddy: let me think about it and get back to you'
   policy_note: Generic callback without a specific topic or deadline is not a commitment.
   expected_commitments: []
+  verified: true
 - category: act_vs_ignore
   scenario: generic_callback_with_topic_positive
   difficulty: hard
@@ -119,30 +133,35 @@
   messages: 'Dana: can you approve the quote?
 
     Gaddy: let me think about the quote and get back to you tomorrow'
-  policy_note: 'Contrastive pair with generic_callback_ignore: adding topic + deadline makes it a commitment.'
+  policy_note: 'Contrastive pair with generic_callback_ignore: adding topic + deadline
+    makes it a commitment.'
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Get back to Dana about the quote
     deadline: '2025-01-07'
-    context: let me think about the quote and get back to you tomorrow
     status: waiting
     notification: none
+    context_fragments:
+    - let me think about the quote and get back to you tomorrow
 - category: act_vs_ignore
   scenario: vague_action_unclear
   difficulty: hard
   chat_id: 120363000002@g.us
   chat_name: Project Alpha
-  messages: 'Gaddy: we should probably do something about the project at some point'
-  policy_note: Vague action with no clear owner or deadline → unclear status, not ignored.
+  messages: 'Gaddy: we probably need to do something about the project at some point'
+  policy_note: Vague action with no clear owner or deadline → unclear status, not
+    ignored.
   expected_commitments:
   - id: null
     committed_party: null
     required_action: Do something about the project
     deadline: null
-    context: we should probably do something about the project at some point
     status: unclear
     notification: none
+    context_fragments:
+    - we probably need to do something about the project at some point
+  verified: true
 - category: act_vs_ignore
   scenario: request_without_acceptance_ignore
   difficulty: hard
@@ -157,7 +176,8 @@
   chat_id: 972501111111@c.us
   chat_name: Rachel
   messages: 'Gaddy: if they send the quote, I''ll approve it'
-  policy_note: Conditional promise where condition has not been met → ignore, not a commitment yet.
+  policy_note: Conditional promise where condition has not been met → ignore, not
+    a commitment yet.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: should_without_will_ignore
@@ -181,20 +201,23 @@
   chat_id: 972501111111@c.us
   chat_name: Rachel
   messages: 'Gaddy: I might be able to send the documents tomorrow, but I''m not sure'
-  policy_note: Hedged language ('might', 'maybe') with no clear commitment → unclear, not ignore.
+  policy_note: Hedged language ('might', 'maybe') with no clear commitment → unclear,
+    not ignore.
   expected_commitments:
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
     deadline: '2025-01-07'
-    context: I might be able to send the documents tomorrow, but I'm not sure
     status: unclear
     notification: none
+    context_fragments:
+    - I might be able to send the documents tomorrow, but I'm not sure
 - category: act_vs_ignore
   scenario: past_tense_no_existing_ignore
   difficulty: hard
-  chat_id: 972503333333@c.us
-  chat_name: Supplier - Mike
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: I already called the supplier yesterday and sorted it out'
-  policy_note: Past-tense statements about completed actions without existing commitments → ignore.
+  policy_note: Past-tense statements about completed actions without existing commitments
+    → ignore.
   expected_commitments: []
