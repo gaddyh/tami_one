@@ -59,7 +59,22 @@ app/
     └── transcription.py             # Voice-note transcription via OpenAI
 scripts/seed.py                      # CLI seed entry point
 scripts/eval_runner.py               # Local commitment-extraction eval runner
-tests/evals/                         # Seed examples + generated train/dev/test JSON splits
+tests/evals/
+├── data/                             # YAML example definitions (6 categories + challenge + schema)
+│   ├── _schema.yaml                  # Shared constants: chat_id, chat_name, defaults
+│   ├── act_vs_ignore.yaml            # Category A: act vs ignore boundary (18 examples)
+│   ├── args_party.yaml               # Category B: committed_party extraction (15)
+│   ├── args_deadline.yaml            # Category C: deadline extraction (15)
+│   ├── args_required_action.yaml     # Category D: required_action extraction (15)
+│   ├── lifecycle_update_vs_new.yaml  # Category E: update vs new commitment (15)
+│   ├── lifecycle_completion.yaml     # Category F: done/dismissed status (15)
+│   └── challenge_act_ignore.yaml     # Challenge split: hard act/ignore pairs (36)
+├── generate_devset.py                # Data-driven generator: YAML → train/dev/test JSON splits
+├── seed_examples.json                # Legacy hand-written reference examples
+├── trainset.json                     # Generated (40 examples)
+├── devset.json                       # Generated (22 examples)
+├── testset.json                      # Generated (31 examples)
+└── challenge_act_ignore.json         # Generated challenge split (36 examples)
 tests/                               # upsert, webhook, commitment extraction/eval tests
 ```
 
