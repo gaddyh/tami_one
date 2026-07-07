@@ -6,7 +6,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: Friday
+    deadline: '2025-01-10'
     context: I will send the documents by Friday
     status: waiting
     notification: none
@@ -18,7 +18,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -30,7 +30,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: today
+    deadline: '2025-01-06'
     context: I will send the documents today
     status: waiting
     notification: none
@@ -42,7 +42,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: next Monday
+    deadline: '2025-01-13'
     context: I will send the documents next Monday
     status: waiting
     notification: none
@@ -54,7 +54,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: by 5pm
+    deadline: '2025-01-06T17:00:00'
     context: I will send the documents by 5pm
     status: waiting
     notification: none
@@ -66,7 +66,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: by 17:00
+    deadline: '2025-01-06T17:00:00'
     context: I will send the documents by 17:00
     status: waiting
     notification: none
@@ -78,7 +78,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: July 15
+    deadline: '2025-07-15'
     context: I will send the documents by July 15
     status: waiting
     notification: none
@@ -90,7 +90,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: end of week
+    deadline: '2025-01-10'
     context: I will send the documents by end of week
     status: waiting
     notification: none
@@ -102,7 +102,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: next week
+    deadline: '2025-01-13'
     context: I will send the documents next week
     status: waiting
     notification: none
@@ -153,7 +153,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: end of the quarter
+    deadline: '2025-03-31'
     context: I'll send the documents by end of the quarter
     status: waiting
     notification: none
@@ -166,7 +166,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: before the meeting
+    deadline: null
     context: I'll send the documents before the meeting
     status: waiting
     notification: none
@@ -181,7 +181,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: actually, let me send them by tomorrow instead
     status: waiting
     notification: none

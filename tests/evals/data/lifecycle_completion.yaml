@@ -8,7 +8,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -16,7 +16,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I sent the documents yesterday
     status: done
     notification: none
@@ -55,7 +55,7 @@
   - id: abc-400
     committed_party: Dana
     required_action: Pay the invoice
-    deadline: Monday
+    deadline: '2025-01-06'
     context: Dana will pay the invoice by Monday
     status: waiting
     notification: none
@@ -63,7 +63,7 @@
   - id: abc-400
     committed_party: Dana
     required_action: Pay the invoice
-    deadline: Monday
+    deadline: '2025-01-06'
     context: done, the invoice is paid
     status: done
     notification: none
@@ -75,7 +75,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -83,7 +83,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: the documents were sent this morning
     status: done
     notification: none
@@ -95,7 +95,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -103,7 +103,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: never mind about the documents, we don't need them anymore
     status: dismissed
     notification: none
@@ -115,7 +115,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -123,7 +123,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I'll definitely send the documents tomorrow as promised
     status: waiting
     notification: none
@@ -135,7 +135,7 @@
   - id: abc-300
     committed_party: Bob
     required_action: Prepare the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Bob will prepare the report by Friday
     status: waiting
     notification: none
@@ -143,7 +143,7 @@
   - id: abc-300
     committed_party: Bob
     required_action: Prepare the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Bob finished the report and submitted it
     status: done
     notification: none
@@ -156,7 +156,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -170,7 +170,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -207,7 +207,7 @@
   - id: abc-456
     committed_party: Gaddy
     required_action: Call the supplier
-    deadline: today
+    deadline: '2025-01-06'
     context: I'll do it, I'll call the supplier today
     status: waiting
     notification: none
@@ -220,7 +220,7 @@
   - id: abc-300
     committed_party: Bob
     required_action: Prepare the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Bob will prepare the report by Friday
     status: waiting
     notification: none
@@ -228,7 +228,7 @@
   - id: abc-300
     committed_party: Bob
     required_action: Prepare the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Alice told me Bob submitted the report yesterday
     status: done
     notification: none
@@ -249,7 +249,7 @@
   - id: abc-456
     committed_party: Gaddy
     required_action: Call the supplier
-    deadline: today
+    deadline: '2025-01-06'
     context: forget about calling the supplier unless they respond today
     status: waiting
     notification: none
@@ -262,7 +262,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -270,7 +270,7 @@
   - id: abc-123
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I sent 3 out of the 5 documents, will send the rest tomorrow
     status: waiting
     notification: none

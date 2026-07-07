@@ -38,7 +38,7 @@ class Commitment(BaseModel):
     )
     deadline: str | None = Field(
         default=None,
-        description="Explicit deadline only. Do not infer or invent deadlines.",
+        description="Explicit deadline only in ISO 8601 format (e.g. 2025-07-10T14:30:00). Do not infer or invent deadlines.",
     )
     context: str = Field(
         description="Short evidence/context from the WhatsApp messages.",

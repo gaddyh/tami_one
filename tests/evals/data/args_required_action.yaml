@@ -6,7 +6,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I'll send the documents tomorrow
     status: waiting
     notification: none
@@ -30,7 +30,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Prepare the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: I'll have the report ready by Friday
     status: waiting
     notification: none
@@ -42,7 +42,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Book the meeting room
-    deadline: Tuesday
+    deadline: '2025-01-07'
     context: I'll reserve the meeting room for Tuesday
     status: waiting
     notification: none
@@ -54,7 +54,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Upload the signed form
-    deadline: Wednesday
+    deadline: '2025-01-08'
     context: I'll upload the signed form by Wednesday
     status: waiting
     notification: none
@@ -66,7 +66,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I'll send over the docs tomorrow
     status: waiting
     notification: none
@@ -78,7 +78,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I'll get the paperwork to you tomorrow
     status: waiting
     notification: none
@@ -90,7 +90,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Call the supplier
-    deadline: today
+    deadline: '2025-01-06'
     context: I'll give the supplier a call about the order today
     status: waiting
     notification: none
@@ -102,7 +102,7 @@
   - id: null
     committed_party: Dana
     required_action: Pay the invoice
-    deadline: today
+    deadline: '2025-01-06'
     context: I'll take care of the invoice payment today
     status: waiting
     notification: none
@@ -114,7 +114,7 @@
   - id: null
     committed_party: Dana
     required_action: Pay the invoice
-    deadline: Friday
+    deadline: '2025-01-10'
     context: I'll settle the invoice by Friday
     status: waiting
     notification: none
@@ -126,7 +126,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Prepare the report
-    deadline: end of week
+    deadline: '2025-01-10'
     context: I'll draft the report by end of week
     status: waiting
     notification: none
@@ -152,7 +152,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Take care of the invoice
-    deadline: Friday
+    deadline: '2025-01-10'
     context: I'll make sure the invoice is taken care of by Friday
     status: waiting
     notification: none
@@ -165,7 +165,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Review, sign, and send back the contract
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I'll review the contract, sign it, and send it back by tomorrow
     status: waiting
     notification: none
@@ -182,7 +182,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Handle the vendor registration forms
-    deadline: Wednesday
+    deadline: '2025-01-08'
     context: I need to handle the paperwork, specifically the vendor registration forms
     status: waiting
     notification: none

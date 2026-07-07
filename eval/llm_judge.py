@@ -38,7 +38,7 @@ class JudgeField(dspy.Signature):
     Two values are equivalent if they convey the same meaning, even if worded
     differently. For example:
     - "settle the invoice" and "pay the invoice" are equivalent (required_action)
-    - "by Friday" and "Friday" are equivalent (deadline)
+    - "2025-01-10" and "2025-01-10T00:00:00" are equivalent (deadline)
     - "Bob agreed to send the report" and "sure, I'll have it ready" are NOT
       equivalent unless the context makes clear they refer to the same thing
 

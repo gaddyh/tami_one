@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from typing import Sequence
 
 import dspy
@@ -47,6 +48,9 @@ class ExtractCommitments(dspy.Signature):
 
     chat_id: str = dspy.InputField()
     chat_name: str | None = dspy.InputField()
+    current_datetime: str = dspy.InputField(
+        desc="Current date and time in ISO 8601 format (UTC). Use this to interpret relative deadlines like 'tomorrow' or 'next Friday'."
+    )
     existing_commitments_json: str = dspy.InputField(
         desc="JSON array of existing commitments, including their ids."
     )
@@ -70,10 +74,14 @@ class CommitmentAgent(dspy.Module):
         chat_name: str | None,
         existing_commitments_json: str,
         messages: str,
+        current_datetime: str | None = None,
     ) -> dspy.Prediction:
+        if current_datetime is None:
+            current_datetime = datetime.now(timezone.utc).isoformat()
         pred = self.extract(
             chat_id=chat_id,
             chat_name=chat_name,
+            current_datetime=current_datetime,
             existing_commitments_json=existing_commitments_json,
             messages=messages,
         )
@@ -90,10 +98,14 @@ class CommitmentAgent(dspy.Module):
         chat_name: str | None,
         existing_commitments_json: str,
         messages: str,
+        current_datetime: str | None = None,
     ) -> dspy.Prediction:
+        if current_datetime is None:
+            current_datetime = datetime.now(timezone.utc).isoformat()
         pred = await self.extract.acall(
             chat_id=chat_id,
             chat_name=chat_name,
+            current_datetime=current_datetime,
             existing_commitments_json=existing_commitments_json,
             messages=messages,
         )

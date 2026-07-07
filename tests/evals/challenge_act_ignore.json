@@ -5,6 +5,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: can someone prepare the slides for Monday?",
     "expected_commitments": [],
@@ -16,6 +17,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: if the client approves the budget, I'll start the project",
     "expected_commitments": [],
@@ -27,6 +29,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Bob: I'll get back to you on that",
     "expected_commitments": [],
@@ -38,6 +41,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: we should really update the website at some point",
     "expected_commitments": [],
@@ -49,6 +53,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: who has time to write a full proposal this week?",
     "expected_commitments": [],
@@ -60,6 +65,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I already sent the email to the team yesterday",
     "expected_commitments": [],
@@ -71,6 +77,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: we should all hang out sometime soon",
     "expected_commitments": [],
@@ -82,6 +89,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: the report really needs to be more detailed",
     "expected_commitments": [],
@@ -93,6 +101,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: did anyone follow up with the vendor last week?",
     "expected_commitments": [],
@@ -104,6 +113,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Bob: maybe we could try reaching out to the new supplier",
     "expected_commitments": [],
@@ -115,6 +125,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I hope we can finish the migration by next month",
     "expected_commitments": [],
@@ -126,6 +137,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: the server is down again, looking into it",
     "expected_commitments": [],
@@ -137,6 +149,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: thanks in advance for handling the client call",
     "expected_commitments": [],
@@ -148,6 +161,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: don't forget Bob needs the data by Friday",
     "expected_commitments": [],
@@ -159,6 +173,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'm worried we won't meet the deadline for the launch",
     "expected_commitments": [],
@@ -170,6 +185,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: the client said they'll review the proposal and get back to us next week",
     "expected_commitments": [],
@@ -181,6 +197,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'm almost done with the presentation",
     "expected_commitments": [],
@@ -192,6 +209,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I started looking into the bug",
     "expected_commitments": [],
@@ -203,6 +221,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: can you send me the slides by Monday?\nBob: sure, I'll send them by Monday",
     "expected_commitments": [
@@ -212,7 +231,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Send the slides",
-        "deadline": "Monday",
+        "deadline": "2025-01-06",
         "context": "Alice asked Bob to send the slides by Monday, Bob agreed",
         "status": "waiting",
         "notification": "none"
@@ -226,6 +245,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: what about the budget?\nBob: let me review the budget and get back to you tomorrow",
     "expected_commitments": [
@@ -235,7 +255,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Get back to Alice about the budget",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "let me review the budget and get back to you tomorrow",
         "status": "waiting",
         "notification": "none"
@@ -249,6 +269,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I will definitely call the client before noon",
     "expected_commitments": [
@@ -258,7 +279,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Call the client",
-        "deadline": "before noon",
+        "deadline": "2025-01-06T12:00:00",
         "context": "I will definitely call the client before noon",
         "status": "waiting",
         "notification": "none"
@@ -272,6 +293,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: we need someone to handle the vendor registration\nBob: I'll take care of the vendor registration by Wednesday",
     "expected_commitments": [
@@ -281,7 +303,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Handle the vendor registration",
-        "deadline": "Wednesday",
+        "deadline": "2025-01-08",
         "context": "I'll take care of the vendor registration by Wednesday",
         "status": "waiting",
         "notification": "none"
@@ -295,6 +317,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: the client just approved the budget!\nGaddy: great, I'll start the project tomorrow then",
     "expected_commitments": [
@@ -304,7 +327,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Start the project",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "the client approved the budget, I'll start the project tomorrow",
         "status": "waiting",
         "notification": "none"
@@ -318,6 +341,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll prepare the quarterly report",
     "expected_commitments": [
@@ -341,6 +365,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: Dana will send the contract to the client by Friday",
     "expected_commitments": [
@@ -350,7 +375,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Dana",
         "required_action": "Send the contract to the client",
-        "deadline": "Friday",
+        "deadline": "2025-01-10",
         "context": "Dana will send the contract to the client by Friday",
         "status": "waiting",
         "notification": "none"
@@ -364,6 +389,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I might be able to review the code tomorrow, but I'm not sure",
     "expected_commitments": [
@@ -373,7 +399,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Review the code",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "I might be able to review the code tomorrow, but I'm not sure",
         "status": "unclear",
         "notification": "none"
@@ -387,6 +413,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I need to deal with the invoice\nGaddy: I'll pay it by end of week",
     "expected_commitments": [
@@ -396,7 +423,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Pay the invoice",
-        "deadline": "end of week",
+        "deadline": "2025-01-10",
         "context": "I'll pay it by end of week",
         "status": "waiting",
         "notification": "none"
@@ -410,6 +437,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: can you update the spreadsheet?\nBob: on it",
     "expected_commitments": [
@@ -433,6 +461,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I submitted the application last week\nGaddy: now just waiting for the city to approve the permit",
     "expected_commitments": [
@@ -456,6 +485,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: let me check with the accountant and I'll update you today",
     "expected_commitments": [
@@ -465,7 +495,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Check with the accountant and update",
-        "deadline": "today",
+        "deadline": "2025-01-06",
         "context": "let me check with the accountant and I'll update you today",
         "status": "waiting",
         "notification": "none"
@@ -479,6 +509,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll handle the client meeting on Thursday",
     "expected_commitments": [
@@ -488,7 +519,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Handle the client meeting",
-        "deadline": "Thursday",
+        "deadline": "2025-01-09",
         "context": "I'll handle the client meeting on Thursday",
         "status": "waiting",
         "notification": "none"
@@ -502,6 +533,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I need to call the bank about the fees today",
     "expected_commitments": [
@@ -511,7 +543,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Call the bank about the fees",
-        "deadline": "today",
+        "deadline": "2025-01-06",
         "context": "I need to call the bank about the fees today",
         "status": "waiting",
         "notification": "none"
@@ -525,6 +557,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: did you confirm the venue?\nBob: not yet, I'll call them this afternoon",
     "expected_commitments": [
@@ -534,7 +567,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Call the venue to confirm",
-        "deadline": "this afternoon",
+        "deadline": "2025-01-06T14:00:00",
         "context": "not yet, I'll call them this afternoon",
         "status": "waiting",
         "notification": "none"
@@ -548,6 +581,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'm going to submit the proposal by Friday end of day",
     "expected_commitments": [
@@ -557,7 +591,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Submit the proposal",
-        "deadline": "Friday end of day",
+        "deadline": "2025-01-10T17:00:00",
         "context": "I'm going to submit the proposal by Friday end of day",
         "status": "waiting",
         "notification": "none"
@@ -571,6 +605,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I can review the contract and send comments by tomorrow",
     "expected_commitments": [
@@ -580,7 +615,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Review the contract and send comments",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "I can review the contract and send comments by tomorrow",
         "status": "waiting",
         "notification": "none"
@@ -594,6 +629,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: has anyone followed up with the vendor?\nBob: not yet, I'll email them today",
     "expected_commitments": [
@@ -603,7 +639,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Email the vendor",
-        "deadline": "today",
+        "deadline": "2025-01-06",
         "context": "not yet, I'll email them today",
         "status": "waiting",
         "notification": "none"

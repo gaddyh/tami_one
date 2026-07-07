@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import os
 import re
 from collections import Counter
+from datetime import datetime
 
 import dspy
 
@@ -21,6 +23,10 @@ _FIELDS = [
     "status",
     "notification",
 ]
+
+# Time assigned to date-only deadlines (e.g. "2025-01-10" → "2025-01-10T14:00:00").
+# Configurable via environment variable for flexibility.
+_DATE_ONLY_DEFAULT_HOUR = int(os.environ.get("EVAL_DATE_ONLY_HOUR", "14"))
 
 _REQUIRED_ACTION_F1_THRESHOLD = 0.75
 
@@ -70,7 +76,7 @@ def commitment_metric(
                     field_match = False
                     break
             elif field == "deadline":
-                if ev != av:
+                if not _deadline_equal(ev, av):
                     if use_llm_judge and judge_field_safe(field, str(ev), str(av)):
                         continue
                     field_match = False
@@ -132,7 +138,7 @@ def compare_commitments(
                         {"index": idx, "field": field, "expected": ev, "actual": av}
                     )
             elif field == "deadline":
-                if ev != av:
+                if not _deadline_equal(ev, av):
                     if use_llm_judge and judge_field_safe(field, str(ev), str(av)):
                         continue
                     mismatches.append(
@@ -179,6 +185,35 @@ def _normalize_for_comparison(commitments: list[Commitment]) -> list[dict]:
                 d[k] = v.lower()
     dumped.sort(key=lambda c: (c.get("required_action", ""), c.get("committed_party") or ""))
     return dumped
+
+
+def _normalize_deadline(value: str | None) -> str | None:
+    """Normalize an ISO 8601 deadline for comparison.
+
+    Date-only strings (e.g. '2025-01-10') are treated as 14:00 local time.
+    Timezone offsets are stripped (compared as naive local times).
+    Non-ISO strings are returned lowercased for backward compatibility.
+    """
+    if value is None or value == "—" or not str(value).strip():
+        return None
+    s = str(value).strip()
+    # _normalize_for_comparison lowercases all strings, so try both
+    # original and uppercased to handle lowercase 't'/'z' in ISO 8601.
+    for candidate in (s, s.upper()):
+        for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+            try:
+                dt = datetime.strptime(candidate, fmt)
+                if fmt == "%Y-%m-%d":
+                    dt = dt.replace(hour=_DATE_ONLY_DEFAULT_HOUR)
+                return dt.replace(tzinfo=None).strftime("%Y-%m-%dT%H:%M:%S")
+            except ValueError:
+                continue
+    return s.lower()
+
+
+def _deadline_equal(expected: str | None, actual: str | None) -> bool:
+    """Compare two deadline values with ISO 8601 normalization."""
+    return _normalize_deadline(expected) == _normalize_deadline(actual)
 
 
 def _word_overlap(expected: str, actual: str, threshold: float = 0.8) -> bool:

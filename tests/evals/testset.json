@@ -5,6 +5,7 @@
     "difficulty": "easy",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll call the supplier today",
     "expected_commitments": [
@@ -14,7 +15,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Call the supplier",
-        "deadline": "today",
+        "deadline": "2025-01-06",
         "context": "I'll call the supplier today",
         "status": "waiting",
         "notification": "none"
@@ -27,6 +28,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: we should really call the supplier about the delay",
     "expected_commitments": [],
@@ -38,6 +40,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: who has time to prepare a full report by Friday?",
     "expected_commitments": [],
@@ -49,6 +52,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I might be able to send the documents tomorrow, but I'm not sure",
     "expected_commitments": [
@@ -58,7 +62,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the documents",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "I might be able to send the documents tomorrow, but I'm not sure",
         "status": "unclear",
         "notification": "none"
@@ -72,6 +76,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I already called the supplier yesterday and sorted it out",
     "expected_commitments": [],
@@ -83,6 +88,7 @@
     "difficulty": "medium",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: what time is the meeting tomorrow?",
     "expected_commitments": []
@@ -93,6 +99,7 @@
     "difficulty": "easy",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I will send the documents",
     "expected_commitments": [
@@ -115,6 +122,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll send the documents by end of the quarter",
     "expected_commitments": [
@@ -124,7 +132,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the documents",
-        "deadline": "end of the quarter",
+        "deadline": "2025-03-31",
         "context": "I'll send the documents by end of the quarter",
         "status": "waiting",
         "notification": "none"
@@ -138,6 +146,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll send the documents before the meeting",
     "expected_commitments": [
@@ -147,7 +156,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the documents",
-        "deadline": "before the meeting",
+        "deadline": null,
         "context": "I'll send the documents before the meeting",
         "status": "waiting",
         "notification": "none"
@@ -161,6 +170,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll send the documents by Friday\nGaddy: actually, let me send them by tomorrow instead",
     "expected_commitments": [
@@ -170,7 +180,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the documents",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "actually, let me send them by tomorrow instead",
         "status": "waiting",
         "notification": "none"
@@ -184,6 +194,7 @@
     "difficulty": "medium",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I will send the documents next week",
     "expected_commitments": [
@@ -193,7 +204,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the documents",
-        "deadline": "next week",
+        "deadline": "2025-01-13",
         "context": "I will send the documents next week",
         "status": "waiting",
         "notification": "none"
@@ -206,6 +217,7 @@
     "difficulty": "easy",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: Bob will send the documents by Friday",
     "expected_commitments": [
@@ -215,7 +227,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Send the documents",
-        "deadline": "Friday",
+        "deadline": "2025-01-10",
         "context": "Bob will send the documents by Friday",
         "status": "waiting",
         "notification": "none"
@@ -228,6 +240,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: the contractor needs to finish the renovation by next week",
     "expected_commitments": [
@@ -237,7 +250,7 @@
         "chat_name": "Gaddy",
         "committed_party": "the contractor",
         "required_action": "Finish the renovation",
-        "deadline": "next week",
+        "deadline": "2025-01-13",
         "context": "the contractor needs to finish the renovation by next week",
         "status": "waiting",
         "notification": "none"
@@ -251,6 +264,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: Dana will handle the invoice payment by Friday",
     "expected_commitments": [
@@ -260,7 +274,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Dana",
         "required_action": "Handle the invoice payment",
-        "deadline": "Friday",
+        "deadline": "2025-01-10",
         "context": "Dana will handle the invoice payment by Friday",
         "status": "waiting",
         "notification": "none"
@@ -274,6 +288,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Alice: I talked to the lawyer yesterday\nAlice: he said he'll file the motion by Wednesday",
     "expected_commitments": [
@@ -283,7 +298,7 @@
         "chat_name": "Gaddy",
         "committed_party": "the lawyer",
         "required_action": "File the motion",
-        "deadline": "Wednesday",
+        "deadline": "2025-01-08",
         "context": "he said he'll file the motion by Wednesday",
         "status": "waiting",
         "notification": "none"
@@ -297,6 +312,7 @@
     "difficulty": "medium",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: someone needs to book the meeting room for Tuesday\nDana: I'll book it",
     "expected_commitments": [
@@ -306,7 +322,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Dana",
         "required_action": "Book the meeting room",
-        "deadline": "Tuesday",
+        "deadline": "2025-01-07",
         "context": "Gaddy asked someone to book the meeting room, Dana volunteered",
         "status": "waiting",
         "notification": "none"
@@ -319,6 +335,7 @@
     "difficulty": "easy",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll upload the signed form by Wednesday",
     "expected_commitments": [
@@ -328,7 +345,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Upload the signed form",
-        "deadline": "Wednesday",
+        "deadline": "2025-01-08",
         "context": "I'll upload the signed form by Wednesday",
         "status": "waiting",
         "notification": "none"
@@ -341,6 +358,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll review the contract, sign it, and send it back by tomorrow",
     "expected_commitments": [
@@ -350,7 +368,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Review, sign, and send back the contract",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "I'll review the contract, sign it, and send it back by tomorrow",
         "status": "waiting",
         "notification": "none"
@@ -364,6 +382,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I need to handle the paperwork\nGaddy: specifically the vendor registration forms\nGaddy: I'll do it by Wednesday",
     "expected_commitments": [
@@ -373,7 +392,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Handle the vendor registration forms",
-        "deadline": "Wednesday",
+        "deadline": "2025-01-08",
         "context": "I need to handle the paperwork, specifically the vendor registration forms",
         "status": "waiting",
         "notification": "none"
@@ -387,6 +406,7 @@
     "difficulty": "medium",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Dana: I'll settle the invoice by Friday",
     "expected_commitments": [
@@ -396,7 +416,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Dana",
         "required_action": "Pay the invoice",
-        "deadline": "Friday",
+        "deadline": "2025-01-10",
         "context": "I'll settle the invoice by Friday",
         "status": "waiting",
         "notification": "none"
@@ -409,6 +429,7 @@
     "difficulty": "medium",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[]",
     "messages": "Gaddy: I'll draft the report by end of week",
     "expected_commitments": [
@@ -418,7 +439,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Prepare the report",
-        "deadline": "end of week",
+        "deadline": "2025-01-10",
         "context": "I'll draft the report by end of week",
         "status": "waiting",
         "notification": "none"
@@ -431,7 +452,8 @@
     "difficulty": "easy",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
-    "existing_commitments_json": "[{\"id\": \"abc-400\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Dana\", \"required_action\": \"Pay the invoice\", \"deadline\": \"Monday\", \"context\": \"Dana will pay the invoice by Monday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "current_datetime": "2025-01-06T10:00:00Z",
+    "existing_commitments_json": "[{\"id\": \"abc-400\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Dana\", \"required_action\": \"Pay the invoice\", \"deadline\": \"2025-01-06\", \"context\": \"Dana will pay the invoice by Monday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Dana: done, the invoice is paid",
     "expected_commitments": [
       {
@@ -440,7 +462,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Dana",
         "required_action": "Pay the invoice",
-        "deadline": "Monday",
+        "deadline": "2025-01-06",
         "context": "done, the invoice is paid",
         "status": "done",
         "notification": "none"
@@ -453,7 +475,8 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
-    "existing_commitments_json": "[{\"id\": \"abc-300\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Bob\", \"required_action\": \"Prepare the report\", \"deadline\": \"Friday\", \"context\": \"Bob will prepare the report by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "current_datetime": "2025-01-06T10:00:00Z",
+    "existing_commitments_json": "[{\"id\": \"abc-300\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Bob\", \"required_action\": \"Prepare the report\", \"deadline\": \"2025-01-10\", \"context\": \"Bob will prepare the report by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Charlie: Alice told me Bob submitted the report yesterday",
     "expected_commitments": [
       {
@@ -462,7 +485,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Prepare the report",
-        "deadline": "Friday",
+        "deadline": "2025-01-10",
         "context": "Alice told me Bob submitted the report yesterday",
         "status": "done",
         "notification": "none"
@@ -476,6 +499,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[{\"id\": \"abc-456\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Call the supplier\", \"deadline\": null, \"context\": \"Need to call the supplier about the order\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Gaddy: forget about calling the supplier unless they respond today",
     "expected_commitments": [
@@ -485,7 +509,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Call the supplier",
-        "deadline": "today",
+        "deadline": "2025-01-06",
         "context": "forget about calling the supplier unless they respond today",
         "status": "waiting",
         "notification": "none"
@@ -499,7 +523,8 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
-    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "current_datetime": "2025-01-06T10:00:00Z",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"2025-01-07\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Gaddy: I sent 3 out of the 5 documents, will send the rest tomorrow",
     "expected_commitments": [
       {
@@ -508,7 +533,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the documents",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "I sent 3 out of the 5 documents, will send the rest tomorrow",
         "status": "waiting",
         "notification": "none"
@@ -522,7 +547,8 @@
     "difficulty": "medium",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
-    "existing_commitments_json": "[{\"id\": \"abc-300\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Bob\", \"required_action\": \"Prepare the report\", \"deadline\": \"Friday\", \"context\": \"Bob will prepare the report by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "current_datetime": "2025-01-06T10:00:00Z",
+    "existing_commitments_json": "[{\"id\": \"abc-300\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Bob\", \"required_action\": \"Prepare the report\", \"deadline\": \"2025-01-10\", \"context\": \"Bob will prepare the report by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Alice: Bob finished the report and submitted it",
     "expected_commitments": [
       {
@@ -531,7 +557,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Prepare the report",
-        "deadline": "Friday",
+        "deadline": "2025-01-10",
         "context": "Bob finished the report and submitted it",
         "status": "done",
         "notification": "none"
@@ -544,7 +570,8 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
-    "existing_commitments_json": "[{\"id\": \"abc-300\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Bob\", \"required_action\": \"Prepare the report\", \"deadline\": \"Friday\", \"context\": \"Bob will prepare the report by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "current_datetime": "2025-01-06T10:00:00Z",
+    "existing_commitments_json": "[{\"id\": \"abc-300\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Bob\", \"required_action\": \"Prepare the report\", \"deadline\": \"2025-01-10\", \"context\": \"Bob will prepare the report by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Bob: I need more time, can I prepare the report by next Monday?",
     "expected_commitments": [
       {
@@ -553,7 +580,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Bob",
         "required_action": "Prepare the report",
-        "deadline": "next Monday",
+        "deadline": "2025-01-13",
         "context": "I need more time, can I prepare the report by next Monday?",
         "status": "waiting",
         "notification": "none"
@@ -567,7 +594,8 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
-    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "current_datetime": "2025-01-06T10:00:00Z",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"2025-01-07\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Gaddy: I'll send the documents once the legal team approves them",
     "expected_commitments": [
       {
@@ -576,7 +604,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the documents",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "I'll send the documents once the legal team approves them",
         "status": "waiting",
         "notification": "none"
@@ -590,6 +618,7 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
+    "current_datetime": "2025-01-06T10:00:00Z",
     "existing_commitments_json": "[{\"id\": \"abc-456\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Call the supplier\", \"deadline\": null, \"context\": \"Need to call the supplier about the order\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Gaddy: I'll call the supplier about the new order today instead of the old one",
     "expected_commitments": [
@@ -599,7 +628,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Call the supplier",
-        "deadline": "today",
+        "deadline": "2025-01-06",
         "context": "I'll call the supplier about the new order today instead of the old one",
         "status": "waiting",
         "notification": "none"
@@ -613,7 +642,8 @@
     "difficulty": "hard",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
-    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "current_datetime": "2025-01-06T10:00:00Z",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"2025-01-07\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Gaddy: I also need to send the contract to the client by Friday",
     "expected_commitments": [
       {
@@ -622,7 +652,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the contract to the client",
-        "deadline": "Friday",
+        "deadline": "2025-01-10",
         "context": "I also need to send the contract to the client by Friday",
         "status": "waiting",
         "notification": "none"
@@ -636,7 +666,8 @@
     "difficulty": "medium",
     "chat_id": "972546610653@c.us",
     "chat_name": "Gaddy",
-    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"tomorrow\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
+    "current_datetime": "2025-01-06T10:00:00Z",
+    "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972546610653@c.us\", \"chat_name\": \"Gaddy\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"2025-01-07\", \"context\": \"I will send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Gaddy: still planning to send the documents tomorrow",
     "expected_commitments": [
       {
@@ -645,7 +676,7 @@
         "chat_name": "Gaddy",
         "committed_party": "Gaddy",
         "required_action": "Send the documents",
-        "deadline": "tomorrow",
+        "deadline": "2025-01-07",
         "context": "still planning to send the documents tomorrow",
         "status": "waiting",
         "notification": "none"

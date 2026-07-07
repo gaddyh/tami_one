@@ -17,7 +17,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -43,7 +43,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Call the supplier
-    deadline: today
+    deadline: '2025-01-06'
     context: I'll call the supplier today
     status: waiting
     notification: none
@@ -62,7 +62,7 @@
   - id: null
     committed_party: Bob
     required_action: Send the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Alice asked Bob to send the report by Friday, Bob agreed
     status: waiting
     notification: none
@@ -102,7 +102,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Get back to Dana about the quote
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: let me think about the quote and get back to you tomorrow
     status: waiting
     notification: none
@@ -152,7 +152,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I might be able to send the documents tomorrow, but I'm not sure
     status: unclear
     notification: none

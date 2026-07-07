@@ -17,6 +17,7 @@ def make_example(
     existing_commitments_json: str,
     messages: str,
     expected_commitments: list[Commitment],
+    current_datetime: str = "",
     category: str = "",
     scenario: str = "",
     difficulty: str = "",
@@ -24,6 +25,7 @@ def make_example(
     return dspy.Example(
         chat_id=chat_id,
         chat_name=chat_name,
+        current_datetime=current_datetime,
         existing_commitments_json=existing_commitments_json,
         messages=messages,
         expected_commitments=expected_commitments,
@@ -33,6 +35,7 @@ def make_example(
     ).with_inputs(
         "chat_id",
         "chat_name",
+        "current_datetime",
         "existing_commitments_json",
         "messages",
     )
@@ -57,6 +60,7 @@ def build_devset(devset_path: Path | None = None) -> list[dspy.Example]:
             make_example(
                 chat_id=entry["chat_id"],
                 chat_name=entry.get("chat_name"),
+                current_datetime=entry.get("current_datetime", "2025-01-06T10:00:00Z"),
                 existing_commitments_json=entry.get("existing_commitments_json", "[]"),
                 messages=entry["messages"],
                 expected_commitments=expected,

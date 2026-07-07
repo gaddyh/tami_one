@@ -82,6 +82,7 @@ def _build_example(raw: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any
         "difficulty": raw["difficulty"],
         "chat_id": schema["chat_id"],
         "chat_name": schema["chat_name"],
+        "current_datetime": schema.get("current_datetime", "2025-01-06T10:00:00Z"),
         "existing_commitments_json": existing_json,
         "messages": raw["messages"],
         "expected_commitments": expected_filled,

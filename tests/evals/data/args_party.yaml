@@ -8,7 +8,7 @@
   - id: null
     committed_party: Bob
     required_action: Send the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Alice asked Bob to send the report by Friday, Bob agreed
     status: waiting
     notification: none
@@ -22,7 +22,7 @@
   - id: null
     committed_party: Alice
     required_action: Send the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Bob asked Alice to send the report by Friday, Alice agreed
     status: waiting
     notification: none
@@ -34,7 +34,7 @@
   - id: null
     committed_party: Gaddy
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: I will send the documents by tomorrow
     status: waiting
     notification: none
@@ -46,7 +46,7 @@
   - id: null
     committed_party: Bob
     required_action: Send the documents
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Bob will send the documents by Friday
     status: waiting
     notification: none
@@ -83,7 +83,7 @@
   - id: null
     committed_party: Charlie
     required_action: Prepare the report
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Alice asked for someone to prepare the report, Charlie volunteered
     status: waiting
     notification: none
@@ -97,7 +97,7 @@
   - id: null
     committed_party: Dana
     required_action: Book the meeting room
-    deadline: Tuesday
+    deadline: '2025-01-07'
     context: Gaddy asked someone to book the meeting room, Dana volunteered
     status: waiting
     notification: none
@@ -136,7 +136,7 @@
   - id: abc-100
     committed_party: Alice
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: Alice will send the documents by tomorrow
     status: waiting
     notification: none
@@ -144,7 +144,7 @@
   - id: abc-100
     committed_party: Bob
     required_action: Send the documents
-    deadline: tomorrow
+    deadline: '2025-01-07'
     context: actually Bob will handle it instead of Alice
     status: waiting
     notification: none
@@ -170,7 +170,7 @@
   - id: null
     committed_party: the contractor
     required_action: Finish the renovation
-    deadline: next week
+    deadline: '2025-01-13'
     context: the contractor needs to finish the renovation by next week
     status: waiting
     notification: none
@@ -184,7 +184,7 @@
   - id: null
     committed_party: Dana
     required_action: Handle the invoice payment
-    deadline: Friday
+    deadline: '2025-01-10'
     context: Dana will handle the invoice payment by Friday
     status: waiting
     notification: none
@@ -200,7 +200,7 @@
   - id: null
     committed_party: the lawyer
     required_action: File the motion
-    deadline: Wednesday
+    deadline: '2025-01-08'
     context: he said he'll file the motion by Wednesday
     status: waiting
     notification: none

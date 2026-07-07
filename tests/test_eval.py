@@ -63,7 +63,7 @@ def test_commitment_metric_match():
             chat_id="chat@c.us",
             committed_party="Alice",
             required_action="Send report",
-            deadline="Friday",
+            deadline="2025-01-10",
             context="Alice will send the report by Friday",
             status="waiting",
         ),
@@ -82,7 +82,7 @@ def test_commitment_metric_no_match():
             chat_id="chat@c.us",
             committed_party="Alice",
             required_action="Send report",
-            deadline="Friday",
+            deadline="2025-01-10",
             context="Alice will send the report by Friday",
             status="waiting",
         ),
@@ -139,6 +139,7 @@ def test_make_example_has_correct_inputs():
     example = make_example(
         chat_id="chat@c.us",
         chat_name="Test Chat",
+        current_datetime="2025-01-06T10:00:00Z",
         existing_commitments_json="[]",
         messages="Alice: hello",
         expected_commitments=[],
@@ -146,6 +147,7 @@ def test_make_example_has_correct_inputs():
 
     assert example.chat_id == "chat@c.us"
     assert example.chat_name == "Test Chat"
+    assert example.current_datetime == "2025-01-06T10:00:00Z"
     assert example.existing_commitments_json == "[]"
     assert example.messages == "Alice: hello"
     assert example.expected_commitments == []
@@ -155,13 +157,14 @@ def test_make_example_with_inputs_marked():
     example = make_example(
         chat_id="chat@c.us",
         chat_name="Test Chat",
+        current_datetime="2025-01-06T10:00:00Z",
         existing_commitments_json="[]",
         messages="Alice: hello",
         expected_commitments=[],
     )
 
     input_keys = set(example.inputs().keys())
-    assert input_keys == {"chat_id", "chat_name", "existing_commitments_json", "messages"}
+    assert input_keys == {"chat_id", "chat_name", "current_datetime", "existing_commitments_json", "messages"}
 
 
 def test_build_devset_loads_all_examples():
@@ -175,6 +178,7 @@ def test_build_devset_loads_all_examples():
         assert hasattr(ex, "messages")
         assert hasattr(ex, "expected_commitments")
         assert hasattr(ex, "difficulty")
+        assert hasattr(ex, "current_datetime")
 
 
 def test_build_devset_examples_have_inputs():
@@ -185,3 +189,4 @@ def test_build_devset_examples_have_inputs():
         input_keys = set(ex.inputs().keys())
         assert "chat_id" in input_keys
         assert "messages" in input_keys
+        assert "current_datetime" in input_keys

@@ -17,6 +17,7 @@ import json
 import re
 from collections import Counter
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -56,10 +57,10 @@ _SUBCAUSE_LABELS: dict[str, dict[str, str]] = {
         "too_generic": "Action too generic vs expected",
     },
     "deadline_normalization": {
-        "prefix_by": "Missing/extra 'by' prefix",
-        "time_format": "Time format mismatch (17:00 vs 5pm)",
-        "vague_relative_phrase": "Relative deadline phrasing (end of week)",
-        "event_based_deadline": "Event-based deadline (before the meeting)",
+        "date_only_vs_datetime": "Date-only vs datetime (2025-01-10 vs 2025-01-10T00:00:00)",
+        "timezone_mismatch": "Same instant, different timezone representation",
+        "off_by_one_day": "Dates differ by 1 day (relative-date interpretation error)",
+        "format_mismatch": "One value is ISO 8601, the other is not",
     },
     "context_metric_noise": {
         "paraphrase": "Context paraphrased but same meaning",
@@ -170,18 +171,50 @@ def _detect_deadline_subcause(failure: dict[str, Any]) -> str:
     expected = failure.get("expected_commitments", [])
     actual = failure.get("actual_commitments", [])
     if not expected or not actual:
-        return "prefix_by"
-    exp_dl = (expected[0].get("deadline") or "").lower()
-    act_dl = (actual[0].get("deadline") or "").lower()
-    if exp_dl.replace("by ", "").strip() == act_dl.replace("by ", "").strip():
-        return "prefix_by"
-    if any(c in exp_dl + act_dl for c in ":"):
-        return "time_format"
-    if any(w in exp_dl + act_dl for w in ("end of", "quarter", "week", "soon", "later")):
-        return "vague_relative_phrase"
-    if any(w in exp_dl + act_dl for w in ("before", "after", "meeting", "event")):
-        return "event_based_deadline"
-    return "prefix_by"
+        return "format_mismatch"
+    exp_dl = (expected[0].get("deadline") or "").strip()
+    act_dl = (actual[0].get("deadline") or "").strip()
+    if not exp_dl and not act_dl:
+        return "format_mismatch"
+    exp_has_time = "T" in exp_dl
+    act_has_time = "T" in act_dl
+    if exp_has_time != act_has_time:
+        return "date_only_vs_datetime"
+    exp_iso = _is_iso8601(exp_dl)
+    act_iso = _is_iso8601(act_dl)
+    if exp_iso != act_iso:
+        return "format_mismatch"
+    if exp_iso and act_iso:
+        try:
+            exp_dt = _parse_iso(exp_dl)
+            act_dt = _parse_iso(act_dl)
+            diff = abs((exp_dt - act_dt).total_seconds())
+            if diff <= 86400:
+                return "off_by_one_day"
+        except Exception:
+            pass
+    return "format_mismatch"
+
+
+def _is_iso8601(s: str) -> bool:
+    if not s:
+        return False
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+        try:
+            datetime.strptime(s, fmt)
+            return True
+        except ValueError:
+            continue
+    return False
+
+
+def _parse_iso(s: str) -> datetime:
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            continue
+    raise ValueError(f"Not ISO 8601: {s}")
 
 
 def _detect_context_subcause(failure: dict[str, Any]) -> str:

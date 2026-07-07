@@ -412,7 +412,7 @@ def test_format_existing_commitments_lists_items():
             chat_id="group@c.us",
             committed_party="Alice",
             required_action="Send report",
-            deadline="Friday",
+            deadline="2025-01-10",
             context="Team meeting",
             status="waiting",
         ),
@@ -461,7 +461,7 @@ def test_normalize_commitments_preserves_other_fields():
             chat_name="Old",
             committed_party="Bob",
             required_action="Pay invoice",
-            deadline="Monday",
+            deadline="2025-01-06",
             context="Pay the invoice by Monday",
             status="done",
             notification="urgent",
@@ -475,7 +475,7 @@ def test_normalize_commitments_preserves_other_fields():
     assert result[0].id == "abc-123"
     assert result[0].committed_party == "Bob"
     assert result[0].required_action == "Pay invoice"
-    assert result[0].deadline == "Monday"
+    assert result[0].deadline == "2025-01-06"
     assert result[0].status == "done"
     assert result[0].notification == "urgent"
 
@@ -504,7 +504,7 @@ async def test_drain_inserts_new_commitments(test_engine):
             chat_id="972546610653@c.us",
             committed_party="Gaddy",
             required_action="Send the documents",
-            deadline="tomorrow",
+            deadline="2025-01-07",
             context="I will send the documents by tomorrow",
             status="waiting",
         ),
@@ -544,7 +544,7 @@ async def test_drain_updates_existing_commitment(test_engine):
             chat_id="972546610653@c.us",
             committed_party="Gaddy",
             required_action="Send the documents",
-            deadline="tomorrow",
+            deadline="2025-01-07",
             context="I will send the documents by tomorrow",
             status=CommitmentStatus.WAITING,
             notification=NotificationType.DAILY_DIGEST,
@@ -564,7 +564,7 @@ async def test_drain_updates_existing_commitment(test_engine):
             chat_id="972546610653@c.us",
             committed_party="Gaddy",
             required_action="Send the documents",
-            deadline="tomorrow",
+            deadline="2025-01-07",
             context="I will send the documents by tomorrow",
             status="done",
             notification="none",
@@ -673,7 +673,7 @@ async def test_drain_passes_existing_to_extractor(test_engine):
             chat_id="972546610653@c.us",
             committed_party="Bob",
             required_action="Pay invoice",
-            deadline="Monday",
+            deadline="2025-01-06",
             context="Pay the invoice by Monday",
             status=CommitmentStatus.WAITING,
         )
