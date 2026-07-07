@@ -42,7 +42,11 @@ from eval.metrics import (
     compare_commitments,
     commitment_metric,
 )
-from eval.llm_judge import reset_cache as reset_judge_cache
+from eval.llm_judge import (
+    reset_cache as reset_judge_cache,
+    save_verdicts as save_judge_verdicts,
+    set_judge_model,
+)
 
 console = Console(record=True)
 
@@ -185,6 +189,9 @@ def _run_split(
             "field_matches": field_matches,
             "messages": ex.messages,
             "existing_commitments_json": getattr(ex, "existing_commitments_json", "[]"),
+            "current_datetime": getattr(ex, "current_datetime", ""),
+            "chat_id": getattr(ex, "chat_id", ""),
+            "chat_name": getattr(ex, "chat_name", ""),
             "pred_commitments": pred.commitments,
             "expected_commitments": ex.expected_commitments,
         })
@@ -629,6 +636,43 @@ def _commitments_to_dicts(commitments: list) -> list[dict]:
     return out
 
 
+def _save_predictions_jsonl(
+    run_dir: Path,
+    results: list[dict],
+    *,
+    run_id: str = "",
+    agent_model: str = "",
+) -> None:
+    """Save all predictions (agent outputs) as JSONL for frozen regrading."""
+    path = run_dir / "predictions.jsonl"
+    input_keys = ["chat_id", "chat_name", "current_datetime", "existing_commitments_json", "messages"]
+    with path.open("w", encoding="utf-8") as f:
+        for r in results:
+            for e in r["per_example"]:
+                row = {
+                    "run_id": run_id,
+                    "split": e["split"],
+                    "example_index": e["index"],
+                    "example_id": f"{e['category']}/{e['scenario']}",
+                    "category": e["category"],
+                    "scenario": e["scenario"],
+                    "difficulty": e["difficulty"],
+                    "input_keys": input_keys,
+                    "inputs": {
+                        "chat_id": e.get("chat_id", ""),
+                        "chat_name": e.get("chat_name", ""),
+                        "current_datetime": e.get("current_datetime", ""),
+                        "existing_commitments_json": e.get("existing_commitments_json", "[]"),
+                        "messages": e["messages"],
+                    },
+                    "expected_commitments": _commitments_to_dicts(e["expected_commitments"]),
+                    "actual_commitments": _commitments_to_dicts(e["pred_commitments"]),
+                    "agent_model": agent_model,
+                    "created_at": datetime.now().isoformat(),
+                }
+                f.write(_json.dumps(row, ensure_ascii=False) + "\n")
+
+
 def _save_failures_jsonl(run_dir: Path, results: list[dict]) -> None:
     """Save all failures across splits as a JSONL file for debugging."""
     path = run_dir / "failures.jsonl"
@@ -734,6 +778,11 @@ def main() -> None:
         help="Enable LLM-as-judge for semantic field matching (required_action, deadline, context)",
     )
     parser.add_argument(
+        "--freeze-judge",
+        action="store_true",
+        help="Save judge verdicts to judge_verdicts.jsonl (implies --llm-judge)",
+    )
+    parser.add_argument(
         "--save",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -746,9 +795,14 @@ def main() -> None:
 
     configure_dspy(settings)
 
+    if args.freeze_judge:
+        args.llm_judge = True
+
     if args.llm_judge:
         reset_judge_cache()
-        console.print("[dim]LLM judge enabled for required_action, deadline, context[/]\n")
+        set_judge_model(settings.openai_model)
+        label = "LLM judge enabled (+freeze)" if args.freeze_judge else "LLM judge enabled"
+        console.print(f"[dim]{label} for required_action, deadline, context[/]\n")
 
     run_dir: Path | None = None
     run_id: str | None = None
@@ -772,7 +826,12 @@ def main() -> None:
         if run_dir:
             _save_summary_md(run_dir, run_id, results, settings.openai_model)
             _save_failures_jsonl(run_dir, results)
+            _save_predictions_jsonl(run_dir, results, run_id=run_id or "", agent_model=settings.openai_model)
+            if args.freeze_judge:
+                save_judge_verdicts(run_dir / "judge_verdicts.jsonl")
+                console.print(f"[dim]Judge verdicts saved to: {run_dir}/judge_verdicts.jsonl[/]")
             console.print(f"\n[bold green]Reports saved to: {run_dir}/[/]")
+            console.print(f"[dim]Predictions saved to: {run_dir}/predictions.jsonl[/]")
         sys.exit(0)
 
     split = args.split or "dev"
@@ -780,7 +839,12 @@ def main() -> None:
     if run_dir:
         _save_split_md(run_dir, split, r)
         _save_failures_jsonl(run_dir, [r])
+        _save_predictions_jsonl(run_dir, [r], run_id=run_id or "", agent_model=settings.openai_model)
+        if args.freeze_judge:
+            save_judge_verdicts(run_dir / "judge_verdicts.jsonl")
+            console.print(f"[dim]Judge verdicts saved to: {run_dir}/judge_verdicts.jsonl[/]")
         console.print(f"\n[bold green]Report saved to: {run_dir}/{split}.md[/]")
+        console.print(f"[dim]Predictions saved to: {run_dir}/predictions.jsonl[/]")
 
 
 if __name__ == "__main__":
