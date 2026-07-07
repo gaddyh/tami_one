@@ -42,6 +42,7 @@ from eval.metrics import (
     compare_commitments,
     commitment_metric,
 )
+from eval.llm_judge import reset_cache as reset_judge_cache
 
 console = Console(record=True)
 
@@ -112,6 +113,7 @@ def _run_split(
     *,
     limit: int | None = None,
     verbose: bool = False,
+    use_llm_judge: bool = False,
 ) -> dict:
     """Run eval on a single split and return summary stats with confusion matrix data."""
     path = _split_path(split)
@@ -129,10 +131,10 @@ def _run_split(
 
         expected_empty = len(ex.expected_commitments) == 0
         actual_empty = len(pred.commitments) == 0
-        mismatches = compare_commitments(ex.expected_commitments, pred.commitments)
+        mismatches = compare_commitments(ex.expected_commitments, pred.commitments, use_llm_judge=use_llm_judge)
         matched = not mismatches
         avi = act_vs_ignore_metric(ex, pred)
-        metric_score = commitment_metric(ex, pred)
+        metric_score = commitment_metric(ex, pred, use_llm_judge=use_llm_judge)
 
         # Classify: TP / FP / FN / TN
         if not expected_empty and not actual_empty:
@@ -162,6 +164,10 @@ def _run_split(
                         field_matches[field] = _token_f1(ev_s, av_s) >= 0.75
                     else:
                         field_matches[field] = ev_s == av_s
+                    # LLM judge fallback for semantic fields
+                    if not field_matches[field] and use_llm_judge and field in ("required_action", "deadline", "context"):
+                        from eval.llm_judge import judge_field_safe
+                        field_matches[field] = judge_field_safe(field, ev_s, av_s)
 
         per_example.append({
             "index": i,
@@ -723,9 +729,15 @@ def main() -> None:
         help="Print actual vs expected for each example",
     )
     parser.add_argument(
-        "--save",
+        "--llm-judge",
         action="store_true",
-        help="Save reports as markdown files under runs/<run_id>/",
+        help="Enable LLM-as-judge for semantic field matching (required_action, deadline, context)",
+    )
+    parser.add_argument(
+        "--save",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Save reports as markdown files under runs/<run_id>/ (default: on, use --no-save to disable)",
     )
     args = parser.parse_args()
 
@@ -733,6 +745,10 @@ def main() -> None:
         settings.openai_model = args.model
 
     configure_dspy(settings)
+
+    if args.llm_judge:
+        reset_judge_cache()
+        console.print("[dim]LLM judge enabled for required_action, deadline, context[/]\n")
 
     run_dir: Path | None = None
     run_id: str | None = None
@@ -745,7 +761,7 @@ def main() -> None:
     if args.all:
         results = []
         for split in ["train", "dev", "test"]:
-            r = _run_split(split, limit=args.limit, verbose=args.verbose)
+            r = _run_split(split, limit=args.limit, verbose=args.verbose, use_llm_judge=args.llm_judge)
             results.append(r)
             if run_dir:
                 _save_split_md(run_dir, split, r)
@@ -758,7 +774,7 @@ def main() -> None:
         sys.exit(0)
 
     split = args.split or "dev"
-    r = _run_split(split, limit=args.limit, verbose=args.verbose)
+    r = _run_split(split, limit=args.limit, verbose=args.verbose, use_llm_judge=args.llm_judge)
     if run_dir:
         _save_split_md(run_dir, split, r)
         _save_failures_jsonl(run_dir, [r])

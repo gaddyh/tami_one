@@ -8,6 +8,7 @@ from collections import Counter
 import dspy
 
 from app.commitments.models import Commitment
+from eval.llm_judge import JUDGE_FIELDS, judge_field_safe
 
 _FIELDS = [
     "id",
@@ -28,6 +29,8 @@ def commitment_metric(
     example: dspy.Example,
     prediction: dspy.Prediction,
     trace=None,
+    *,
+    use_llm_judge: bool = False,
 ) -> float:
     """Compare predicted commitments against expected commitments.
 
@@ -56,10 +59,20 @@ def commitment_metric(
             av = act.get(field, "—")
             if field == "context":
                 if not _word_overlap(str(ev), str(av)):
+                    if use_llm_judge and judge_field_safe(field, str(ev), str(av)):
+                        continue
                     field_match = False
                     break
             elif field == "required_action":
                 if _token_f1(str(ev), str(av)) < _REQUIRED_ACTION_F1_THRESHOLD:
+                    if use_llm_judge and judge_field_safe(field, str(ev), str(av)):
+                        continue
+                    field_match = False
+                    break
+            elif field == "deadline":
+                if ev != av:
+                    if use_llm_judge and judge_field_safe(field, str(ev), str(av)):
+                        continue
                     field_match = False
                     break
             elif ev != av:
@@ -72,7 +85,7 @@ def commitment_metric(
 
 
 def compare_commitments(
-    expected: list[Commitment], actual: list[Commitment]
+    expected: list[Commitment], actual: list[Commitment], *, use_llm_judge: bool = False,
 ) -> list[dict]:
     """Compare two commitment lists field-by-field.
 
@@ -106,11 +119,22 @@ def compare_commitments(
             av = act.get(field, "—")
             if field == "context":
                 if not _word_overlap(str(ev), str(av)):
+                    if use_llm_judge and judge_field_safe(field, str(ev), str(av)):
+                        continue
                     mismatches.append(
                         {"index": idx, "field": field, "expected": ev, "actual": av}
                     )
             elif field == "required_action":
                 if _token_f1(str(ev), str(av)) < _REQUIRED_ACTION_F1_THRESHOLD:
+                    if use_llm_judge and judge_field_safe(field, str(ev), str(av)):
+                        continue
+                    mismatches.append(
+                        {"index": idx, "field": field, "expected": ev, "actual": av}
+                    )
+            elif field == "deadline":
+                if ev != av:
+                    if use_llm_judge and judge_field_safe(field, str(ev), str(av)):
+                        continue
                     mismatches.append(
                         {"index": idx, "field": field, "expected": ev, "actual": av}
                     )
