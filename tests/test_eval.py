@@ -7,11 +7,13 @@ from pathlib import Path
 import dspy
 import pytest
 
-from app.commitments.eval import (
-    act_vs_ignore_metric,
+from eval.dataset import (
     build_devset,
-    commitment_metric,
     make_example,
+)
+from eval.metrics import (
+    act_vs_ignore_metric,
+    commitment_metric,
 )
 from app.commitments.models import Commitment
 

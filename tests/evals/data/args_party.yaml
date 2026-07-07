@@ -1,0 +1,206 @@
+- category: args_party
+  scenario: alice_asks_bob_bob_accepts
+  difficulty: easy
+  messages: 'Alice: Bob, can you send me the report by Friday?
+
+    Bob: sure, I''ll have it ready by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Send the report
+    deadline: Friday
+    context: Alice asked Bob to send the report by Friday, Bob agreed
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: bob_asks_alice_alice_accepts
+  difficulty: easy
+  messages: 'Bob: Alice, can you send me the report by Friday?
+
+    Alice: sure, I''ll have it ready by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Alice
+    required_action: Send the report
+    deadline: Friday
+    context: Bob asked Alice to send the report by Friday, Alice agreed
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: self_commitment_speaker
+  difficulty: easy
+  messages: 'Gaddy: I will send the documents by tomorrow'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: third_party_named
+  difficulty: easy
+  messages: 'Gaddy: Bob will send the documents by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Send the documents
+    deadline: Friday
+    context: Bob will send the documents by Friday
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: external_party_waiting
+  difficulty: medium
+  messages: 'Gaddy: I''m waiting for the bank to process the loan
+
+    Gaddy: nothing I can do until they respond'
+  expected_commitments:
+  - id: null
+    committed_party: the bank
+    required_action: Process the loan
+    deadline: null
+    context: I'm waiting for the bank to process the loan
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: alice_asks_bob_bob_refuses
+  difficulty: medium
+  messages: 'Alice: Bob, can you send me the report by Friday?
+
+    Bob: sorry, I won''t be able to do it this week'
+  expected_commitments: []
+- category: args_party
+  scenario: multi_party_only_acceptor_committed
+  difficulty: medium
+  messages: 'Alice: we need someone to prepare the report by Friday
+
+    Bob: I can''t, I''m swamped
+
+    Charlie: I''ll do it, I''ll have it ready by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Charlie
+    required_action: Prepare the report
+    deadline: Friday
+    context: Alice asked for someone to prepare the report, Charlie volunteered
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: request_to_group_one_volunteers
+  difficulty: medium
+  messages: 'Gaddy: someone needs to book the meeting room for Tuesday
+
+    Dana: I''ll book it'
+  expected_commitments:
+  - id: null
+    committed_party: Dana
+    required_action: Book the meeting room
+    deadline: Tuesday
+    context: Gaddy asked someone to book the meeting room, Dana volunteered
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: unknown_party_unclear
+  difficulty: hard
+  messages: 'Gaddy: someone needs to call the supplier about the order'
+  policy_note: '''Someone needs to do X'' has no committed party → unclear.'
+  expected_commitments:
+  - id: null
+    committed_party: null
+    required_action: Call the supplier
+    deadline: null
+    context: someone needs to call the supplier about the order
+    status: unclear
+    notification: none
+- category: args_party
+  scenario: group_we_need_unclear
+  difficulty: hard
+  messages: 'Gaddy: we need to send the documents to the client'
+  policy_note: '''We need to do X'' has no individual owner → unclear.'
+  expected_commitments:
+  - id: null
+    committed_party: null
+    required_action: Send the documents to the client
+    deadline: null
+    context: we need to send the documents to the client
+    status: unclear
+    notification: none
+- category: args_party
+  scenario: party_handoff_update
+  difficulty: hard
+  messages: 'Gaddy: actually Bob will handle it instead of Alice'
+  policy_note: 'Party handoff: update existing commitment with new party.'
+  existing_commitments:
+  - id: abc-100
+    committed_party: Alice
+    required_action: Send the documents
+    deadline: tomorrow
+    context: Alice will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-100
+    committed_party: Bob
+    required_action: Send the documents
+    deadline: tomorrow
+    context: actually Bob will handle it instead of Alice
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: speaker_commits_for_other_named
+  difficulty: hard
+  messages: 'Gaddy: Alice will send the documents, I''ll make sure of it'
+  policy_note: Speaker asserts another person will do it → commitment with that person as party.
+  expected_commitments:
+  - id: null
+    committed_party: Alice
+    required_action: Send the documents
+    deadline: null
+    context: Alice will send the documents, I'll make sure of it
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: party_implied_by_role
+  difficulty: hard
+  messages: 'Gaddy: the contractor needs to finish the renovation by next week'
+  policy_note: Party implied by role title, not a named person.
+  expected_commitments:
+  - id: null
+    committed_party: the contractor
+    required_action: Finish the renovation
+    deadline: next week
+    context: the contractor needs to finish the renovation by next week
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: speaker_volunteers_other_without_confirmation
+  difficulty: hard
+  messages: 'Gaddy: Dana will handle the invoice payment by Friday'
+  policy_note: Speaker names someone else as responsible without their confirmation → commitment with
+    named person as party.
+  expected_commitments:
+  - id: null
+    committed_party: Dana
+    required_action: Handle the invoice payment
+    deadline: Friday
+    context: Dana will handle the invoice payment by Friday
+    status: waiting
+    notification: none
+- category: args_party
+  scenario: implicit_party_from_context
+  difficulty: hard
+  messages: 'Alice: I talked to the lawyer yesterday
+
+    Alice: he said he''ll file the motion by Wednesday'
+  policy_note: Party must be inferred from conversational context, not explicitly named in the commitment
+    sentence.
+  expected_commitments:
+  - id: null
+    committed_party: the lawyer
+    required_action: File the motion
+    deadline: Wednesday
+    context: he said he'll file the motion by Wednesday
+    status: waiting
+    notification: none

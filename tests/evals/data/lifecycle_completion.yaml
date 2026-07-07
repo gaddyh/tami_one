@@ -1,0 +1,276 @@
+- category: lifecycle_completion
+  scenario: existing_mark_done
+  difficulty: easy
+  messages: 'Gaddy: I sent the documents yesterday
+
+    Gaddy: they should have arrived'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I sent the documents yesterday
+    status: done
+    notification: none
+- category: lifecycle_completion
+  scenario: past_tense_without_existing_ignore
+  difficulty: easy
+  messages: 'Gaddy: I sent the documents yesterday'
+  expected_commitments: []
+- category: lifecycle_completion
+  scenario: dismiss_existing
+  difficulty: easy
+  messages: 'Gaddy: forget about calling the supplier
+
+    Gaddy: I found another source'
+  existing_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: Need to call the supplier about the order
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: forget about calling the supplier, I found another source
+    status: dismissed
+    notification: none
+- category: lifecycle_completion
+  scenario: done_short_confirmation
+  difficulty: easy
+  messages: 'Dana: done, the invoice is paid'
+  existing_commitments:
+  - id: abc-400
+    committed_party: Dana
+    required_action: Pay the invoice
+    deadline: Monday
+    context: Dana will pay the invoice by Monday
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-400
+    committed_party: Dana
+    required_action: Pay the invoice
+    deadline: Monday
+    context: done, the invoice is paid
+    status: done
+    notification: none
+- category: lifecycle_completion
+  scenario: done_passive_voice
+  difficulty: medium
+  messages: 'Gaddy: the documents were sent this morning'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: the documents were sent this morning
+    status: done
+    notification: none
+- category: lifecycle_completion
+  scenario: dismiss_vague
+  difficulty: medium
+  messages: 'Gaddy: never mind about the documents, we don''t need them anymore'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: never mind about the documents, we don't need them anymore
+    status: dismissed
+    notification: none
+- category: lifecycle_completion
+  scenario: future_promise_not_done
+  difficulty: medium
+  messages: 'Gaddy: I''ll definitely send the documents tomorrow as promised'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I'll definitely send the documents tomorrow as promised
+    status: waiting
+    notification: none
+- category: lifecycle_completion
+  scenario: done_by_different_party
+  difficulty: medium
+  messages: 'Alice: Bob finished the report and submitted it'
+  existing_commitments:
+  - id: abc-300
+    committed_party: Bob
+    required_action: Prepare the report
+    deadline: Friday
+    context: Bob will prepare the report by Friday
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-300
+    committed_party: Bob
+    required_action: Prepare the report
+    deadline: Friday
+    context: Bob finished the report and submitted it
+    status: done
+    notification: none
+- category: lifecycle_completion
+  scenario: started_not_done
+  difficulty: hard
+  messages: 'Gaddy: I started working on the documents'
+  policy_note: Progress updates do not complete existing commitments.
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments: []
+- category: lifecycle_completion
+  scenario: almost_done_not_done
+  difficulty: hard
+  messages: 'Gaddy: almost done with the documents'
+  policy_note: Being almost done is not done — no update.
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments: []
+- category: lifecycle_completion
+  scenario: dismiss_then_new_same_action
+  difficulty: hard
+  messages: 'Gaddy: forget about the old supplier order
+
+    Gaddy: I need to call a new supplier about a different order'
+  policy_note: Dismiss old + new commitment with same action but different target → new only.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Call a new supplier
+    deadline: null
+    context: I need to call a new supplier about a different order
+    status: waiting
+    notification: none
+- category: lifecycle_completion
+  scenario: will_do_not_done
+  difficulty: hard
+  messages: 'Gaddy: I''ll do it, I''ll call the supplier today'
+  policy_note: '''Will do'' is a future promise, not a completion.'
+  existing_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: Need to call the supplier about the order
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: today
+    context: I'll do it, I'll call the supplier today
+    status: waiting
+    notification: none
+- category: lifecycle_completion
+  scenario: third_party_completion_report
+  difficulty: hard
+  messages: 'Charlie: Alice told me Bob submitted the report yesterday'
+  policy_note: Third-party reports completion of someone else's commitment → done.
+  existing_commitments:
+  - id: abc-300
+    committed_party: Bob
+    required_action: Prepare the report
+    deadline: Friday
+    context: Bob will prepare the report by Friday
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-300
+    committed_party: Bob
+    required_action: Prepare the report
+    deadline: Friday
+    context: Alice told me Bob submitted the report yesterday
+    status: done
+    notification: none
+- category: lifecycle_completion
+  scenario: dismiss_with_condition
+  difficulty: hard
+  messages: 'Gaddy: forget about calling the supplier unless they respond today'
+  policy_note: Conditional dismiss ('unless they respond today') → keep waiting, update deadline.
+  existing_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: Need to call the supplier about the order
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: today
+    context: forget about calling the supplier unless they respond today
+    status: waiting
+    notification: none
+- category: lifecycle_completion
+  scenario: partial_completion_not_done
+  difficulty: hard
+  messages: 'Gaddy: I sent 3 out of the 5 documents, will send the rest tomorrow'
+  policy_note: Partial completion ('sent 3 out of 5 documents') → not done, still waiting.
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I sent 3 out of the 5 documents, will send the rest tomorrow
+    status: waiting
+    notification: none

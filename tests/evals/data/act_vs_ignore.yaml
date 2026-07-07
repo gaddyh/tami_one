@@ -1,0 +1,164 @@
+- category: act_vs_ignore
+  scenario: social_chat_ignore
+  difficulty: easy
+  messages: 'Gaddy: hey how are you?
+
+    Gaddy: long time no see
+
+    Gaddy: let''s catch up soon'
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: explicit_self_commitment
+  difficulty: easy
+  messages: 'Gaddy: I will send the documents by tomorrow
+
+    Gaddy: just need to finish the last page'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: thanks_only_ignore
+  difficulty: easy
+  messages: 'Gaddy: good morning!
+
+    Gaddy: thanks for the help yesterday
+
+    Gaddy: have a great day'
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: motivational_ignore
+  difficulty: easy
+  messages: 'Gaddy: you''ve got this, keep up the great work!'
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: explicit_promise_different_action
+  difficulty: easy
+  messages: 'Gaddy: I''ll call the supplier today'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: today
+    context: I'll call the supplier today
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: soft_social_future_ignore
+  difficulty: medium
+  messages: 'Gaddy: let''s grab coffee sometime'
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: request_plus_acceptance
+  difficulty: medium
+  messages: 'Alice: can you send me the report by Friday?
+
+    Bob: sure, I''ll have it ready by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Send the report
+    deadline: Friday
+    context: Alice asked Bob to send the report by Friday, Bob agreed
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: waiting_external_party
+  difficulty: medium
+  messages: 'Gaddy: I''m waiting for the bank to process the loan
+
+    Gaddy: nothing I can do until they respond'
+  expected_commitments:
+  - id: null
+    committed_party: the bank
+    required_action: Process the loan
+    deadline: null
+    context: I'm waiting for the bank to process the loan
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: question_only_ignore
+  difficulty: medium
+  messages: 'Gaddy: what time is the meeting tomorrow?'
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: generic_callback_ignore
+  difficulty: hard
+  messages: 'Gaddy: let me think about it and get back to you'
+  policy_note: Generic callback without a specific topic or deadline is not a commitment.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: generic_callback_with_topic_positive
+  difficulty: hard
+  messages: 'Dana: can you approve the quote?
+
+    Gaddy: let me think about the quote and get back to you tomorrow'
+  policy_note: 'Contrastive pair with generic_callback_ignore: adding topic + deadline makes it a commitment.'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Get back to Dana about the quote
+    deadline: tomorrow
+    context: let me think about the quote and get back to you tomorrow
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: vague_action_unclear
+  difficulty: hard
+  messages: 'Gaddy: we should probably do something about the project at some point'
+  policy_note: Vague action with no clear owner or deadline → unclear status, not ignored.
+  expected_commitments:
+  - id: null
+    committed_party: null
+    required_action: Do something about the project
+    deadline: null
+    context: we should probably do something about the project at some point
+    status: unclear
+    notification: none
+- category: act_vs_ignore
+  scenario: request_without_acceptance_ignore
+  difficulty: hard
+  messages: 'Alice: can someone send me the report by Friday?'
+  policy_note: A request with no acceptance or volunteer is not yet a commitment.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: conditional_promise_untriggered_ignore
+  difficulty: hard
+  messages: 'Gaddy: if they send the quote, I''ll approve it'
+  policy_note: Conditional promise where condition has not been met → ignore, not a commitment yet.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: should_without_will_ignore
+  difficulty: hard
+  messages: 'Gaddy: we should really call the supplier about the delay'
+  policy_note: '''We should do X'' is an opinion, not a commitment to act.'
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: rhetorical_question_ignore
+  difficulty: hard
+  messages: 'Gaddy: who has time to prepare a full report by Friday?'
+  policy_note: Rhetorical questions are not commitments, even if they mention an action.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: hedged_commitment_unclear
+  difficulty: hard
+  messages: 'Gaddy: I might be able to send the documents tomorrow, but I''m not sure'
+  policy_note: Hedged language ('might', 'maybe') with no clear commitment → unclear, not ignore.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I might be able to send the documents tomorrow, but I'm not sure
+    status: unclear
+    notification: none
+- category: act_vs_ignore
+  scenario: past_tense_no_existing_ignore
+  difficulty: hard
+  messages: 'Gaddy: I already called the supplier yesterday and sorted it out'
+  policy_note: Past-tense statements about completed actions without existing commitments → ignore.
+  expected_commitments: []

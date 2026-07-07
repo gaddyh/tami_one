@@ -1,0 +1,360 @@
+- category: act_vs_ignore
+  scenario: challenge_request_no_acceptance
+  difficulty: hard
+  messages: 'Alice: can someone prepare the slides for Monday?'
+  policy_note: Request with no acceptance or volunteer → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_conditional_untriggered
+  difficulty: hard
+  messages: 'Gaddy: if the client approves the budget, I''ll start the project'
+  policy_note: Conditional promise, condition not met → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_generic_callback
+  difficulty: hard
+  messages: 'Bob: I''ll get back to you on that'
+  policy_note: Generic callback without topic or deadline → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_should_not_will
+  difficulty: hard
+  messages: 'Gaddy: we should really update the website at some point'
+  policy_note: '''Should'' is opinion, not commitment → ignore.'
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_rhetorical_question
+  difficulty: hard
+  messages: 'Gaddy: who has time to write a full proposal this week?'
+  policy_note: Rhetorical question mentioning action → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_past_tense_no_existing
+  difficulty: hard
+  messages: 'Gaddy: I already sent the email to the team yesterday'
+  policy_note: Past-tense completion without existing commitment → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_social_vague
+  difficulty: hard
+  messages: 'Gaddy: we should all hang out sometime soon'
+  policy_note: Vague social intent without specifics → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_opinion_not_commitment
+  difficulty: hard
+  messages: 'Gaddy: the report really needs to be more detailed'
+  policy_note: Expressing opinion about what needs doing → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_question_about_past
+  difficulty: hard
+  messages: 'Alice: did anyone follow up with the vendor last week?'
+  policy_note: Question about past events → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_suggestion_not_promise
+  difficulty: hard
+  messages: 'Bob: maybe we could try reaching out to the new supplier'
+  policy_note: Suggesting an approach is not committing to it → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_hope_not_commitment
+  difficulty: hard
+  messages: 'Gaddy: I hope we can finish the migration by next month'
+  policy_note: Expressing hope/wish is not a commitment → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_report_status_no_action
+  difficulty: hard
+  messages: 'Gaddy: the server is down again, looking into it'
+  policy_note: Reporting current status without committing to action → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_appreciation_not_commitment
+  difficulty: hard
+  messages: 'Alice: thanks in advance for handling the client call'
+  policy_note: Thanking someone for future help is not a commitment → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_reminder_not_commitment
+  difficulty: hard
+  messages: 'Gaddy: don''t forget Bob needs the data by Friday'
+  policy_note: Reminding someone else is not a commitment by the speaker → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_worry_not_commitment
+  difficulty: hard
+  messages: 'Gaddy: I''m worried we won''t meet the deadline for the launch'
+  policy_note: Expressing concern is not a commitment → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_information_sharing
+  difficulty: hard
+  messages: 'Gaddy: the client said they''ll review the proposal and get back to us next week'
+  policy_note: Sharing information without action item → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_almost_done_no_existing
+  difficulty: hard
+  messages: 'Gaddy: I''m almost done with the presentation'
+  policy_note: Progress report without existing commitment → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_started_no_existing
+  difficulty: hard
+  messages: 'Gaddy: I started looking into the bug'
+  policy_note: Started working without existing commitment → ignore.
+  expected_commitments: []
+- category: act_vs_ignore
+  scenario: challenge_request_with_acceptance
+  difficulty: hard
+  messages: 'Alice: can you send me the slides by Monday?
+
+    Bob: sure, I''ll send them by Monday'
+  policy_note: Request + explicit acceptance → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Send the slides
+    deadline: Monday
+    context: Alice asked Bob to send the slides by Monday, Bob agreed
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_generic_callback_with_topic
+  difficulty: hard
+  messages: 'Alice: what about the budget?
+
+    Bob: let me review the budget and get back to you tomorrow'
+  policy_note: 'Contrastive pair: generic callback but WITH topic + deadline → commitment.'
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Get back to Alice about the budget
+    deadline: tomorrow
+    context: let me review the budget and get back to you tomorrow
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_explicit_self_promise
+  difficulty: hard
+  messages: 'Gaddy: I will definitely call the client before noon'
+  policy_note: Explicit 'I will' with specific action and deadline → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Call the client
+    deadline: before noon
+    context: I will definitely call the client before noon
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_volunteer
+  difficulty: hard
+  messages: 'Alice: we need someone to handle the vendor registration
+
+    Bob: I''ll take care of the vendor registration by Wednesday'
+  policy_note: Volunteering to do something specific → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Handle the vendor registration
+    deadline: Wednesday
+    context: I'll take care of the vendor registration by Wednesday
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_conditional_triggered
+  difficulty: hard
+  messages: 'Alice: the client just approved the budget!
+
+    Gaddy: great, I''ll start the project tomorrow then'
+  policy_note: Conditional promise where condition IS satisfied → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Start the project
+    deadline: tomorrow
+    context: the client approved the budget, I'll start the project tomorrow
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_will_with_specific_action
+  difficulty: hard
+  messages: 'Gaddy: I''ll prepare the quarterly report'
+  policy_note: '''I will'' with concrete action but no deadline → commitment without deadline.'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Prepare the quarterly report
+    deadline: null
+    context: I'll prepare the quarterly report
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_third_party_commits
+  difficulty: hard
+  messages: 'Gaddy: Dana will send the contract to the client by Friday'
+  policy_note: Speaker asserts someone else will do something → commitment with that party.
+  expected_commitments:
+  - id: null
+    committed_party: Dana
+    required_action: Send the contract to the client
+    deadline: Friday
+    context: Dana will send the contract to the client by Friday
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_hedged_unclear
+  difficulty: hard
+  messages: 'Gaddy: I might be able to review the code tomorrow, but I''m not sure'
+  policy_note: Hedged commitment → unclear status, not ignore.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Review the code
+    deadline: tomorrow
+    context: I might be able to review the code tomorrow, but I'm not sure
+    status: unclear
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_multi_message_commitment
+  difficulty: hard
+  messages: 'Gaddy: I need to deal with the invoice
+
+    Gaddy: I''ll pay it by end of week'
+  policy_note: Commitment built across multiple messages → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Pay the invoice
+    deadline: end of week
+    context: I'll pay it by end of week
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_implicit_acceptance
+  difficulty: hard
+  messages: 'Alice: can you update the spreadsheet?
+
+    Bob: on it'
+  policy_note: Request followed by action-oriented response → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Update the spreadsheet
+    deadline: null
+    context: Alice asked Bob to update the spreadsheet, Bob said 'on it'
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_waiting_external
+  difficulty: hard
+  messages: 'Gaddy: I submitted the application last week
+
+    Gaddy: now just waiting for the city to approve the permit'
+  policy_note: Waiting for external party to act → commitment with external party.
+  expected_commitments:
+  - id: null
+    committed_party: the city
+    required_action: Approve the permit
+    deadline: null
+    context: waiting for the city to approve the permit
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_let_me_with_action
+  difficulty: hard
+  messages: 'Gaddy: let me check with the accountant and I''ll update you today'
+  policy_note: '''Let me X'' with specific action → commitment.'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Check with the accountant and update
+    deadline: today
+    context: let me check with the accountant and I'll update you today
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_responsibility_claim
+  difficulty: hard
+  messages: 'Gaddy: I''ll handle the client meeting on Thursday'
+  policy_note: Claiming responsibility for a task → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Handle the client meeting
+    deadline: Thursday
+    context: I'll handle the client meeting on Thursday
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_need_to_with_intent
+  difficulty: hard
+  messages: 'Gaddy: I need to call the bank about the fees today'
+  policy_note: '''I need to X'' with clear intent to act → commitment.'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Call the bank about the fees
+    deadline: today
+    context: I need to call the bank about the fees today
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_confirm_and_commit
+  difficulty: hard
+  messages: 'Alice: did you confirm the venue?
+
+    Bob: not yet, I''ll call them this afternoon'
+  policy_note: Confirming a task and committing to deadline → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Call the venue to confirm
+    deadline: this afternoon
+    context: not yet, I'll call them this afternoon
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_plan_with_action
+  difficulty: hard
+  messages: 'Gaddy: I''m going to submit the proposal by Friday end of day'
+  policy_note: Stating a plan with specific action and timing → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Submit the proposal
+    deadline: Friday end of day
+    context: I'm going to submit the proposal by Friday end of day
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_offer_help
+  difficulty: hard
+  messages: 'Gaddy: I can review the contract and send comments by tomorrow'
+  policy_note: Offering to do something specific → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Review the contract and send comments
+    deadline: tomorrow
+    context: I can review the contract and send comments by tomorrow
+    status: waiting
+    notification: none
+- category: act_vs_ignore
+  scenario: challenge_commit_after_question
+  difficulty: hard
+  messages: 'Alice: has anyone followed up with the vendor?
+
+    Bob: not yet, I''ll email them today'
+  policy_note: Question followed by commitment to act → commitment.
+  expected_commitments:
+  - id: null
+    committed_party: Bob
+    required_action: Email the vendor
+    deadline: today
+    context: not yet, I'll email them today
+    status: waiting
+    notification: none

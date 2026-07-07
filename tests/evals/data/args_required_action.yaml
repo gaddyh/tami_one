@@ -1,0 +1,188 @@
+- category: args_required_action
+  scenario: send_docs_forward
+  difficulty: easy
+  messages: 'Gaddy: I''ll send the documents tomorrow'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I'll send the documents tomorrow
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: call_supplier_ring
+  difficulty: easy
+  messages: 'Gaddy: I need to call the supplier about the order'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: I need to call the supplier about the order
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: prepare_report
+  difficulty: easy
+  messages: 'Gaddy: I''ll have the report ready by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Prepare the report
+    deadline: Friday
+    context: I'll have the report ready by Friday
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: book_meeting_room_reserve
+  difficulty: easy
+  messages: 'Gaddy: I''ll reserve the meeting room for Tuesday'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Book the meeting room
+    deadline: Tuesday
+    context: I'll reserve the meeting room for Tuesday
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: upload_signed_form
+  difficulty: easy
+  messages: 'Gaddy: I''ll upload the signed form by Wednesday'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Upload the signed form
+    deadline: Wednesday
+    context: I'll upload the signed form by Wednesday
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: send_docs_send_over
+  difficulty: medium
+  messages: 'Gaddy: I''ll send over the docs tomorrow'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I'll send over the docs tomorrow
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: send_docs_paperwork
+  difficulty: medium
+  messages: 'Gaddy: I''ll get the paperwork to you tomorrow'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I'll get the paperwork to you tomorrow
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: call_supplier_phone
+  difficulty: medium
+  messages: 'Gaddy: I''ll give the supplier a call about the order today'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: today
+    context: I'll give the supplier a call about the order today
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: pay_invoice_take_care
+  difficulty: medium
+  messages: 'Dana: I''ll take care of the invoice payment today'
+  expected_commitments:
+  - id: null
+    committed_party: Dana
+    required_action: Pay the invoice
+    deadline: today
+    context: I'll take care of the invoice payment today
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: pay_invoice_settle
+  difficulty: medium
+  messages: 'Dana: I''ll settle the invoice by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Dana
+    required_action: Pay the invoice
+    deadline: Friday
+    context: I'll settle the invoice by Friday
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: prepare_report_draft
+  difficulty: medium
+  messages: 'Gaddy: I''ll draft the report by end of week'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Prepare the report
+    deadline: end of week
+    context: I'll draft the report by end of week
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: process_loan
+  difficulty: hard
+  messages: 'Gaddy: the bank needs to process the loan application'
+  policy_note: External party as committed_party with action inferred from context.
+  expected_commitments:
+  - id: null
+    committed_party: the bank
+    required_action: Process the loan
+    deadline: null
+    context: the bank needs to process the loan application
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: very_indirect_action
+  difficulty: hard
+  messages: 'Gaddy: I''ll make sure the invoice is taken care of by Friday'
+  policy_note: Vague indirect action ('make sure it's taken care of') → extract the underlying action.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Take care of the invoice
+    deadline: Friday
+    context: I'll make sure the invoice is taken care of by Friday
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: multi_step_action
+  difficulty: hard
+  messages: 'Gaddy: I''ll review the contract, sign it, and send it back by tomorrow'
+  policy_note: Multi-step action described in one message → single commitment with combined action.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Review, sign, and send back the contract
+    deadline: tomorrow
+    context: I'll review the contract, sign it, and send it back by tomorrow
+    status: waiting
+    notification: none
+- category: args_required_action
+  scenario: action_split_across_messages
+  difficulty: hard
+  messages: 'Gaddy: I need to handle the paperwork
+
+    Gaddy: specifically the vendor registration forms
+
+    Gaddy: I''ll do it by Wednesday'
+  policy_note: Action details split across multiple messages → single commitment combining the information.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Handle the vendor registration forms
+    deadline: Wednesday
+    context: I need to handle the paperwork, specifically the vendor registration forms
+    status: waiting
+    notification: none

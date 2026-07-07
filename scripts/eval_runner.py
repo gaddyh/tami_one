@@ -1,25 +1,25 @@
-"""CLI entry point for running a DSPy evaluation smoke test.
+"""CLI entry point for running DSPy commitment extraction evaluations.
 
 Usage:
-    # Full devset (12 examples)
-    .venv/bin/python scripts/smoke_eval.py
+    # Full devset
+    .venv/bin/python scripts/eval_runner.py
 
     # Run a specific split
-    .venv/bin/python scripts/smoke_eval.py --split dev
-    .venv/bin/python scripts/smoke_eval.py --split test
-    .venv/bin/python scripts/smoke_eval.py --split train
+    .venv/bin/python scripts/eval_runner.py --split dev
+    .venv/bin/python scripts/eval_runner.py --split test
+    .venv/bin/python scripts/eval_runner.py --split train
 
     # Run all splits with aggregated results table
-    .venv/bin/python scripts/smoke_eval.py --all
+    .venv/bin/python scripts/eval_runner.py --all
 
     # First 3 examples only
-    .venv/bin/python scripts/smoke_eval.py --limit 3
+    .venv/bin/python scripts/eval_runner.py --limit 3
 
     # Use a specific model
-    .venv/bin/python scripts/smoke_eval.py --model gpt-4o-mini
+    .venv/bin/python scripts/eval_runner.py --model gpt-4o-mini
 
     # Verbose: show actual vs expected per example
-    .venv/bin/python scripts/smoke_eval.py --verbose
+    .venv/bin/python scripts/eval_runner.py --verbose
 """
 
 import argparse
@@ -34,11 +34,11 @@ from rich.table import Table
 
 from app.config import settings
 from app.commitments.commitments_agent import CommitmentAgent, configure_dspy
-from app.commitments.eval import (
+from eval.dataset import build_devset
+from eval.metrics import (
     _token_f1,
     _word_overlap,
     act_vs_ignore_metric,
-    build_devset,
     compare_commitments,
     commitment_metric,
 )
@@ -165,6 +165,7 @@ def _run_split(
 
         per_example.append({
             "index": i,
+            "split": split,
             "category": getattr(ex, "category", "—") or "—",
             "scenario": getattr(ex, "scenario", "—") or "—",
             "difficulty": getattr(ex, "difficulty", "—") or "—",
@@ -177,6 +178,7 @@ def _run_split(
             "mismatches": mismatches,
             "field_matches": field_matches,
             "messages": ex.messages,
+            "existing_commitments_json": getattr(ex, "existing_commitments_json", "[]"),
             "pred_commitments": pred.commitments,
             "expected_commitments": ex.expected_commitments,
         })
@@ -608,6 +610,53 @@ def _print_aggregated_table(results: list[dict]) -> None:
     console.print(table)
 
 
+def _commitments_to_dicts(commitments: list) -> list[dict]:
+    """Convert commitment objects (pydantic or dict) to plain dicts."""
+    out = []
+    for c in commitments:
+        if hasattr(c, "model_dump"):
+            out.append(c.model_dump(mode="json"))
+        elif isinstance(c, dict):
+            out.append(c)
+        else:
+            out.append(str(c))
+    return out
+
+
+def _save_failures_jsonl(run_dir: Path, results: list[dict]) -> None:
+    """Save all failures across splits as a JSONL file for debugging."""
+    path = run_dir / "failures.jsonl"
+    with path.open("w", encoding="utf-8") as f:
+        for r in results:
+            for e in r["per_example"]:
+                conf = e["confusion"]
+                if conf == "fp":
+                    error_type = "FALSE_POSITIVE"
+                    mismatched_fields = []
+                elif conf == "fn":
+                    error_type = "FALSE_NEGATIVE"
+                    mismatched_fields = []
+                elif conf == "tp" and e.get("mismatches"):
+                    error_type = "FIELD_MISMATCH"
+                    mismatched_fields = [m["field"] for m in e["mismatches"]]
+                else:
+                    continue
+
+                row = {
+                    "split": e["split"],
+                    "category": e["category"],
+                    "scenario": e["scenario"],
+                    "difficulty": e["difficulty"],
+                    "messages": e["messages"],
+                    "existing_commitments": _json.loads(e.get("existing_commitments_json", "[]")),
+                    "expected_commitments": _commitments_to_dicts(e["expected_commitments"]),
+                    "actual_commitments": _commitments_to_dicts(e["pred_commitments"]),
+                    "error_type": error_type,
+                    "mismatched_fields": mismatched_fields,
+                }
+                f.write(_json.dumps(row, ensure_ascii=False) + "\n")
+
+
 def _save_split_md(run_dir: Path, split: str, result: dict) -> None:
     """Save a single split's recorded console output as a markdown file."""
     text = console.export_text(clear=True, styles=False)
@@ -704,6 +753,7 @@ def main() -> None:
         _print_aggregated_table(results)
         if run_dir:
             _save_summary_md(run_dir, run_id, results, settings.openai_model)
+            _save_failures_jsonl(run_dir, results)
             console.print(f"\n[bold green]Reports saved to: {run_dir}/[/]")
         sys.exit(0)
 
@@ -711,6 +761,7 @@ def main() -> None:
     r = _run_split(split, limit=args.limit, verbose=args.verbose)
     if run_dir:
         _save_split_md(run_dir, split, r)
+        _save_failures_jsonl(run_dir, [r])
         console.print(f"\n[bold green]Report saved to: {run_dir}/{split}.md[/]")
 
 

@@ -1,0 +1,307 @@
+- category: lifecycle_update_vs_new
+  scenario: update_existing_deadline
+  difficulty: easy
+  messages: 'Gaddy: I won''t manage tomorrow, I''ll send the documents next Monday'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: next Monday
+    context: I won't manage tomorrow, I'll send the documents next Monday
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: new_unrelated_commitment
+  difficulty: easy
+  messages: 'Gaddy: I also need to call the supplier today'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: today
+    context: I also need to call the supplier today
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: new_when_no_existing
+  difficulty: easy
+  messages: 'Gaddy: I''ll send the documents tomorrow'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I'll send the documents tomorrow
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: same_existing_no_duplicate
+  difficulty: medium
+  messages: 'Gaddy: I''ll call the supplier later today'
+  existing_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: Need to call the supplier about the order
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: today
+    context: I'll call the supplier later today
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: new_when_existing_different_action
+  difficulty: medium
+  messages: 'Gaddy: I need to prepare the report by Friday'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Prepare the report
+    deadline: Friday
+    context: I need to prepare the report by Friday
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: update_existing_context_only
+  difficulty: medium
+  messages: 'Gaddy: I''ll send the documents as soon as I get the signature'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I'll send the documents as soon as I get the signature
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: existing_unchanged_no_update
+  difficulty: medium
+  messages: 'Gaddy: still planning to send the documents tomorrow'
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: still planning to send the documents tomorrow
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: party_handoff_update
+  difficulty: hard
+  messages: 'Gaddy: actually Bob will handle it instead of Alice'
+  policy_note: 'Party handoff: update existing commitment with new party.'
+  existing_commitments:
+  - id: abc-200
+    committed_party: Alice
+    required_action: Send the documents
+    deadline: Friday
+    context: Alice will send the documents by Friday
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-200
+    committed_party: Bob
+    required_action: Send the documents
+    deadline: Friday
+    context: actually Bob will handle it instead of Alice
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: multiple_existing_update_one
+  difficulty: hard
+  messages: 'Gaddy: I''ll send the documents by Friday instead'
+  policy_note: With multiple existing commitments, only update the one that changed.
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: Need to call the supplier about the order
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: Friday
+    context: I'll send the documents by Friday instead
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: same_action_different_party_new
+  difficulty: hard
+  messages: 'Gaddy: Dana will also send her documents by Friday'
+  policy_note: Same action but different party → new commitment, not an update.
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: null
+    committed_party: Dana
+    required_action: Send the documents
+    deadline: Friday
+    context: Dana will also send her documents by Friday
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: update_action_on_existing
+  difficulty: hard
+  messages: 'Gaddy: actually I''ll email the supplier instead of calling'
+  policy_note: Action change on existing commitment → update with new required_action.
+  existing_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: Need to call the supplier about the order
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Email the supplier
+    deadline: null
+    context: actually I'll email the supplier instead of calling
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: update_deadline_different_party_existing
+  difficulty: hard
+  messages: 'Bob: I need more time, can I prepare the report by next Monday?'
+  policy_note: Deadline update by the committed party themselves.
+  existing_commitments:
+  - id: abc-300
+    committed_party: Bob
+    required_action: Prepare the report
+    deadline: Friday
+    context: Bob will prepare the report by Friday
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-300
+    committed_party: Bob
+    required_action: Prepare the report
+    deadline: next Monday
+    context: I need more time, can I prepare the report by next Monday?
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: same_action_same_party_context_change
+  difficulty: hard
+  messages: 'Gaddy: I''ll send the documents once the legal team approves them'
+  policy_note: Same action+party but new context info → update context on existing.
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I'll send the documents once the legal team approves them
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: multiple_fields_changed
+  difficulty: hard
+  messages: 'Gaddy: I''ll call the supplier about the new order today instead of the old one'
+  policy_note: 'Multiple fields changed simultaneously: deadline + context.'
+  existing_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: null
+    context: Need to call the supplier about the order
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: abc-456
+    committed_party: Gaddy
+    required_action: Call the supplier
+    deadline: today
+    context: I'll call the supplier about the new order today instead of the old one
+    status: waiting
+    notification: none
+- category: lifecycle_update_vs_new
+  scenario: new_that_looks_like_update
+  difficulty: hard
+  messages: 'Gaddy: I also need to send the contract to the client by Friday'
+  policy_note: New commitment with similar action to existing but different enough → new, not update.
+  existing_commitments:
+  - id: abc-123
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the contract to the client
+    deadline: Friday
+    context: I also need to send the contract to the client by Friday
+    status: waiting
+    notification: none

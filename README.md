@@ -47,8 +47,10 @@ app/
 │   ├── models.py                 # Canonical Commitment / CommitmentList schema
 │   ├── commitments_agent.py      # DSPy Signature + Module for commitment extraction
 │   ├── extractor.py              # Adapter: messages + existing commitments → DSPy agent
-│   ├── eval.py                   # DSPy eval scaffolding + token-F1 required_action metric
 │   └── processor.py              # Drains buffer, calls extractor, upserts CommitmentItem rows
+├── eval/
+│   ├── metrics.py                # DSPy eval metrics: commitment_metric, act_vs_ignore, token-F1
+│   └── dataset.py                # Example construction + devset loading
 ├── agents/
 │   ├── core.py                    # OpenAI agent used by the 360dialog business bot
 │   └── memory.py                   # Per-thread in-memory conversation history
@@ -56,7 +58,7 @@ app/
     ├── whatsapp.py                 # 360dialog API client
     └── transcription.py             # Voice-note transcription via OpenAI
 scripts/seed.py                      # CLI seed entry point
-scripts/smoke_eval.py                # Local commitment-extraction eval runner
+scripts/eval_runner.py               # Local commitment-extraction eval runner
 tests/evals/                         # Seed examples + generated train/dev/test JSON splits
 tests/                               # upsert, webhook, commitment extraction/eval tests
 ```
@@ -82,7 +84,8 @@ The commitment extractor has been refactored from a one-off raw OpenAI `response
 - `Commitment` / `CommitmentList` remain the canonical domain schema in `app/commitments/models.py`.
 - `app/commitments/commitments_agent.py` defines `ExtractCommitments(dspy.Signature)` and `CommitmentAgent(dspy.Module)`.
 - `extract_commitments()` keeps the same public interface used by `processor.py`, but internally calls the DSPy agent and normalizes `chat_id` / `chat_name` after the LLM response.
-- `app/commitments/eval.py` contains a strict full-commitment metric, with token-F1 matching for `required_action` so small wording differences are not always counted as failures.
+- `eval/metrics.py` contains a strict full-commitment metric, with token-F1 matching for `required_action` so small wording differences are not always counted as failures.
+- `eval/dataset.py` handles example construction and devset loading.
 
 The generated eval dataset is made of controlled probes rather than random examples. Each example is tagged by:
 
@@ -92,10 +95,10 @@ The generated eval dataset is made of controlled probes rather than random examp
 | Difficulty | `easy`, `medium`, `hard` |
 | Scenario | A specific contrastive case, such as `request_without_acceptance_ignore`, `almost_done_not_done`, or `party_implied_by_role` |
 
-The hand-written examples are preserved separately as `tests/evals/seed_examples.json`. The deterministic generator writes generated-only splits:
+The hand-written examples are preserved separately as `tests/evals/seed_examples.json` (a legacy reference dataset, not used by the eval runner). The data-driven generator reads YAML definitions from `tests/evals/data/` and writes JSON splits:
 
 ```bash
-python tests/evals/generate_commitment_devset.py
+python tests/evals/generate_devset.py
 ```
 
 Current generated split sizes:
@@ -107,12 +110,12 @@ Current generated split sizes:
 | Test | 31 |
 | Total | 93 |
 
-### Latest smoke-eval results
+### Latest eval results
 
 Command:
 
 ```bash
-python scripts/smoke_eval.py --all
+python scripts/eval_runner.py --all
 ```
 
 Latest run:
@@ -204,16 +207,16 @@ curl -X POST https://your-app.onrender.com/admin/seed
 
 Covers: Green API payload normalization, contact upsert + buffering, webhook handling, commitment extraction helpers, and commitment-eval utilities.
 
-Run the commitment smoke eval separately:
+Run the commitment eval separately:
 
 ```bash
-python scripts/smoke_eval.py --all
+python scripts/eval_runner.py --all
 ```
 
 Regenerate the deterministic train/dev/test eval splits:
 
 ```bash
-python tests/evals/generate_commitment_devset.py
+python tests/evals/generate_devset.py
 ```
 
 ## Deploy (Render)

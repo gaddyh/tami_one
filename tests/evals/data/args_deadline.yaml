@@ -1,0 +1,187 @@
+- category: args_deadline
+  scenario: deadline_by_Friday
+  difficulty: easy
+  messages: 'Gaddy: I will send the documents by Friday'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: Friday
+    context: I will send the documents by Friday
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_by_tomorrow
+  difficulty: easy
+  messages: 'Gaddy: I will send the documents by tomorrow'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: I will send the documents by tomorrow
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_today
+  difficulty: easy
+  messages: 'Gaddy: I will send the documents today'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: today
+    context: I will send the documents today
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_next_Monday
+  difficulty: easy
+  messages: 'Gaddy: I will send the documents next Monday'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: next Monday
+    context: I will send the documents next Monday
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_by_5pm
+  difficulty: easy
+  messages: 'Gaddy: I will send the documents by 5pm'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: by 5pm
+    context: I will send the documents by 5pm
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_by_1700
+  difficulty: medium
+  messages: 'Gaddy: I will send the documents by 17:00'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: by 17:00
+    context: I will send the documents by 17:00
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_by_July_15
+  difficulty: medium
+  messages: 'Gaddy: I will send the documents by July 15'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: July 15
+    context: I will send the documents by July 15
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_by_end_of_week
+  difficulty: medium
+  messages: 'Gaddy: I will send the documents by end of week'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: end of week
+    context: I will send the documents by end of week
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_next_week
+  difficulty: medium
+  messages: 'Gaddy: I will send the documents next week'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: next week
+    context: I will send the documents next week
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_soon
+  difficulty: hard
+  messages: 'Gaddy: I will send the documents soon'
+  policy_note: '''soon'' is not a concrete deadline → null.'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: null
+    context: I will send the documents soon
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_when_I_can
+  difficulty: hard
+  messages: 'Gaddy: I will send the documents when I can'
+  policy_note: '''when I can'' is not a concrete deadline → null.'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: null
+    context: I will send the documents when I can
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_none
+  difficulty: easy
+  messages: 'Gaddy: I will send the documents'
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: null
+    context: I will send the documents
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_relative_context
+  difficulty: hard
+  messages: 'Gaddy: I''ll send the documents by end of the quarter'
+  policy_note: Relative deadline 'by end of the quarter' is a valid explicit deadline.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: end of the quarter
+    context: I'll send the documents by end of the quarter
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_implied_from_event
+  difficulty: hard
+  messages: 'Gaddy: I''ll send the documents before the meeting'
+  policy_note: Deadline implied by an event ('before the meeting') is a valid explicit deadline.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: before the meeting
+    context: I'll send the documents before the meeting
+    status: waiting
+    notification: none
+- category: args_deadline
+  scenario: deadline_conflicting_multi_message
+  difficulty: hard
+  messages: 'Gaddy: I''ll send the documents by Friday
+
+    Gaddy: actually, let me send them by tomorrow instead'
+  policy_note: When two deadlines are mentioned, use the most recent/specific one.
+  expected_commitments:
+  - id: null
+    committed_party: Gaddy
+    required_action: Send the documents
+    deadline: tomorrow
+    context: actually, let me send them by tomorrow instead
+    status: waiting
+    notification: none
