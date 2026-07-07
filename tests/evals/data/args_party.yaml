@@ -1,6 +1,8 @@
 - category: args_party
   scenario: alice_asks_bob_bob_accepts
   difficulty: easy
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: Bob, can you send me the report by Friday?
 
     Bob: sure, I''ll have it ready by Friday'
@@ -15,6 +17,8 @@
 - category: args_party
   scenario: bob_asks_alice_alice_accepts
   difficulty: easy
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Bob: Alice, can you send me the report by Friday?
 
     Alice: sure, I''ll have it ready by Friday'
@@ -29,6 +33,8 @@
 - category: args_party
   scenario: self_commitment_speaker
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents by tomorrow'
   expected_commitments:
   - id: null
@@ -41,6 +47,8 @@
 - category: args_party
   scenario: third_party_named
   difficulty: easy
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Gaddy: Bob will send the documents by Friday'
   expected_commitments:
   - id: null
@@ -53,6 +61,8 @@
 - category: args_party
   scenario: external_party_waiting
   difficulty: medium
+  chat_id: 972504444444@c.us
+  chat_name: David (Bank Leumi)
   messages: 'Gaddy: I''m waiting for the bank to process the loan
 
     Gaddy: nothing I can do until they respond'
@@ -67,6 +77,8 @@
 - category: args_party
   scenario: alice_asks_bob_bob_refuses
   difficulty: medium
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: Bob, can you send me the report by Friday?
 
     Bob: sorry, I won''t be able to do it this week'
@@ -74,6 +86,8 @@
 - category: args_party
   scenario: multi_party_only_acceptor_committed
   difficulty: medium
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: we need someone to prepare the report by Friday
 
     Bob: I can''t, I''m swamped
@@ -90,6 +104,8 @@
 - category: args_party
   scenario: request_to_group_one_volunteers
   difficulty: medium
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: someone needs to book the meeting room for Tuesday
 
     Dana: I''ll book it'
@@ -104,6 +120,8 @@
 - category: args_party
   scenario: unknown_party_unclear
   difficulty: hard
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: someone needs to call the supplier about the order'
   policy_note: '''Someone needs to do X'' has no committed party → unclear.'
   expected_commitments:
@@ -117,6 +135,8 @@
 - category: args_party
   scenario: group_we_need_unclear
   difficulty: hard
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: we need to send the documents to the client'
   policy_note: '''We need to do X'' has no individual owner → unclear.'
   expected_commitments:
@@ -130,6 +150,8 @@
 - category: args_party
   scenario: party_handoff_update
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Gaddy: actually Bob will handle it instead of Alice'
   policy_note: 'Party handoff: update existing commitment with new party.'
   existing_commitments:
@@ -151,6 +173,8 @@
 - category: args_party
   scenario: speaker_commits_for_other_named
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Gaddy: Alice will send the documents, I''ll make sure of it'
   policy_note: Speaker asserts another person will do it → commitment with that person as party.
   expected_commitments:
@@ -164,6 +188,8 @@
 - category: args_party
   scenario: party_implied_by_role
   difficulty: hard
+  chat_id: 972506666666@c.us
+  chat_name: Contractor - Yossi
   messages: 'Gaddy: the contractor needs to finish the renovation by next week'
   policy_note: Party implied by role title, not a named person.
   expected_commitments:
@@ -177,6 +203,8 @@
 - category: args_party
   scenario: speaker_volunteers_other_without_confirmation
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Gaddy: Dana will handle the invoice payment by Friday'
   policy_note: Speaker names someone else as responsible without their confirmation → commitment with
     named person as party.
@@ -191,6 +219,8 @@
 - category: args_party
   scenario: implicit_party_from_context
   difficulty: hard
+  chat_id: 972509999999@c.us
+  chat_name: Alice
   messages: 'Alice: I talked to the lawyer yesterday
 
     Alice: he said he''ll file the motion by Wednesday'

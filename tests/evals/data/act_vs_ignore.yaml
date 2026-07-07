@@ -1,6 +1,8 @@
 - category: act_vs_ignore
   scenario: social_chat_ignore
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: hey how are you?
 
     Gaddy: long time no see
@@ -10,6 +12,8 @@
 - category: act_vs_ignore
   scenario: explicit_self_commitment
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents by tomorrow
 
     Gaddy: just need to finish the last page'
@@ -24,6 +28,8 @@
 - category: act_vs_ignore
   scenario: thanks_only_ignore
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: good morning!
 
     Gaddy: thanks for the help yesterday
@@ -33,11 +39,15 @@
 - category: act_vs_ignore
   scenario: motivational_ignore
   difficulty: easy
+  chat_id: 972502222222@c.us
+  chat_name: Tom
   messages: 'Gaddy: you''ve got this, keep up the great work!'
   expected_commitments: []
 - category: act_vs_ignore
   scenario: explicit_promise_different_action
   difficulty: easy
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: I''ll call the supplier today'
   expected_commitments:
   - id: null
@@ -50,11 +60,15 @@
 - category: act_vs_ignore
   scenario: soft_social_future_ignore
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: let''s grab coffee sometime'
   expected_commitments: []
 - category: act_vs_ignore
   scenario: request_plus_acceptance
   difficulty: medium
+  chat_id: 120363000001@g.us
+  chat_name: Project Team
   messages: 'Alice: can you send me the report by Friday?
 
     Bob: sure, I''ll have it ready by Friday'
@@ -69,6 +83,8 @@
 - category: act_vs_ignore
   scenario: waiting_external_party
   difficulty: medium
+  chat_id: 972504444444@c.us
+  chat_name: David (Bank Leumi)
   messages: 'Gaddy: I''m waiting for the bank to process the loan
 
     Gaddy: nothing I can do until they respond'
@@ -83,17 +99,23 @@
 - category: act_vs_ignore
   scenario: question_only_ignore
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: what time is the meeting tomorrow?'
   expected_commitments: []
 - category: act_vs_ignore
   scenario: generic_callback_ignore
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: let me think about it and get back to you'
   policy_note: Generic callback without a specific topic or deadline is not a commitment.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: generic_callback_with_topic_positive
   difficulty: hard
+  chat_id: 972505555555@c.us
+  chat_name: Dana
   messages: 'Dana: can you approve the quote?
 
     Gaddy: let me think about the quote and get back to you tomorrow'
@@ -109,6 +131,8 @@
 - category: act_vs_ignore
   scenario: vague_action_unclear
   difficulty: hard
+  chat_id: 120363000002@g.us
+  chat_name: Project Alpha
   messages: 'Gaddy: we should probably do something about the project at some point'
   policy_note: Vague action with no clear owner or deadline → unclear status, not ignored.
   expected_commitments:
@@ -122,30 +146,40 @@
 - category: act_vs_ignore
   scenario: request_without_acceptance_ignore
   difficulty: hard
+  chat_id: 120363000001@g.us
+  chat_name: Project Team
   messages: 'Alice: can someone send me the report by Friday?'
   policy_note: A request with no acceptance or volunteer is not yet a commitment.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: conditional_promise_untriggered_ignore
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: if they send the quote, I''ll approve it'
   policy_note: Conditional promise where condition has not been met → ignore, not a commitment yet.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: should_without_will_ignore
   difficulty: hard
+  chat_id: 120363000002@g.us
+  chat_name: Project Alpha
   messages: 'Gaddy: we should really call the supplier about the delay'
   policy_note: '''We should do X'' is an opinion, not a commitment to act.'
   expected_commitments: []
 - category: act_vs_ignore
   scenario: rhetorical_question_ignore
   difficulty: hard
+  chat_id: 120363000001@g.us
+  chat_name: Project Team
   messages: 'Gaddy: who has time to prepare a full report by Friday?'
   policy_note: Rhetorical questions are not commitments, even if they mention an action.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: hedged_commitment_unclear
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I might be able to send the documents tomorrow, but I''m not sure'
   policy_note: Hedged language ('might', 'maybe') with no clear commitment → unclear, not ignore.
   expected_commitments:
@@ -159,6 +193,8 @@
 - category: act_vs_ignore
   scenario: past_tense_no_existing_ignore
   difficulty: hard
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: I already called the supplier yesterday and sorted it out'
   policy_note: Past-tense statements about completed actions without existing commitments → ignore.
   expected_commitments: []

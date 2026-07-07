@@ -1,6 +1,8 @@
 - category: lifecycle_completion
   scenario: existing_mark_done
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I sent the documents yesterday
 
     Gaddy: they should have arrived'
@@ -23,11 +25,15 @@
 - category: lifecycle_completion
   scenario: past_tense_without_existing_ignore
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I sent the documents yesterday'
   expected_commitments: []
 - category: lifecycle_completion
   scenario: dismiss_existing
   difficulty: easy
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: forget about calling the supplier
 
     Gaddy: I found another source'
@@ -50,6 +56,8 @@
 - category: lifecycle_completion
   scenario: done_short_confirmation
   difficulty: easy
+  chat_id: 972505555555@c.us
+  chat_name: Dana
   messages: 'Dana: done, the invoice is paid'
   existing_commitments:
   - id: abc-400
@@ -70,6 +78,8 @@
 - category: lifecycle_completion
   scenario: done_passive_voice
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: the documents were sent this morning'
   existing_commitments:
   - id: abc-123
@@ -90,6 +100,8 @@
 - category: lifecycle_completion
   scenario: dismiss_vague
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: never mind about the documents, we don''t need them anymore'
   existing_commitments:
   - id: abc-123
@@ -110,6 +122,8 @@
 - category: lifecycle_completion
   scenario: future_promise_not_done
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll definitely send the documents tomorrow as promised'
   existing_commitments:
   - id: abc-123
@@ -130,6 +144,8 @@
 - category: lifecycle_completion
   scenario: done_by_different_party
   difficulty: medium
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: Bob finished the report and submitted it'
   existing_commitments:
   - id: abc-300
@@ -150,6 +166,8 @@
 - category: lifecycle_completion
   scenario: started_not_done
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I started working on the documents'
   policy_note: Progress updates do not complete existing commitments.
   existing_commitments:
@@ -164,6 +182,8 @@
 - category: lifecycle_completion
   scenario: almost_done_not_done
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: almost done with the documents'
   policy_note: Being almost done is not done — no update.
   existing_commitments:
@@ -178,6 +198,8 @@
 - category: lifecycle_completion
   scenario: dismiss_then_new_same_action
   difficulty: hard
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: forget about the old supplier order
 
     Gaddy: I need to call a new supplier about a different order'
@@ -193,6 +215,8 @@
 - category: lifecycle_completion
   scenario: will_do_not_done
   difficulty: hard
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: I''ll do it, I''ll call the supplier today'
   policy_note: '''Will do'' is a future promise, not a completion.'
   existing_commitments:
@@ -214,6 +238,8 @@
 - category: lifecycle_completion
   scenario: third_party_completion_report
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Charlie: Alice told me Bob submitted the report yesterday'
   policy_note: Third-party reports completion of someone else's commitment → done.
   existing_commitments:
@@ -235,6 +261,8 @@
 - category: lifecycle_completion
   scenario: dismiss_with_condition
   difficulty: hard
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: forget about calling the supplier unless they respond today'
   policy_note: Conditional dismiss ('unless they respond today') → keep waiting, update deadline.
   existing_commitments:
@@ -256,6 +284,8 @@
 - category: lifecycle_completion
   scenario: partial_completion_not_done
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I sent 3 out of the 5 documents, will send the rest tomorrow'
   policy_note: Partial completion ('sent 3 out of 5 documents') → not done, still waiting.
   existing_commitments:

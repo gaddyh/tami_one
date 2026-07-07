@@ -1,6 +1,8 @@
 - category: args_required_action
   scenario: send_docs_forward
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll send the documents tomorrow'
   expected_commitments:
   - id: null
@@ -13,6 +15,8 @@
 - category: args_required_action
   scenario: call_supplier_ring
   difficulty: easy
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: I need to call the supplier about the order'
   expected_commitments:
   - id: null
@@ -25,6 +29,8 @@
 - category: args_required_action
   scenario: prepare_report
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll have the report ready by Friday'
   expected_commitments:
   - id: null
@@ -37,6 +43,8 @@
 - category: args_required_action
   scenario: book_meeting_room_reserve
   difficulty: easy
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Gaddy: I''ll reserve the meeting room for Tuesday'
   expected_commitments:
   - id: null
@@ -49,6 +57,8 @@
 - category: args_required_action
   scenario: upload_signed_form
   difficulty: easy
+  chat_id: 972508888888@c.us
+  chat_name: Notary - Sarah
   messages: 'Gaddy: I''ll upload the signed form by Wednesday'
   expected_commitments:
   - id: null
@@ -61,6 +71,8 @@
 - category: args_required_action
   scenario: send_docs_send_over
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll send over the docs tomorrow'
   expected_commitments:
   - id: null
@@ -73,6 +85,8 @@
 - category: args_required_action
   scenario: send_docs_paperwork
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll get the paperwork to you tomorrow'
   expected_commitments:
   - id: null
@@ -85,6 +99,8 @@
 - category: args_required_action
   scenario: call_supplier_phone
   difficulty: medium
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: I''ll give the supplier a call about the order today'
   expected_commitments:
   - id: null
@@ -97,6 +113,8 @@
 - category: args_required_action
   scenario: pay_invoice_take_care
   difficulty: medium
+  chat_id: 972505555555@c.us
+  chat_name: Dana
   messages: 'Dana: I''ll take care of the invoice payment today'
   expected_commitments:
   - id: null
@@ -109,6 +127,8 @@
 - category: args_required_action
   scenario: pay_invoice_settle
   difficulty: medium
+  chat_id: 972505555555@c.us
+  chat_name: Dana
   messages: 'Dana: I''ll settle the invoice by Friday'
   expected_commitments:
   - id: null
@@ -121,6 +141,8 @@
 - category: args_required_action
   scenario: prepare_report_draft
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll draft the report by end of week'
   expected_commitments:
   - id: null
@@ -133,6 +155,8 @@
 - category: args_required_action
   scenario: process_loan
   difficulty: hard
+  chat_id: 972504444444@c.us
+  chat_name: David (Bank Leumi)
   messages: 'Gaddy: the bank needs to process the loan application'
   policy_note: External party as committed_party with action inferred from context.
   expected_commitments:
@@ -146,6 +170,8 @@
 - category: args_required_action
   scenario: very_indirect_action
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll make sure the invoice is taken care of by Friday'
   policy_note: Vague indirect action ('make sure it's taken care of') → extract the underlying action.
   expected_commitments:
@@ -159,6 +185,8 @@
 - category: args_required_action
   scenario: multi_step_action
   difficulty: hard
+  chat_id: 972508888888@c.us
+  chat_name: Notary - Sarah
   messages: 'Gaddy: I''ll review the contract, sign it, and send it back by tomorrow'
   policy_note: Multi-step action described in one message → single commitment with combined action.
   expected_commitments:
@@ -172,6 +200,8 @@
 - category: args_required_action
   scenario: action_split_across_messages
   difficulty: hard
+  chat_id: 972503333333@c.us
+  chat_name: Supplier - Mike
   messages: 'Gaddy: I need to handle the paperwork
 
     Gaddy: specifically the vendor registration forms

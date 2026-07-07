@@ -49,12 +49,17 @@ def _load_schema() -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
-def _fill_commitment(c: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+def _fill_commitment(
+    c: dict[str, Any],
+    schema: dict[str, Any],
+    chat_id: str,
+    chat_name: str,
+) -> dict[str, Any]:
     """Fill in chat_id, chat_name, status, notification defaults."""
     filled = {
         "id": c.get("id"),
-        "chat_id": schema["chat_id"],
-        "chat_name": schema["chat_name"],
+        "chat_id": chat_id,
+        "chat_name": chat_name,
         "committed_party": c.get("committed_party"),
         "required_action": c["required_action"],
         "deadline": c.get("deadline"),
@@ -67,21 +72,24 @@ def _fill_commitment(c: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any
 
 def _build_example(raw: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
     """Convert a YAML example entry to the JSON output format."""
+    chat_id = raw.get("chat_id", schema["chat_id"])
+    chat_name = raw.get("chat_name", schema["chat_name"])
+
     existing = raw.get("existing_commitments", [])
     existing_json = json.dumps(
-        [_fill_commitment(c, schema) for c in existing],
+        [_fill_commitment(c, schema, chat_id, chat_name) for c in existing],
         ensure_ascii=False,
     )
 
     expected = raw.get("expected_commitments", [])
-    expected_filled = [_fill_commitment(c, schema) for c in expected]
+    expected_filled = [_fill_commitment(c, schema, chat_id, chat_name) for c in expected]
 
     out: dict[str, Any] = {
         "category": raw["category"],
         "scenario": raw["scenario"],
         "difficulty": raw["difficulty"],
-        "chat_id": schema["chat_id"],
-        "chat_name": schema["chat_name"],
+        "chat_id": chat_id,
+        "chat_name": chat_name,
         "current_datetime": schema.get("current_datetime", "2025-01-06T10:00:00Z"),
         "existing_commitments_json": existing_json,
         "messages": raw["messages"],
@@ -178,7 +186,27 @@ def main() -> None:
     _assert_has_hard_per_category(dev, "dev")
     _assert_has_hard_per_category(test, "test")
 
+    _OLD_SELF_CHAT = "972546610653@c.us"
+    _SENTINEL = "972500000000@c.us"
+    for ex in all_examples:
+        assert ex["chat_id"] != _OLD_SELF_CHAT, (
+            f"Example {ex['category']}/{ex['scenario']} still has old self-chat chat_id"
+        )
+        assert ex["chat_id"] != _SENTINEL, (
+            f"Example {ex['category']}/{ex['scenario']} still has sentinel chat_id "
+            "(missing per-example chat_id in YAML)"
+        )
+
     challenge = load_challenge_examples()
+
+    for ex in challenge:
+        assert ex["chat_id"] != _OLD_SELF_CHAT, (
+            f"Challenge example {ex['category']}/{ex['scenario']} still has old self-chat chat_id"
+        )
+        assert ex["chat_id"] != _SENTINEL, (
+            f"Challenge example {ex['category']}/{ex['scenario']} still has sentinel chat_id "
+            "(missing per-example chat_id in YAML)"
+        )
 
     for name, data in [
         ("trainset.json", train),

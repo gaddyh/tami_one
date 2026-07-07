@@ -275,6 +275,7 @@ def _print_failure_list(failures: list[FailureRecord]) -> None:
 
 def _print_failure_detail(failure: FailureRecord) -> None:
     # 1. Input panel
+    input_text = f"[dim]Messages:[/]\n{failure.messages}"
     meta_lines = []
     if failure.chat_id:
         meta_lines.append(f"[dim]chat_id:[/] {failure.chat_id}")
@@ -282,9 +283,8 @@ def _print_failure_detail(failure: FailureRecord) -> None:
         meta_lines.append(f"[dim]chat_name:[/] {failure.chat_name}")
     if failure.current_datetime:
         meta_lines.append(f"[dim]current_datetime:[/] {failure.current_datetime}")
-
-    input_text = "\n".join(meta_lines) + "\n\n" if meta_lines else ""
-    input_text += f"[dim]Messages:[/]\n{failure.messages}"
+    if meta_lines:
+        input_text += "\n\n" + "\n".join(meta_lines)
     if failure.existing_commitments:
         input_text += f"\n\n[dim]Existing commitments:[/]\n{_json.dumps(failure.existing_commitments, indent=2, ensure_ascii=False)}"
 

@@ -1,114 +1,152 @@
 - category: act_vs_ignore
   scenario: challenge_request_no_acceptance
   difficulty: hard
+  chat_id: 120363000001@g.us
+  chat_name: Project Team
   messages: 'Alice: can someone prepare the slides for Monday?'
   policy_note: Request with no acceptance or volunteer → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_conditional_untriggered
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: if the client approves the budget, I''ll start the project'
   policy_note: Conditional promise, condition not met → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_generic_callback
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Bob: I''ll get back to you on that'
   policy_note: Generic callback without topic or deadline → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_should_not_will
   difficulty: hard
+  chat_id: 120363000002@g.us
+  chat_name: Project Alpha
   messages: 'Gaddy: we should really update the website at some point'
   policy_note: '''Should'' is opinion, not commitment → ignore.'
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_rhetorical_question
   difficulty: hard
+  chat_id: 120363000001@g.us
+  chat_name: Project Team
   messages: 'Gaddy: who has time to write a full proposal this week?'
   policy_note: Rhetorical question mentioning action → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_past_tense_no_existing
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I already sent the email to the team yesterday'
   policy_note: Past-tense completion without existing commitment → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_social_vague
   difficulty: hard
+  chat_id: 972502222222@c.us
+  chat_name: Tom
   messages: 'Gaddy: we should all hang out sometime soon'
   policy_note: Vague social intent without specifics → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_opinion_not_commitment
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Gaddy: the report really needs to be more detailed'
   policy_note: Expressing opinion about what needs doing → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_question_about_past
   difficulty: hard
+  chat_id: 120363000001@g.us
+  chat_name: Project Team
   messages: 'Alice: did anyone follow up with the vendor last week?'
   policy_note: Question about past events → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_suggestion_not_promise
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Bob: maybe we could try reaching out to the new supplier'
   policy_note: Suggesting an approach is not committing to it → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_hope_not_commitment
   difficulty: hard
+  chat_id: 120363000002@g.us
+  chat_name: Project Alpha
   messages: 'Gaddy: I hope we can finish the migration by next month'
   policy_note: Expressing hope/wish is not a commitment → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_report_status_no_action
   difficulty: hard
+  chat_id: 120363000005@g.us
+  chat_name: Dev Ops
   messages: 'Gaddy: the server is down again, looking into it'
   policy_note: Reporting current status without committing to action → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_appreciation_not_commitment
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: thanks in advance for handling the client call'
   policy_note: Thanking someone for future help is not a commitment → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_reminder_not_commitment
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Gaddy: don''t forget Bob needs the data by Friday'
   policy_note: Reminding someone else is not a commitment by the speaker → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_worry_not_commitment
   difficulty: hard
+  chat_id: 120363000002@g.us
+  chat_name: Project Alpha
   messages: 'Gaddy: I''m worried we won''t meet the deadline for the launch'
   policy_note: Expressing concern is not a commitment → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_information_sharing
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: the client said they''ll review the proposal and get back to us next week'
   policy_note: Sharing information without action item → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_almost_done_no_existing
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''m almost done with the presentation'
   policy_note: Progress report without existing commitment → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_started_no_existing
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I started looking into the bug'
   policy_note: Started working without existing commitment → ignore.
   expected_commitments: []
 - category: act_vs_ignore
   scenario: challenge_request_with_acceptance
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: can you send me the slides by Monday?
 
     Bob: sure, I''ll send them by Monday'
@@ -124,6 +162,8 @@
 - category: act_vs_ignore
   scenario: challenge_generic_callback_with_topic
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: what about the budget?
 
     Bob: let me review the budget and get back to you tomorrow'
@@ -139,6 +179,8 @@
 - category: act_vs_ignore
   scenario: challenge_explicit_self_promise
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will definitely call the client before noon'
   policy_note: Explicit 'I will' with specific action and deadline → commitment.
   expected_commitments:
@@ -152,6 +194,8 @@
 - category: act_vs_ignore
   scenario: challenge_volunteer
   difficulty: hard
+  chat_id: 120363000004@g.us
+  chat_name: Office Logistics
   messages: 'Alice: we need someone to handle the vendor registration
 
     Bob: I''ll take care of the vendor registration by Wednesday'
@@ -167,6 +211,8 @@
 - category: act_vs_ignore
   scenario: challenge_conditional_triggered
   difficulty: hard
+  chat_id: 972509999999@c.us
+  chat_name: Alice
   messages: 'Alice: the client just approved the budget!
 
     Gaddy: great, I''ll start the project tomorrow then'
@@ -182,6 +228,8 @@
 - category: act_vs_ignore
   scenario: challenge_will_with_specific_action
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll prepare the quarterly report'
   policy_note: '''I will'' with concrete action but no deadline → commitment without deadline.'
   expected_commitments:
@@ -195,6 +243,8 @@
 - category: act_vs_ignore
   scenario: challenge_third_party_commits
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Gaddy: Dana will send the contract to the client by Friday'
   policy_note: Speaker asserts someone else will do something → commitment with that party.
   expected_commitments:
@@ -208,6 +258,8 @@
 - category: act_vs_ignore
   scenario: challenge_hedged_unclear
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I might be able to review the code tomorrow, but I''m not sure'
   policy_note: Hedged commitment → unclear status, not ignore.
   expected_commitments:
@@ -221,6 +273,8 @@
 - category: act_vs_ignore
   scenario: challenge_multi_message_commitment
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I need to deal with the invoice
 
     Gaddy: I''ll pay it by end of week'
@@ -236,6 +290,8 @@
 - category: act_vs_ignore
   scenario: challenge_implicit_acceptance
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: can you update the spreadsheet?
 
     Bob: on it'
@@ -251,6 +307,8 @@
 - category: act_vs_ignore
   scenario: challenge_waiting_external
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I submitted the application last week
 
     Gaddy: now just waiting for the city to approve the permit'
@@ -266,6 +324,8 @@
 - category: act_vs_ignore
   scenario: challenge_let_me_with_action
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: let me check with the accountant and I''ll update you today'
   policy_note: '''Let me X'' with specific action → commitment.'
   expected_commitments:
@@ -279,6 +339,8 @@
 - category: act_vs_ignore
   scenario: challenge_responsibility_claim
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll handle the client meeting on Thursday'
   policy_note: Claiming responsibility for a task → commitment.
   expected_commitments:
@@ -292,6 +354,8 @@
 - category: act_vs_ignore
   scenario: challenge_need_to_with_intent
   difficulty: hard
+  chat_id: 972504444444@c.us
+  chat_name: David (Bank Leumi)
   messages: 'Gaddy: I need to call the bank about the fees today'
   policy_note: '''I need to X'' with clear intent to act → commitment.'
   expected_commitments:
@@ -305,6 +369,8 @@
 - category: act_vs_ignore
   scenario: challenge_confirm_and_commit
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: did you confirm the venue?
 
     Bob: not yet, I''ll call them this afternoon'
@@ -320,6 +386,8 @@
 - category: act_vs_ignore
   scenario: challenge_plan_with_action
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''m going to submit the proposal by Friday end of day'
   policy_note: Stating a plan with specific action and timing → commitment.
   expected_commitments:
@@ -333,6 +401,8 @@
 - category: act_vs_ignore
   scenario: challenge_offer_help
   difficulty: hard
+  chat_id: 972508888888@c.us
+  chat_name: Notary - Sarah
   messages: 'Gaddy: I can review the contract and send comments by tomorrow'
   policy_note: Offering to do something specific → commitment.
   expected_commitments:
@@ -346,6 +416,8 @@
 - category: act_vs_ignore
   scenario: challenge_commit_after_question
   difficulty: hard
+  chat_id: 120363000003@g.us
+  chat_name: Report Review
   messages: 'Alice: has anyone followed up with the vendor?
 
     Bob: not yet, I''ll email them today'

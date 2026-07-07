@@ -1,6 +1,8 @@
 - category: args_deadline
   scenario: deadline_by_Friday
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents by Friday'
   expected_commitments:
   - id: null
@@ -13,6 +15,8 @@
 - category: args_deadline
   scenario: deadline_by_tomorrow
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents by tomorrow'
   expected_commitments:
   - id: null
@@ -25,6 +29,8 @@
 - category: args_deadline
   scenario: deadline_today
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents today'
   expected_commitments:
   - id: null
@@ -37,6 +43,8 @@
 - category: args_deadline
   scenario: deadline_next_Monday
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents next Monday'
   expected_commitments:
   - id: null
@@ -49,6 +57,8 @@
 - category: args_deadline
   scenario: deadline_by_5pm
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents by 5pm'
   expected_commitments:
   - id: null
@@ -61,6 +71,8 @@
 - category: args_deadline
   scenario: deadline_by_1700
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents by 17:00'
   expected_commitments:
   - id: null
@@ -73,6 +85,8 @@
 - category: args_deadline
   scenario: deadline_by_July_15
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents by July 15'
   expected_commitments:
   - id: null
@@ -85,6 +99,8 @@
 - category: args_deadline
   scenario: deadline_by_end_of_week
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents by end of week'
   expected_commitments:
   - id: null
@@ -97,6 +113,8 @@
 - category: args_deadline
   scenario: deadline_next_week
   difficulty: medium
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents next week'
   expected_commitments:
   - id: null
@@ -109,6 +127,8 @@
 - category: args_deadline
   scenario: deadline_soon
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents soon'
   policy_note: '''soon'' is not a concrete deadline → null.'
   expected_commitments:
@@ -122,6 +142,8 @@
 - category: args_deadline
   scenario: deadline_when_I_can
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents when I can'
   policy_note: '''when I can'' is not a concrete deadline → null.'
   expected_commitments:
@@ -135,6 +157,8 @@
 - category: args_deadline
   scenario: deadline_none
   difficulty: easy
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I will send the documents'
   expected_commitments:
   - id: null
@@ -147,6 +171,8 @@
 - category: args_deadline
   scenario: deadline_relative_context
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll send the documents by end of the quarter'
   policy_note: Relative deadline 'by end of the quarter' is a valid explicit deadline.
   expected_commitments:
@@ -160,6 +186,8 @@
 - category: args_deadline
   scenario: deadline_implied_from_event
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll send the documents before the meeting'
   policy_note: Deadline implied by an event ('before the meeting') is a valid explicit deadline.
   expected_commitments:
@@ -173,6 +201,8 @@
 - category: args_deadline
   scenario: deadline_conflicting_multi_message
   difficulty: hard
+  chat_id: 972501111111@c.us
+  chat_name: Rachel
   messages: 'Gaddy: I''ll send the documents by Friday
 
     Gaddy: actually, let me send them by tomorrow instead'
