@@ -12,19 +12,42 @@ from app.commitments.models import Commitment, CommitmentList
 
 class ExtractCommitments(dspy.Signature):
     """
-    Extract and update commitments from WhatsApp group history.
+    Extract and update commitments from WhatsApp chat history.
 
     A commitment means someone is expected to do something.
 
     Rules:
-    - Do not invent deadlines.
-    - If the committed party is unclear, use null.
-    - If the action is vague, mark status='unclear'.
     - Return an empty list if no commitment exists.
     - If a message updates, completes, or dismisses an existing commitment,
       return that commitment with the same id and updated fields.
     - For brand-new commitments, set id to null.
     - chat_id and chat_name must match the provided inputs.
+    - If the committed party is unclear, use null.
+    - If the action is vague, write the vague action and set status='unclear'.
+
+    Deadline rules:
+    - Resolve relative deadlines to ISO 8601 dates using current_datetime.
+      "by end of week" → the upcoming Friday's date.
+      "today" → current_datetime's date.
+      "tomorrow" → current_datetime's date + 1 day.
+      "by Friday" / "next Friday" → the upcoming Friday's date.
+      "for Tuesday" → the upcoming Tuesday's date.
+      "next Monday" → the upcoming Monday's date.
+    - Output the resolved date in YYYY-MM-DD format.
+    - If no deadline is mentioned or implied, use null. Do not invent deadlines.
+
+    required_action rules:
+    - Write a concise action phrase: verb + object only (e.g. "Send the documents",
+      "Book the meeting room", "Call the supplier").
+    - Do NOT include deadlines, dates, or time words in the action — those go in
+      the deadline field (e.g. write "Pay the invoice", not "Pay the invoice today").
+
+    context rules:
+    - Quote the relevant message text exactly as written, WITHOUT the speaker
+      name prefix (e.g. write "I'll call the supplier today", NOT "Gaddy: I'll call
+      the supplier today").
+    - When updating an existing commitment, include only the new message that
+      triggers the update, not the original context.
 
     Act vs Ignore rules (critical — do NOT over-extract):
     - A request without acceptance is NOT a commitment. Someone must explicitly
@@ -44,6 +67,19 @@ class ExtractCommitments(dspy.Signature):
     - Reminding someone else to do something is NOT a commitment by the speaker.
     - Sharing information ("the client will get back to us") is NOT a commitment
       unless the speaker is the one who will act.
+
+    Waiting commitments:
+    - "I'm waiting for [party] to [action]" IS a commitment. The committed_party
+      is the external party who must act (e.g. "the bank"), the required_action
+      is what they must do (e.g. "Process the loan"), and status is 'waiting'.
+    - "Nothing I can do until they respond" reinforces a waiting commitment,
+      it does NOT cancel it.
+
+    Dismiss + new:
+    - "Forget about [X]", "cancel [X]", "never mind about [X]" dismisses an
+      existing commitment (return it with status='dismissed').
+    - If the same message also describes a new commitment, return BOTH the
+      dismissed commitment AND the new one.
     """
 
     chat_id: str = dspy.InputField()

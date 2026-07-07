@@ -203,8 +203,8 @@ def _normalize_deadline(value: str | None) -> str | None:
         for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
             try:
                 dt = datetime.strptime(candidate, fmt)
-                if fmt == "%Y-%m-%d":
-                    dt = dt.replace(hour=_DATE_ONLY_DEFAULT_HOUR)
+                if fmt == "%Y-%m-%d" or (dt.hour == 0 and dt.minute == 0 and dt.second == 0):
+                    dt = dt.replace(hour=_DATE_ONLY_DEFAULT_HOUR, minute=0, second=0)
                 return dt.replace(tzinfo=None).strftime("%Y-%m-%dT%H:%M:%S")
             except ValueError:
                 continue
