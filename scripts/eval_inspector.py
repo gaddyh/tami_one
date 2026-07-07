@@ -167,7 +167,7 @@ def _load_from_fresh(
     limit: int | None = None,
     use_llm_judge: bool = False,
 ) -> list[FailureRecord]:
-    from scripts.eval_runner import _run_split
+    from eval_runner import _run_split
 
     result = _run_split(split, limit=limit, verbose=False, use_llm_judge=use_llm_judge)
 
@@ -273,7 +273,7 @@ def _print_failure_list(failures: list[FailureRecord]) -> None:
     console.print(table)
 
 
-def _print_failure_detail(failure: FailureRecord) -> None:
+def _print_failure_detail(failure: FailureRecord, list_position: int | None = None) -> None:
     # 1. Input panel
     input_text = f"[dim]Messages:[/]\n{failure.messages}"
     meta_lines = []
@@ -288,9 +288,12 @@ def _print_failure_detail(failure: FailureRecord) -> None:
     if failure.existing_commitments:
         input_text += f"\n\n[dim]Existing commitments:[/]\n{_json.dumps(failure.existing_commitments, indent=2, ensure_ascii=False)}"
 
+    pos_str = f"#{list_position} " if list_position is not None else ""
+    run_str = f"(run #{failure.index})" if failure.index != list_position else ""
+    title = f"Failure {pos_str}{run_str} — {failure.error_type.replace('_', ' ')} | {failure.category}/{failure.scenario} ({failure.difficulty})"
     console.print(Panel(
         input_text,
-        title=f"Failure #{failure.index} — {failure.error_type.replace('_', ' ')} | {failure.category}/{failure.scenario} ({failure.difficulty})",
+        title=title,
         border_style="red",
     ))
 
@@ -438,6 +441,7 @@ def _apply_filters(
 
 
 _dspy_configured = False
+_rerun_use_judge = False
 
 
 def _ensure_dspy_configured() -> None:
@@ -448,6 +452,14 @@ def _ensure_dspy_configured() -> None:
 
         configure_dspy(settings)
         _dspy_configured = True
+
+
+def _init_judge_for_rerun() -> None:
+    from app.config import settings
+    from eval.llm_judge import set_judge_model
+
+    set_judge_model(settings.openai_model)
+    console.print("[dim]LLM judge enabled for rerun grading[/]\n")
 
 
 def _rerun_example(failure: FailureRecord) -> None:
@@ -480,7 +492,7 @@ def _rerun_example(failure: FailureRecord) -> None:
         for c in failure.expected_commitments
     ]
 
-    new_mismatches = compare_commitments(expected_objs, pred.commitments)
+    new_mismatches = compare_commitments(expected_objs, pred.commitments, use_llm_judge=_rerun_use_judge)
     passed = len(new_mismatches) == 0
 
     if passed:
@@ -682,7 +694,7 @@ def _repl(failures: list[FailureRecord]) -> None:
                 current_detail = min(current_detail + 1, len(filtered) - 1)
             else:
                 current_detail = max(current_detail - 1, 0)
-            _print_failure_detail(filtered[current_detail])
+            _print_failure_detail(filtered[current_detail], list_position=current_detail)
             continue
 
         # Try parsing as a number (detail view)
@@ -693,7 +705,7 @@ def _repl(failures: list[FailureRecord]) -> None:
                 console.print(f"[red]Index out of range (0-{len(filtered) - 1}).[/]")
                 continue
             current_detail = idx
-            _print_failure_detail(filtered[idx])
+            _print_failure_detail(filtered[idx], list_position=idx)
             continue
         except ValueError:
             pass
@@ -740,6 +752,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    global _dspy_configured, _rerun_use_judge
     failures: list[FailureRecord]
 
     if args.split:
@@ -749,11 +762,11 @@ def main() -> None:
 
             settings.openai_model = args.model
 
-        global _dspy_configured
-        _dspy_configured = True  # _run_split already configures dspy
+        _dspy_configured = True
+        _rerun_use_judge = args.llm_judge
 
-        from app.commitments.commitments_agent import configure_dspy
         from app.config import settings
+        from app.commitments.commitments_agent import configure_dspy
 
         configure_dspy(settings)
 
@@ -775,12 +788,18 @@ def main() -> None:
             console.print(f"[red]Run directory not found: {run_dir}[/]")
             raise SystemExit(1)
         failures = _load_from_run(run_dir)
+        if "-judge" in args.run:
+            _rerun_use_judge = True
+            _init_judge_for_rerun()
     else:
         # Interactive picker
         run_dir = _pick_run()
         if run_dir is None:
             raise SystemExit(0)
         failures = _load_from_run(run_dir)
+        if "-judge" in run_dir.name:
+            _rerun_use_judge = True
+            _init_judge_for_rerun()
 
     if not failures:
         console.print("[green]No failures found! All examples passed.[/]")

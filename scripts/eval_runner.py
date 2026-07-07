@@ -24,6 +24,7 @@ Usage:
 
 import argparse
 import json as _json
+import shutil as _shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -62,6 +63,16 @@ _SPLITS = {
 
 def _split_path(split: str) -> Path:
     return Path(__file__).resolve().parent.parent / "tests" / "evals" / _SPLITS[split]
+
+
+def _copy_dataset_to_run(run_dir: Path, splits: list[str]) -> None:
+    """Copy the JSON dataset files used by this run into the run directory."""
+    dest = run_dir / "dataset"
+    dest.mkdir(exist_ok=True)
+    for split in splits:
+        src = _split_path(split)
+        if src.exists():
+            _shutil.copy2(src, dest / src.name)
 
 
 def _mismatch_table(mismatches: list[dict]) -> Table:
@@ -827,6 +838,7 @@ def main() -> None:
             _save_summary_md(run_dir, run_id, results, settings.openai_model)
             _save_failures_jsonl(run_dir, results)
             _save_predictions_jsonl(run_dir, results, run_id=run_id or "", agent_model=settings.openai_model)
+            _copy_dataset_to_run(run_dir, ["train", "dev", "test"])
             if args.freeze_judge:
                 save_judge_verdicts(run_dir / "judge_verdicts.jsonl")
                 console.print(f"[dim]Judge verdicts saved to: {run_dir}/judge_verdicts.jsonl[/]")
@@ -840,6 +852,7 @@ def main() -> None:
         _save_split_md(run_dir, split, r)
         _save_failures_jsonl(run_dir, [r])
         _save_predictions_jsonl(run_dir, [r], run_id=run_id or "", agent_model=settings.openai_model)
+        _copy_dataset_to_run(run_dir, [split])
         if args.freeze_judge:
             save_judge_verdicts(run_dir / "judge_verdicts.jsonl")
             console.print(f"[dim]Judge verdicts saved to: {run_dir}/judge_verdicts.jsonl[/]")
