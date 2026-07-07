@@ -50,7 +50,8 @@ app/
 │   └── processor.py              # Drains buffer, calls extractor, upserts CommitmentItem rows
 ├── eval/
 │   ├── metrics.py                # DSPy eval metrics: commitment_metric, act_vs_ignore, token-F1
-│   └── dataset.py                # Example construction + devset loading
+│   ├── dataset.py                # Example construction + devset loading
+│   └── localize.py               # Failure localization: root cause + subcause + priority scoring
 ├── agents/
 │   ├── core.py                    # OpenAI agent used by the 360dialog business bot
 │   └── memory.py                   # Per-thread in-memory conversation history
@@ -238,7 +239,7 @@ curl -X POST https://your-app.onrender.com/admin/seed
 .venv/bin/python -m pytest tests/ -v
 ```
 
-Covers: Green API payload normalization, contact upsert + buffering, webhook handling, commitment extraction helpers, and commitment-eval utilities.
+Covers: Green API payload normalization, contact upsert + buffering, webhook handling, commitment extraction helpers, commitment-eval utilities, and failure localization (16 deterministic tests in `tests/test_localize.py`).
 
 Run the commitment eval separately:
 
@@ -279,8 +280,8 @@ Roughly in priority order:
 1. **Durable ingestion.** Persist `ChatMessage` rows on arrival (the table already exists) instead of relying solely on the in-memory buffer. This alone removes the "lose messages on restart" risk and gives you a permanent audit trail independent of what the LLM does with them.
 2. **Green API webhook auth is currently disabled** (`verify_green_api_authorization` is defined but commented out in `personal_webhook.py`). Re-enable before this is exposed on a public URL for real.
 3. **Commitment dedup/update matching is still partly model-driven** (matching by `id` inside one extraction call). The eval now includes update-vs-new probes, but production should still add a deterministic fallback if the model creates a near-duplicate commitment.
-4. **`deadline` is free text** (`"in one hour"`, `"by Friday"`, `"next Monday"`), not a resolved timestamp. The latest eval shows deadline extraction is one of the weaker fields, so this should be normalized before urgency sorting or scheduled digests.
-5. **`required_action` wording is not yet stable enough.** The eval uses token-F1 instead of exact equality, but action normalization remains an important quality target.
+4. **`deadline` is free text** (`"in one hour"`, `"by Friday"`, `"next Monday"`), not a resolved timestamp. The localizer flags 7 deadline-normalization failures (priority 3.1) — mostly missing `by` prefix or relative phrasing. Should be normalized before urgency sorting or scheduled digests.
+5. **`required_action` wording is not yet stable enough.** The localizer flags 15 failures (priority 6.8, the top repair target) — mostly verb synonyms (`settle` vs `pay`) and over-specific phrasing (`send over the docs` vs `send the documents`). The eval uses token-F1 instead of exact equality, but action normalization remains the highest-impact quality target.
 6. **`Contact.kind` (client/bank/lawyer/…) is modeled but not populated.** No classifier currently sets it, so nothing downstream can yet filter or route by relationship type.
 7. **No digest job yet.** The `CommitmentItem` data is now good enough to query; a scheduled per-tenant job that renders waiting commitments into a daily WhatsApp message is the natural next milestone.
 8. **`/admin/seed` has no auth of its own** — fine for a private dev deploy, worth gating before wider use.
