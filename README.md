@@ -85,10 +85,12 @@ app/
 eval/
 ├── dataset.py               # Example construction + devset loading
 ├── metrics.py                # commitment_metric, act_vs_ignore_metric, token-F1, word-overlap
-└── localize.py                # Failure → root cause / subcause / repair-type / priority scoring
+├── localize.py                # Failure → root cause / subcause / repair-type / priority scoring
+└── llm_judge.py               # Optional LLM-as-judge for semantic field matching
 scripts/
 ├── seed.py                    # CLI seed entry point
-└── eval_runner.py               # Local commitment-extraction eval runner (train/dev/test/challenge)
+├── eval_runner.py               # Local commitment-extraction eval runner (train/dev/test/challenge)
+└── compare_runs.py             # Compare two eval runs side by side
 tests/
 ├── evals/
 │   ├── data/*.yaml             # Hand-authored example definitions, 6 categories + challenge split
@@ -104,7 +106,7 @@ The extractor is a DSPy `Signature + Module`, not a one-off prompt string:
 
 - `Commitment` / `CommitmentList` (`app/commitments/models.py`) are the canonical domain schema.
 - `ExtractCommitments(dspy.Signature)` in `app/commitments/commitments_agent.py` encodes the extraction rules directly in the docstring — most importantly a set of **act-vs-ignore rules** ("we should do X" is an opinion, not a commitment; a request needs explicit acceptance; "started"/"almost done" are progress reports, not completions).
-- `eval/metrics.py` scores predictions against a hand-labeled devset: exact match on structured fields, token-F1 on `required_action` (so `settle the invoice` vs `pay the invoice` isn't an automatic fail), and word-overlap on `context`.
+- `eval/metrics.py` scores predictions against a hand-labeled devset: exact match on structured fields, token-F1 on `required_action` (so `settle the invoice` vs `pay the invoice` isn't an automatic fail), and word-overlap on `context`. Three semantic fields (`required_action`, `deadline`, `context`) can optionally use an **LLM-as-judge** fallback (`eval/llm_judge.py`) when the deterministic check fails — enabled with `--llm-judge` on the eval runner.
 - `eval/dataset.py` builds train/dev/test splits from YAML fixtures in `tests/evals/data/`, each tagged by category (`act_vs_ignore`, `args_party`, `args_deadline`, `args_required_action`, `lifecycle_update_vs_new`, `lifecycle_completion`), difficulty (`easy`/`medium`/`hard`), and a specific contrastive scenario name.
 
 Current split sizes: **train 40 · dev 22 · test 31** (93 total), generated with:
@@ -118,8 +120,11 @@ python tests/evals/generate_devset.py
 Model: `gpt-5.4-mini`, run `20260707_023551`.
 
 ```bash
-python scripts/eval_runner.py --all
+python scripts/eval_runner.py --all              # deterministic metrics (default)
+python scripts/eval_runner.py --all --llm-judge   # with LLM-as-judge fallback
 ```
+
+Runs are saved to `runs/<run_id>/` by default (use `--no-save` to disable). Runs with `--llm-judge` get a `-judge` suffix in the run ID.
 
 | Split | N | TP | FP | FN | TN | Precision | Recall | F1 | Act/Ignore Acc. | Full-Commitment | Over-Extraction |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -138,6 +143,8 @@ Field accuracy, measured only on true-positive commitment detections:
 | `status` | 100% | 100% | 96% |
 
 **Reading these numbers:** the binary act-vs-ignore decision (should this message produce a commitment at all?) is solid across all three splits. The full-commitment metric is intentionally much stricter — it requires the right party, action, deadline, context, and status simultaneously — and sits around 50% everywhere, which is the real signal on where to invest next.
+
+With `--llm-judge` enabled, the dev split's full-commitment metric rises from 52.6% to 68.4% — the gap is almost entirely semantic equivalence (`reserve` vs `book`, `by Friday` vs `Friday`) that the deterministic metric penalizes but a judge correctly accepts. This confirms the localizer's top-2 repair recommendation: fix `required_action` and `context` matching in the metric/postprocessing layer first.
 
 ### Failure localization
 
@@ -167,6 +174,16 @@ The top two repairs are both about **normalization, not the model's judgment** �
 One pattern worth calling out even though it scores lower on priority: several `under_extraction_policy` and `party_resolution` misses across *all three* splits are the same shape — a commitment implied by someone's role or an external party rather than stated directly (*"I'm waiting for the bank to process the loan"*, *"we need to send the documents"*, *"the contractor needs to finish by next week"*). These recur often enough that they're a real, cross-split gap even though today's failure count per category is small.
 
 The localizer is validated with 16 deterministic tests (`tests/test_localize.py`) against fixed fake failures in `tests/evals/localize_cases/`, so its scoring logic isn't just eyeballed.
+
+### Comparing runs
+
+`scripts/compare_runs.py` diffs two eval runs side by side — showing failures fixed, new failures, and persistent failures per scenario:
+
+```bash
+python scripts/compare_runs.py runs/<run_a> runs/<run_b>
+```
+
+Output is a rich console table (summary, per-category, per-scenario diff) saved as markdown to `runs/compares/<run_a>_vs_<run_b>.md`.
 
 ## Data model
 
@@ -250,12 +267,13 @@ curl -X POST https://your-app.onrender.com/admin/seed
 .venv/bin/python -m pytest tests/ -v
 ```
 
-Covers Green API payload normalization, contact upsert + buffering, webhook handling, commitment extraction helpers, commitment-eval utilities, and the failure localizer (16 deterministic tests).
+Covers Green API payload normalization, contact upsert + buffering, webhook handling, commitment extraction helpers, commitment-eval utilities, the failure localizer (16 deterministic tests), and the LLM judge (11 tests with mocked DSPy responses).
 
-Run the commitment eval separately, and regenerate the deterministic train/dev/test splits if the YAML fixtures change:
+Run the commitment eval, optionally with LLM-as-judge, and regenerate the deterministic train/dev/test splits if the YAML fixtures change:
 
 ```bash
-python scripts/eval_runner.py --all
+python scripts/eval_runner.py --all              # deterministic (default)
+python scripts/eval_runner.py --all --llm-judge   # with LLM judge
 python tests/evals/generate_devset.py
 ```
 

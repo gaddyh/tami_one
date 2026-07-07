@@ -754,6 +754,8 @@ def main() -> None:
     run_id: str | None = None
     if args.save:
         run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        if args.llm_judge:
+            run_id += "-judge"
         run_dir = Path(__file__).resolve().parent.parent / "runs" / run_id
         run_dir.mkdir(parents=True, exist_ok=True)
         console.print(f"[bold green]Saving reports to: {run_dir}[/]\n")
