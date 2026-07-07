@@ -221,7 +221,50 @@ When loading an existing run, the inspector joins `failures.jsonl` with `predict
 | `help` / `h` | Show available commands |
 | `quit` / `q` | Exit |
 
-The detail view shows three sections: (1) the input messages and metadata, (2) a field-by-field expected vs actual diff table with ✓/✗/~ indicators, and (3) root cause, subcause, repair type, confidence, and suggested repair text from the localizer.
+The detail view shows three sections: (1) the input messages and chat metadata, (2) a field-by-field expected vs actual diff table with ✓/✗/~ indicators (mismatches shown in red), and (3) root cause, subcause, repair type, confidence, and suggested repair text from the localizer.
+
+<details>
+<summary>Example inspector output (click to expand)</summary>
+
+```
+inspector>: 1
+╭─────────────────────── Failure #6 — FIELD MISMATCH | args_deadline/deadline_by_end_of_week (medium) ────────────────────────╮
+│ Messages:                                                                                                                   │
+│ Gaddy: I will send the documents by end of week                                                                             │
+│                                                                                                                             │
+│ chat_id: 972501111111@c.us                                                                                                  │
+│ chat_name: Rachel                                                                                                           │
+│ current_datetime: 2025-01-06T10:00:00Z                                                                                      │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                          Expected vs Actual
+┏━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ #   ┃ Field              ┃ Expected                       ┃ Actual                         ┃ Match ┃
+┡━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ 0   │ id                 │ None                           │ None                           │   ✓   │
+├─────┼────────────────────┼────────────────────────────────┼────────────────────────────────┼───────┤
+│     │ committed_party    │ Gaddy                          │ Gaddy                          │   ✓   │
+├─────┼────────────────────┼────────────────────────────────┼────────────────────────────────┼───────┤
+│     │ required_action    │ Send the documents             │ send the documents             │   ~   │
+├─────┼────────────────────┼────────────────────────────────┼────────────────────────────────┼───────┤
+│     │ deadline           │ 2025-01-10                     │ None                           │   ✗   │
+├─────┼────────────────────┼────────────────────────────────┼────────────────────────────────┼───────┤
+│     │ context            │ I will send the documents by   │ Gaddy: I will send the         │   ~   │
+│     │                    │ end of week                    │ documents by end of week       │       │
+├─────┼────────────────────┼────────────────────────────────┼────────────────────────────────┼───────┤
+│     │ status             │ waiting                        │ waiting                        │   ✓   │
+├─────┼────────────────────┼────────────────────────────────┼────────────────────────────────┼───────┤
+│     │ notification       │ none                           │ none                           │   ✓   │
+└─────┴────────────────────┴────────────────────────────────┴────────────────────────────────┴───────┘
+╭─────────────────────────────────────────────────────── Localization ────────────────────────────────────────────────────────╮
+│ Root Cause: deadline_normalization                                                                                          │
+│ Subcause: format_mismatch                                                                                                   │
+│ Repair Type: metric_or_postprocess                                                                                          │
+│ Confidence: 0.90                                                                                                            │
+│ Suggested Repair: Canonicalize deadline phrases                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+</details>
 
 The `rerun` command is useful after making code changes — it re-runs a single failing example through a fresh agent instance and shows whether the fix worked, without re-running the entire eval set.
 

@@ -329,7 +329,7 @@ def _print_diff_table(
     table.add_column("#", style="dim", width=3)
     table.add_column("Field", style="bold", width=18)
     table.add_column("Expected", style="green", width=30)
-    table.add_column("Actual", style="red", width=30)
+    table.add_column("Actual", width=30)
     table.add_column("Match", justify="center", width=5)
 
     for idx in range(max_len):
@@ -344,24 +344,23 @@ def _print_diff_table(
 
             if ev_s == av_s:
                 match_str = "[green]✓[/]"
-                row_style = None
+                av_styled = av_s
             elif field in mismatch_set:
                 match_str = "[red]✗[/]"
-                row_style = "red"
+                av_styled = f"[red]{av_s}[/]"
             elif not expected or not actual:
                 match_str = "[red]✗[/]"
-                row_style = "red"
+                av_styled = f"[red]{av_s}[/]"
             else:
                 match_str = "[yellow]~[/]"
-                row_style = None
+                av_styled = f"[yellow]{av_s}[/]"
 
             table.add_row(
                 str(idx) if field == all_fields[0] else "",
                 field,
                 ev_s,
-                av_s,
+                av_styled,
                 match_str,
-                style=row_style,
             )
 
     console.print(table)
