@@ -456,8 +456,9 @@ def _ensure_dspy_configured() -> None:
 
 def _init_judge_for_rerun() -> None:
     from app.config import settings
-    from eval.llm_judge import set_judge_model
+    from eval.llm_judge import reset_cache as reset_judge_cache, set_judge_model
 
+    reset_judge_cache()
     set_judge_model(settings.openai_model)
     console.print("[dim]LLM judge enabled for rerun grading[/]\n")
 

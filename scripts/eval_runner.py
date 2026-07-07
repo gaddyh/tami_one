@@ -75,6 +75,34 @@ def _copy_dataset_to_run(run_dir: Path, splits: list[str]) -> None:
             _shutil.copy2(src, dest / src.name)
 
 
+def _save_run_meta(run_dir: Path, run_id: str, model: str, use_llm_judge: bool) -> None:
+    """Write run metadata (git SHA, dspy version, model) for reproducibility."""
+    import subprocess
+
+    meta = {
+        "run_id": run_id,
+        "model": model,
+        "llm_judge": use_llm_judge,
+        "created_at": _json.dumps(datetime.now(), default=str),
+    }
+    try:
+        sha = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=run_dir.parent.parent, text=True
+        ).strip()
+        meta["git_sha"] = sha
+    except Exception:
+        meta["git_sha"] = "unknown"
+    try:
+        import dspy
+
+        meta["dspy_version"] = dspy.__version__
+    except Exception:
+        meta["dspy_version"] = "unknown"
+    (run_dir / "run_meta.json").write_text(
+        _json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
+
 def _mismatch_table(mismatches: list[dict]) -> Table:
     """Build a rich table from compare_commitments mismatch dicts."""
     table = Table(show_header=True, header_style="bold")
@@ -839,6 +867,7 @@ def main() -> None:
             _save_failures_jsonl(run_dir, results)
             _save_predictions_jsonl(run_dir, results, run_id=run_id or "", agent_model=settings.openai_model)
             _copy_dataset_to_run(run_dir, ["train", "dev", "test"])
+            _save_run_meta(run_dir, run_id or "", settings.openai_model, args.llm_judge)
             if args.freeze_judge:
                 save_judge_verdicts(run_dir / "judge_verdicts.jsonl")
                 console.print(f"[dim]Judge verdicts saved to: {run_dir}/judge_verdicts.jsonl[/]")
@@ -853,6 +882,7 @@ def main() -> None:
         _save_failures_jsonl(run_dir, [r])
         _save_predictions_jsonl(run_dir, [r], run_id=run_id or "", agent_model=settings.openai_model)
         _copy_dataset_to_run(run_dir, [split])
+        _save_run_meta(run_dir, run_id or "", settings.openai_model, args.llm_judge)
         if args.freeze_judge:
             save_judge_verdicts(run_dir / "judge_verdicts.jsonl")
             console.print(f"[dim]Judge verdicts saved to: {run_dir}/judge_verdicts.jsonl[/]")
