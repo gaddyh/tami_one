@@ -14,72 +14,131 @@ class ExtractCommitments(dspy.Signature):
     """
     Extract and update commitments from WhatsApp chat history.
 
-    A commitment means someone is expected to do something.
+    A commitment means someone is expected to do something specific.
+    Return ONLY commitments that are new, updated, completed, dismissed, or unclear.
+    If no commitment exists, return an empty list.
 
-    Rules:
-    - Return an empty list if no commitment exists.
+    ─── OUTPUT RULES ───
+    - For brand-new commitments, set id to null.
     - If a message updates, completes, or dismisses an existing commitment,
       return that commitment with the same id and updated fields.
-    - For brand-new commitments, set id to null.
     - chat_id and chat_name must match the provided inputs.
     - If the committed party is unclear, use null.
-    - If the action is vague, write the vague action and set status='unclear'.
+    - If the action is vague but a commitment is implied, write the vague action
+      and set status='unclear'.
 
-    Deadline rules:
-    - Resolve relative deadlines to ISO 8601 dates using current_datetime.
-      "by end of week" → the upcoming Friday's date.
-      "today" → current_datetime's date.
-      "tomorrow" → current_datetime's date + 1 day.
-      "by Friday" / "next Friday" → the upcoming Friday's date.
-      "for Tuesday" → the upcoming Tuesday's date.
-      "next Monday" → the upcoming Monday's date.
-    - Output the resolved date in YYYY-MM-DD format.
-    - If no deadline is mentioned or implied, use null. Do not invent deadlines.
+    ─── WHAT COUNTS AS A COMMITMENT (act) ───
+    - "I'll X" / "I will X" / "I'm going to X" + specific action → commitment.
+    - "I need to X" + specific action + clear intent to act → commitment.
+      Contrast: "we need to X" or "someone needs to X" without a volunteer → NOT a commitment.
+    - "I can X" / "let me X" + specific action → commitment (offer to help).
+    - Request + acceptance → commitment by the person who accepts.
+      Acceptance signals: "sure", "on it", "I'll do it", "I'll have it ready", etc.
+    - Volunteering ("I'll take care of X", "I'll book it") → commitment.
+    - Speaker asserts someone else will act ("Dana will send the contract") →
+      commitment with that party as committed_party.
+    - "I'm waiting for [party] to [action]" → commitment. committed_party is the
+      external party (e.g. "the bank"), required_action is what they must do.
+    - "Let me review X and get back to you" + topic + deadline → commitment.
+      Without topic or deadline, this is NOT a commitment.
+    - Conditional promise ("if X, I'll do Y") → commitment ONLY if the condition
+      is clearly satisfied in the messages. Otherwise ignore.
+    - Multi-message: intent in one message + action/deadline in another → combine
+      into a single commitment.
+    - Hedged language ("I might", "maybe") + specific action → status='unclear'.
 
-    required_action rules:
-    - Write a concise action phrase: verb + object only (e.g. "Send the documents",
-      "Book the meeting room", "Call the supplier").
-    - Do NOT include deadlines, dates, or time words in the action — those go in
-      the deadline field (e.g. write "Pay the invoice", not "Pay the invoice today").
-
-    context rules:
-    - Quote the relevant message text exactly as written, WITHOUT the speaker
-      name prefix (e.g. write "I'll call the supplier today", NOT "Gaddy: I'll call
-      the supplier today").
-    - When updating an existing commitment, include only the new message that
-      triggers the update, not the original context.
-
-    Act vs Ignore rules (critical — do NOT over-extract):
-    - A request without acceptance is NOT a commitment. Someone must explicitly
-      agree, volunteer, or state intent to act.
-    - "We should do X" is an opinion, NOT a commitment. Look for "I will" or
-      "I'll" or explicit acceptance.
-    - Generic social intent ("let's catch up", "we should hang out") is NOT a
-      commitment. There must be a specific action, topic, or deadline.
-    - A conditional promise ("if X, I'll do Y") is NOT a commitment unless the
-      condition is clearly satisfied in the messages.
-    - A rhetorical question is NOT a commitment, even if it mentions an action.
-    - "I hope", "I'm worried", "maybe we could" are NOT commitments.
-    - Past-tense statements about completed actions are NOT new commitments
-      unless they match an existing commitment (use status='done' in that case).
-    - "Started", "almost done", "working on it" are progress reports, NOT
-      completions. Do not mark existing commitments as done.
-    - Reminding someone else to do something is NOT a commitment by the speaker.
-    - Sharing information ("the client will get back to us") is NOT a commitment
+    ─── WHAT TO IGNORE (do NOT over-extract) ───
+    - Social chat, greetings, thanks, motivational phrases.
+    - "We should X" / "we need to X" / "the report needs to be X" → opinion, not commitment.
+    - Request with no acceptance or volunteer ("can someone X?") → not yet a commitment.
+    - Refusal ("I can't", "I won't", "I'm swamped") → no commitment.
+    - Generic callback without topic or deadline ("get back to you on that") → ignore.
+    - Rhetorical questions, even if they mention an action.
+    - "I hope", "I'm worried", "maybe we could" → not commitments.
+    - Past-tense statements about completed actions with no existing commitment → ignore.
+    - "Started", "almost done", "working on it" → progress reports, NOT completions.
+    - Reminding someone else to do something → not a commitment by the speaker.
+    - Sharing information ("the client will get back to us") → not a commitment
       unless the speaker is the one who will act.
+    - Reporting current status ("server is down, looking into it") → not a commitment.
+    - Suggestion ("maybe we could try X") → not a commitment.
+    - Question about past events ("did anyone follow up?") → not a commitment.
 
-    Waiting commitments:
-    - "I'm waiting for [party] to [action]" IS a commitment. The committed_party
-      is the external party who must act (e.g. "the bank"), the required_action
-      is what they must do (e.g. "Process the loan"), and status is 'waiting'.
-    - "Nothing I can do until they respond" reinforces a waiting commitment,
-      it does NOT cancel it.
+    ─── REQUIRED_ACTION RULES ───
+    - Write a concise action phrase: verb + object only.
+    - Do NOT include deadlines, dates, or time words in the action.
+    - Map indirect language to the concrete action:
+      "paperwork" / "docs" → "Send the documents"
+      "give you a ring" / "call you" → "Call the supplier"
+      "take care of the payment" / "settle the invoice" → "Pay the invoice"
+      "draft the report" / "have the report ready" → "Prepare the report"
+      "reserve the room" → "Book the meeting room"
+      "send over the docs" → "Send the documents"
+    - Multi-step action in one message → single combined action
+      (e.g. "Review, sign, and send back the contract").
+    - Action details split across messages → combine into one action.
+    - "Get back to [person] about [topic]" is a valid action when callback has
+      topic and deadline.
+    - "Make sure X is taken care of" → extract the underlying action if inferable.
 
-    Dismiss + new:
-    - "Forget about [X]", "cancel [X]", "never mind about [X]" dismisses an
-      existing commitment (return it with status='dismissed').
+    ─── DEADLINE RULES ───
+    - Resolve relative deadlines to ISO 8601 dates using current_datetime:
+      "today" → current date
+      "tomorrow" → current date + 1 day
+      "by Friday" / "next Friday" / "by end of week" → upcoming Friday
+      "for Tuesday" → upcoming Tuesday
+      "next Monday" → upcoming Monday
+      "by 5pm" / "by 17:00" → date with time component
+      "before noon" → date + T12:00:00
+      "this afternoon" → date + T14:00:00
+      "end of day" → date + T17:00:00
+      "by July 15" → that date
+    - Output format: "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS" if time is specified.
+    - "soon", "when I can", "at some point" → null (not concrete).
+    - "before the meeting" / event-based without a known date → null.
+    - No deadline mentioned or implied → null. Do not invent deadlines.
+
+    ─── CONTEXT RULES ───
+    - Quote the relevant message text exactly as written, WITHOUT the speaker
+      name prefix.
+    - When updating an existing commitment, use only the new message text, not
+      the original context.
+    - For multi-message commitments, include fragments from each relevant message.
+
+    ─── UPDATE vs NEW (when existing_commitments is non-empty) ───
+    - Same action + same party + new deadline or context → UPDATE (same id).
+    - Same action + different party → NEW (id=null), not an update.
+    - Different action → NEW (id=null), even if similar to existing.
+    - Action change on existing ("email instead of calling") → UPDATE with new
+      required_action.
+    - Party handoff ("Bob will handle it instead of Alice") → UPDATE with new
+      committed_party.
+    - "I also need to X" → NEW commitment in addition to existing ones.
+    - "Still planning to X" → UPDATE (reaffirm, may update context).
+    - Similar but different target ("send documents" vs "send contract to client")
+      → NEW, not update.
+    - With multiple existing commitments, only update the one that changed.
+
+    ─── COMPLETION (status='done') ───
+    - Past tense + existing commitment → done ("I sent the documents yesterday").
+    - "done", "finished", "submitted", "paid" + existing → done.
+    - Passive voice ("the documents were sent") + existing → done.
+    - Third-party report ("Alice told me Bob submitted the report") + existing → done.
+    - "Started", "almost done", "working on it" → NOT done. Return empty list or
+      update context only.
+    - "I'll do it" / "will do" → NOT done. It's a future promise — update deadline
+      if specified, keep status='waiting'.
+    - Partial completion ("sent 3 out of 5") → NOT done. Update context, keep waiting.
+    - Past tense without existing commitment → ignore (nothing to mark done).
+
+    ─── DISMISS (status='dismissed') ───
+    - "Forget about X", "cancel X", "never mind about X", "we don't need X anymore"
+      → dismiss existing commitment (same id, status='dismissed').
+    - Conditional dismiss ("forget about X unless Y") → NOT dismissed. Keep
+      status='waiting', update deadline if the condition implies one.
     - If the same message also describes a new commitment, return BOTH the
       dismissed commitment AND the new one.
+    - With multiple existing commitments, only dismiss the one explicitly mentioned.
     """
 
     chat_id: str = dspy.InputField()
