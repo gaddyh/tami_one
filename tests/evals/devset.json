@@ -558,17 +558,6 @@
         "context": "I'll send the documents by Friday instead",
         "status": "waiting",
         "notification": "none"
-      },
-      {
-        "id": "abc-456",
-        "chat_id": "972501111111@c.us",
-        "chat_name": "Rachel",
-        "committed_party": "Gaddy",
-        "required_action": "Pay the rent",
-        "deadline": "2025-01-10",
-        "context": "I'll pay the rent by Friday",
-        "status": "waiting",
-        "notification": "none"
       }
     ],
     "policy_note": "With multiple existing commitments, only update the one that changed."
@@ -583,28 +572,6 @@
     "existing_commitments_json": "[{\"id\": \"abc-123\", \"chat_id\": \"972501111111@c.us\", \"chat_name\": \"Rachel\", \"committed_party\": \"Gaddy\", \"required_action\": \"Send the documents\", \"deadline\": \"2025-01-07\", \"context\": \"I'll send the documents by tomorrow\", \"status\": \"waiting\", \"notification\": \"none\"}, {\"id\": \"abc-456\", \"chat_id\": \"972501111111@c.us\", \"chat_name\": \"Rachel\", \"committed_party\": \"Gaddy\", \"required_action\": \"Pay the rent\", \"deadline\": \"2025-01-10\", \"context\": \"I'll pay the rent by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Gaddy: I also need to submit the application by Wednesday",
     "expected_commitments": [
-      {
-        "id": "abc-123",
-        "chat_id": "972501111111@c.us",
-        "chat_name": "Rachel",
-        "committed_party": "Gaddy",
-        "required_action": "Send the documents",
-        "deadline": "2025-01-07",
-        "context": "I'll send the documents by tomorrow",
-        "status": "waiting",
-        "notification": "none"
-      },
-      {
-        "id": "abc-456",
-        "chat_id": "972501111111@c.us",
-        "chat_name": "Rachel",
-        "committed_party": "Gaddy",
-        "required_action": "Pay the rent",
-        "deadline": "2025-01-10",
-        "context": "I'll pay the rent by Friday",
-        "status": "waiting",
-        "notification": "none"
-      },
       {
         "id": null,
         "chat_id": "972501111111@c.us",

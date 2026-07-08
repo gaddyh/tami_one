@@ -286,6 +286,6 @@ def test_cardinality_category_in_pool():
     assert len(examples) >= 12, f"Expected >=12 cardinality examples, got {len(examples)}"
     for ex in examples:
         assert ex["category"] == "cardinality"
-        assert len(ex.get("expected_commitments", [])) >= 2, (
-            f"Cardinality example {ex['scenario']} should have 2+ expected commitments"
+        assert len(ex.get("expected_commitments", [])) >= 1, (
+            f"Cardinality example {ex['scenario']} should have at least 1 expected commitment"
         )

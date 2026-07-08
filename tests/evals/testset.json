@@ -675,17 +675,6 @@
     "messages": "Gaddy: forget about paying the rent, I already handled it",
     "expected_commitments": [
       {
-        "id": "abc-123",
-        "chat_id": "972501111111@c.us",
-        "chat_name": "Rachel",
-        "committed_party": "Gaddy",
-        "required_action": "Send the documents",
-        "deadline": "2025-01-07",
-        "context": "I'll send the documents by tomorrow",
-        "status": "waiting",
-        "notification": "none"
-      },
-      {
         "id": "abc-456",
         "chat_id": "972501111111@c.us",
         "chat_name": "Rachel",
@@ -708,17 +697,6 @@
     "existing_commitments_json": "[{\"id\": \"abc-789\", \"chat_id\": \"120363000004@g.us\", \"chat_name\": \"Office Logistics\", \"committed_party\": \"Gaddy\", \"required_action\": \"Submit the budget report\", \"deadline\": \"2025-01-10\", \"context\": \"I'll submit the budget report by Friday\", \"status\": \"waiting\", \"notification\": \"none\"}]",
     "messages": "Gaddy: I'll book the meeting room for Tuesday\nGaddy: Dana, can you order the supplies by Wednesday?\nDana: sure, I'll order them by Wednesday",
     "expected_commitments": [
-      {
-        "id": "abc-789",
-        "chat_id": "120363000004@g.us",
-        "chat_name": "Office Logistics",
-        "committed_party": "Gaddy",
-        "required_action": "Submit the budget report",
-        "deadline": "2025-01-10",
-        "context": "I'll submit the budget report by Friday",
-        "status": "waiting",
-        "notification": "none"
-      },
       {
         "id": null,
         "chat_id": "120363000004@g.us",

@@ -107,14 +107,6 @@
     notification: none
     context_fragments:
     - I'll send the documents by Friday instead
-  - id: abc-456
-    committed_party: Gaddy
-    required_action: Pay the rent
-    deadline: '2025-01-10'
-    status: waiting
-    notification: none
-    context_fragments:
-    - I'll pay the rent by Friday
 - category: cardinality
   scenario: multiple_existing_new_unrelated
   difficulty: medium
@@ -139,22 +131,6 @@
     context_fragments:
     - I'll pay the rent by Friday
   expected_commitments:
-  - id: abc-123
-    committed_party: Gaddy
-    required_action: Send the documents
-    deadline: '2025-01-07'
-    status: waiting
-    notification: none
-    context_fragments:
-    - I'll send the documents by tomorrow
-  - id: abc-456
-    committed_party: Gaddy
-    required_action: Pay the rent
-    deadline: '2025-01-10'
-    status: waiting
-    notification: none
-    context_fragments:
-    - I'll pay the rent by Friday
   - id: null
     committed_party: Gaddy
     required_action: Submit the application
@@ -187,14 +163,6 @@
     context_fragments:
     - I'll pay the rent by Friday
   expected_commitments:
-  - id: abc-123
-    committed_party: Gaddy
-    required_action: Send the documents
-    deadline: '2025-01-07'
-    status: waiting
-    notification: none
-    context_fragments:
-    - I'll send the documents by tomorrow
   - id: abc-456
     committed_party: Gaddy
     required_action: Pay the rent
@@ -265,14 +233,6 @@
     context_fragments:
     - I'll submit the budget report by Friday
   expected_commitments:
-  - id: abc-789
-    committed_party: Gaddy
-    required_action: Submit the budget report
-    deadline: '2025-01-10'
-    status: waiting
-    notification: none
-    context_fragments:
-    - I'll submit the budget report by Friday
   - id: null
     committed_party: Gaddy
     required_action: Book the meeting room

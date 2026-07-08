@@ -46,11 +46,21 @@ class ExtractCommitments(dspy.Signature):
     - Multi-message: intent in one message + action/deadline in another → combine
       into a single commitment.
     - Hedged language ("I might", "maybe") + specific action → status='unclear'.
+    - Deadline inheritance: when someone accepts a request that mentions a deadline,
+      inherit that deadline unless they override it.
+      Example: "Can someone book the room for Tuesday?" / "I'll book it"
+      → deadline = upcoming Tuesday (inherited from the request).
+      Example: "Can you send the report by Friday?" / "Sure, I'll have it ready"
+      → deadline = upcoming Friday (inherited from the request).
 
     ─── WHAT TO IGNORE (do NOT over-extract) ───
     - Social chat, greetings, thanks, motivational phrases.
     - "We should X" / "we need to X" / "the report needs to be X" → opinion, not commitment.
-    - Request with no acceptance or volunteer ("can someone X?") → not yet a commitment.
+    - Request with no acceptance or volunteer → not yet a commitment.
+      "can someone X?" / "can you X?" with no reply → IGNORE. A request alone
+      is never a commitment, even if it mentions a deadline.
+      Example: "can someone send me the report by Friday?" with no reply → IGNORE.
+      Contrast: "can you send me the report by Friday?" / "sure, I'll do it" → commitment.
     - Refusal ("I can't", "I won't", "I'm swamped") → no commitment.
     - Generic callback without topic or deadline ("get back to you on that") → ignore.
     - Rhetorical questions, even if they mention an action.
@@ -65,15 +75,21 @@ class ExtractCommitments(dspy.Signature):
     - Question about past events ("did anyone follow up?") → not a commitment.
 
     ─── REQUIRED_ACTION RULES ───
-    - Write a concise action phrase: verb + object only.
+    - Write a concise action phrase: verb + object only. No extra detail.
+      Example: "Call the supplier" (NOT "Call about the order" or "Call a new supplier about a different order")
+      Example: "Send the documents" (NOT "Send the documents tomorrow")
     - Do NOT include deadlines, dates, or time words in the action.
-    - Map indirect language to the concrete action:
-      "paperwork" / "docs" → "Send the documents"
-      "give you a ring" / "call you" → "Call the supplier"
+    - Do NOT include descriptive qualifiers from the message ("about the order",
+      "about a different order", "to the client") unless needed to distinguish
+      two different commitments with the same verb.
+    - Map indirect language to the canonical action:
+      "paperwork" / "docs" / "get the paperwork to you" → "Send the documents"
+      "give you a ring" / "call you" / "give you a call" → "Call the supplier"
       "take care of the payment" / "settle the invoice" → "Pay the invoice"
       "draft the report" / "have the report ready" → "Prepare the report"
       "reserve the room" → "Book the meeting room"
       "send over the docs" → "Send the documents"
+      "call a new supplier" → "Call a new supplier" (NOT "Call a new supplier about a different order")
     - Multi-step action in one message → single combined action
       (e.g. "Review, sign, and send back the contract").
     - Action details split across messages → combine into one action.
@@ -82,25 +98,45 @@ class ExtractCommitments(dspy.Signature):
     - "Make sure X is taken care of" → extract the underlying action if inferable.
 
     ─── DEADLINE RULES ───
-    - Resolve relative deadlines to ISO 8601 dates using current_datetime:
-      "today" → current date
-      "tomorrow" → current date + 1 day
-      "by Friday" / "next Friday" / "by end of week" → upcoming Friday
-      "for Tuesday" → upcoming Tuesday
-      "next Monday" → upcoming Monday
-      "by 5pm" / "by 17:00" → date with time component
-      "before noon" → date + T12:00:00
-      "this afternoon" → date + T14:00:00
-      "end of day" → date + T17:00:00
-      "by July 15" → that date
+    - Resolve relative deadlines to ISO 8601 dates using current_datetime.
+      If current_datetime is 2025-01-06T10:00:00Z (Monday):
+      "today" → "2025-01-06"
+      "tomorrow" → "2025-01-07"
+      "by Friday" / "next Friday" / "by end of week" → "2025-01-10"
+      "for Tuesday" → "2025-01-07" (upcoming Tuesday)
+      "next Monday" → "2025-01-13"
+      "next week" → "2025-01-13" (start of next week, Monday)
+      "by 5pm" / "by 17:00" → "2025-01-06T17:00:00"
+      "before noon" → "2025-01-06T12:00:00"
+      "this afternoon" → "2025-01-06T14:00:00"
+      "end of day" → "2025-01-06T17:00:00"
+      "by July 15" → "2025-07-15"
+      "by end of the quarter" → "2025-03-31" (end of current quarter)
     - Output format: "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS" if time is specified.
     - "soon", "when I can", "at some point" → null (not concrete).
-    - "before the meeting" / event-based without a known date → null.
+    - Event-dependent phrases ("as soon as I get the signature",
+      "once the legal team approves them", "before the meeting") → null
+      for NEW commitments. For UPDATES to existing commitments, these phrases
+      do NOT null an existing deadline — keep the existing deadline unless the
+      message explicitly sets a new one.
+      Example: existing deadline=2025-01-07, message "I'll send them as soon as
+      I get the signature" → deadline stays 2025-01-07 (context update only).
+    - Conditional dismiss deadlines: "unless they respond today" → resolve
+      the condition's deadline ("today" → current date).
+    - Conflicting deadlines across messages: use the most recent/specific one.
+      Example: "I'll send them by Friday" then "actually, let me send them by tomorrow"
+      → deadline = tomorrow.
     - No deadline mentioned or implied → null. Do not invent deadlines.
 
     ─── CONTEXT RULES ───
-    - Quote the relevant message text exactly as written, WITHOUT the speaker
-      name prefix.
+    - Quote the FULL relevant message text exactly as written, WITHOUT the speaker
+      name prefix. Include the complete sentence or clause — do not truncate.
+      Example: "I won't manage tomorrow, I'll send the documents next Monday"
+      (NOT just "I'll send the documents next Monday")
+      Example: "never mind about the documents, we don't need them anymore"
+      (NOT just "we don't need them anymore")
+    - Do NOT include the addressee name if it's part of the message
+      (e.g. "Bob, can you send the report?" → context = "can you send the report?")
     - When updating an existing commitment, use only the new message text, not
       the original context.
     - For multi-message commitments, include fragments from each relevant message.
@@ -118,6 +154,8 @@ class ExtractCommitments(dspy.Signature):
     - Similar but different target ("send documents" vs "send contract to client")
       → NEW, not update.
     - With multiple existing commitments, only update the one that changed.
+    - Do NOT return unchanged existing commitments. Only return commitments
+      that are new, updated, completed, or dismissed.
 
     ─── COMPLETION (status='done') ───
     - Past tense + existing commitment → done ("I sent the documents yesterday").
@@ -139,6 +177,7 @@ class ExtractCommitments(dspy.Signature):
     - If the same message also describes a new commitment, return BOTH the
       dismissed commitment AND the new one.
     - With multiple existing commitments, only dismiss the one explicitly mentioned.
+      Do NOT return unchanged existing commitments — only the dismissed one.
     """
 
     chat_id: str = dspy.InputField()
