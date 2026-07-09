@@ -22,14 +22,13 @@ _drain_task: asyncio.Task | None = None
 async def _drain_loop() -> None:
     while True:
         logger.info("Starting drain cycle")
-        await asyncio.sleep(DRAIN_INTERVAL_SECONDS)
         try:
-            logger.info("Processing commitments")
             results = await drain_and_process()
             total = sum(len(v) for v in results.values())
             logger.info("Drain cycle complete: %d commitment(s)", total)
         except Exception:
             logger.exception("Error in drain cycle")
+        await asyncio.sleep(DRAIN_INTERVAL_SECONDS)
 
 
 @app.on_event("startup")
