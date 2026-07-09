@@ -89,6 +89,21 @@ async def seed_db() -> dict[str, Any]:
     return run_seed(overwrite=True)
 
 
+# curl -X POST https://i-me.onrender.com/admin/drain
+@router.post("/admin/drain")
+async def trigger_drain() -> dict[str, Any]:
+    """Manually trigger a drain cycle (for testing/debugging)."""
+    from app.commitments.processor import drain_and_process
+
+    results = await drain_and_process()
+    total = sum(len(v) for v in results.values())
+    return {
+        "ok": True,
+        "commitments_persisted": total,
+        "chats_processed": len(results),
+    }
+
+
 @router.post("/webhook/green-api")
 async def green_api_webhook(
     request: Request,
