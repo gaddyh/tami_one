@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 
+from langsmith import traceable
 from sqlmodel import Session, select
 
 from app.commitments.extractor import extract_commitments
@@ -49,6 +50,7 @@ def format_messages_for_summary(events: list[MessageEvent]) -> str:
     )
 
 
+@traceable(name="drain_and_process", run_type="chain")
 async def drain_and_process() -> dict[ChatBufferKey, list[CommitmentItem]]:
     """Drain the message buffer and run commitment extraction per conversation.
 

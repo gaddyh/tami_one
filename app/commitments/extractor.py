@@ -1,3 +1,5 @@
+from langsmith import traceable
+
 from app.commitments.commitments_agent import (
     CommitmentAgent,
     format_existing_commitments,
@@ -8,6 +10,7 @@ from app.commitments.models import Commitment
 commitment_agent = CommitmentAgent()
 
 
+@traceable(name="extract_commitments", run_type="llm")
 async def extract_commitments(
     *,
     chat_id: str,

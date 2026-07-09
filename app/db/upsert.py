@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 from dataclasses import asdict, replace
 
+from langsmith import traceable
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 
@@ -30,6 +31,7 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
+@traceable(name="upsert_contact_and_chat", run_type="chain")
 async def upsert_contact_and_chat(event: MessageEvent, session: Session | None = None) -> dict:
     """Create Contact if needed, persist ChatMessage (dedup gate), assign conversation, buffer.
 

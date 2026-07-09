@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 
 import dspy
+from langsmith import traceable
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ def _get_summarizer() -> dspy.Predict:
     return _summarizer
 
 
+@traceable(name="summarize_conversation", run_type="llm")
 async def summarize_conversation(
     *,
     prior_summary: str,
