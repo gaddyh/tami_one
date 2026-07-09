@@ -31,6 +31,7 @@ class Settings:
     conversation_closed_days: int
     waiting_reply_hours: int
     max_extraction_attempts: int
+    conversation_history_context_messages: int
     expected_authorization_header: str
 
     @classmethod
@@ -73,6 +74,7 @@ class Settings:
             conversation_closed_days=int(os.getenv("CONVERSATION_CLOSED_DAYS", "7")),
             waiting_reply_hours=int(os.getenv("WAITING_REPLY_HOURS", "4")),
             max_extraction_attempts=int(os.getenv("MAX_EXTRACTION_ATTEMPTS", "3")),
+            conversation_history_context_messages=int(os.getenv("CONVERSATION_HISTORY_CONTEXT_MESSAGES", "10")),
             expected_authorization_header=os.getenv("EXPECTED_AUTHORIZATION_HEADER", "").strip(),
         )
 

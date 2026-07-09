@@ -192,7 +192,7 @@ class ExtractCommitments(dspy.Signature):
         desc="JSON array of existing commitments, including their ids."
     )
     messages: str = dspy.InputField(
-        desc="Recent WhatsApp messages/history to inspect."
+        desc="WhatsApp messages to inspect. May include prior conversation history (already-processed messages) followed by new messages. Focus extraction on the new messages, but use prior context to resolve references like 'it' or 'the documents'."
     )
 
     commitments: list[Commitment] = dspy.OutputField(

@@ -40,6 +40,46 @@ def format_messages_for_llm(events: list[MessageEvent]) -> list[dict]:
     ]
 
 
+def _load_conversation_history(
+    tenant_id: str,
+    chat_id: str,
+    conversation_id: str,
+    limit: int = 10,
+) -> list[dict]:
+    """Load the last N processed messages from this conversation for LLM context.
+
+    Only returns messages with processed_at IS NOT NULL — the new batch
+    (unprocessed) is passed separately, so there's no overlap.
+    """
+    with Session(engine) as session:
+        rows = session.exec(
+            select(ChatMessage)
+            .where(
+                ChatMessage.tenant_id == tenant_id,
+                ChatMessage.chat_id == chat_id,
+                ChatMessage.conversation_id == conversation_id,
+                ChatMessage.processed_at.is_not(None),
+                ChatMessage.text.is_not(None),
+            )
+            .order_by(ChatMessage.sent_at.desc())
+            .limit(limit)
+        ).all()
+
+    # Reverse to chronological order (we queried desc, then flip)
+    rows = list(reversed(rows))
+
+    return [
+        {
+            "senderName": "me" if r.direction == MessageDirection.OUTBOUND else (r.sender_name or "unknown"),
+            "senderId": r.sender_chat_id or r.chat_id,
+            "textMessage": r.text,
+            "messageId": r.provider_message_id,
+        }
+        for r in rows
+        if r.text
+    ]
+
+
 def format_messages_for_summary(events: list[MessageEvent]) -> str:
     """Format messages for the summarizer (same shape as extraction text)."""
     return "\n".join(
@@ -78,6 +118,17 @@ async def drain_and_process() -> dict[ChatBufferKey, list[CommitmentItem]]:
         messages = format_messages_for_llm(events)
         if not messages:
             continue
+
+        # Load prior conversation history (last N processed messages) for context
+        prior_history: list[dict] = []
+        if conversation_id:
+            prior_history = _load_conversation_history(
+                tenant_id, chat_id, conversation_id,
+                limit=settings.conversation_history_context_messages,
+            )
+
+        # Merge: prior history + new batch (no overlap — history is processed_at IS NOT NULL)
+        all_messages = prior_history + messages
 
         chat_name = events[0].chat_name
         source_message_ids = [
@@ -121,7 +172,7 @@ async def drain_and_process() -> dict[ChatBufferKey, list[CommitmentItem]]:
             commitments = await extract_commitments(
                 chat_id=chat_id,
                 chat_name=chat_name,
-                messages=messages,
+                messages=all_messages,
                 existing=existing,
                 conversation_summary=prior_summary,
             )
