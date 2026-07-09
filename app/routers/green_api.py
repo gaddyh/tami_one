@@ -43,6 +43,9 @@ class MessageEvent:
     message_time: datetime
     text: str | None
     raw_type_webhook: str | None
+    quoted_message_id: str | None = None
+    quoted_text: str | None = None
+    conversation_id: str | None = None
 
 
 def normalize_green_api_message_event(
@@ -66,6 +69,8 @@ def normalize_green_api_message_event(
 
     message_data = get_message_data(payload)
 
+    quoted_message_id, quoted_text = extract_quoted_message(message_data)
+
     return MessageEvent(
         provider_message_id=get_message_id(payload),
         idInstance=payload.get("instanceData", {}).get("idInstance"),
@@ -79,6 +84,8 @@ def normalize_green_api_message_event(
         message_time=get_message_time(payload),
         text=extract_message_text(message_data),
         raw_type_webhook=type_webhook,
+        quoted_message_id=quoted_message_id,
+        quoted_text=quoted_text,
     )
 
 
@@ -182,3 +189,23 @@ def extract_extended_text_message(message_data: dict[str, Any]) -> str | None:
     )
 
     return text or None
+
+
+def extract_quoted_message(message_data: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Extract quoted-message id and text from extendedTextMessageData.
+
+    Green API puts quoted reply info inside extendedTextMessageData.quotedMessage.
+    The stanzaId field is the provider_message_id of the quoted message.
+    Returns (quoted_message_id, quoted_text) or (None, None) if not a reply.
+    """
+    ext_data = message_data.get("extendedTextMessageData") or {}
+    quoted = ext_data.get("quotedMessage") or {}
+    if not quoted:
+        return None, None
+
+    stanza_id = quoted.get("stanzaId")
+    quoted_text = None
+    if quoted.get("typeMessage") == "textMessage":
+        quoted_text = (quoted.get("textMessage") or "").strip() or None
+
+    return stanza_id, quoted_text

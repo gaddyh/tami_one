@@ -185,6 +185,9 @@ class ExtractCommitments(dspy.Signature):
     current_datetime: str = dspy.InputField(
         desc="Current date and time in ISO 8601 format (UTC). Use this to interpret relative deadlines like 'tomorrow' or 'next Friday'."
     )
+    conversation_summary: str = dspy.InputField(
+        desc="Rolling one-line summary of the conversation topic so far. May be empty for new conversations."
+    )
     existing_commitments_json: str = dspy.InputField(
         desc="JSON array of existing commitments, including their ids."
     )
@@ -209,6 +212,7 @@ class CommitmentAgent(dspy.Module):
         existing_commitments_json: str,
         messages: str,
         current_datetime: str | None = None,
+        conversation_summary: str = "",
     ) -> dspy.Prediction:
         if current_datetime is None:
             current_datetime = datetime.now(timezone.utc).isoformat()
@@ -216,6 +220,7 @@ class CommitmentAgent(dspy.Module):
             chat_id=chat_id,
             chat_name=chat_name,
             current_datetime=current_datetime,
+            conversation_summary=conversation_summary,
             existing_commitments_json=existing_commitments_json,
             messages=messages,
         )
@@ -233,6 +238,7 @@ class CommitmentAgent(dspy.Module):
         existing_commitments_json: str,
         messages: str,
         current_datetime: str | None = None,
+        conversation_summary: str = "",
     ) -> dspy.Prediction:
         if current_datetime is None:
             current_datetime = datetime.now(timezone.utc).isoformat()
@@ -240,6 +246,7 @@ class CommitmentAgent(dspy.Module):
             chat_id=chat_id,
             chat_name=chat_name,
             current_datetime=current_datetime,
+            conversation_summary=conversation_summary,
             existing_commitments_json=existing_commitments_json,
             messages=messages,
         )

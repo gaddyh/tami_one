@@ -185,8 +185,8 @@ class ChatMessage(SQLModel, table=True):
 
     tenant_id: str = Field(index=True, foreign_key="tenant.id")
 
-    # Internal FK to Chat.id
-    chat_id: str = Field(index=True, foreign_key="chat.id")
+    # WhatsApp chat id (e.g. 120363xxx@g.us or phone@s.whatsapp.net)
+    chat_id: str = Field(index=True)
 
     # Original WhatsApp / Green API message id
     provider_message_id: str = Field(index=True)
@@ -199,10 +199,38 @@ class ChatMessage(SQLModel, table=True):
 
     text: Optional[str] = None
 
+    # Quoted reply — provider_message_id of the message being replied to
+    quoted_message_id: Optional[str] = Field(default=None, index=True)
+
+    # Assigned at ingest by the threader
+    conversation_id: Optional[str] = Field(default=None, index=True)
+
+    # Durability: null until drain successfully extracts from this message
+    processed_at: Optional[datetime] = Field(default=None, index=True)
+
+    # Poison-batch guard: incremented per failed extraction
+    extraction_attempts: int = Field(default=0)
+
     sent_at: datetime = Field(index=True)
     received_at: datetime = Field(default_factory=utc_now)
 
     created_at: datetime = Field(default_factory=utc_now)
+
+
+class Conversation(SQLModel, table=True):
+    id: str = Field(default_factory=new_id, primary_key=True)
+
+    tenant_id: str = Field(index=True, foreign_key="tenant.id")
+    chat_id: str = Field(index=True)
+
+    summary: str = ""
+
+    # Bumped at ingest (threader), not only at drain — feeds derived state
+    last_message_at: datetime = Field(index=True, default_factory=utc_now)
+    started_at: datetime = Field(default_factory=utc_now)
+
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
 
 
 class CommitmentItem(SQLModel, table=True):
@@ -210,6 +238,9 @@ class CommitmentItem(SQLModel, table=True):
 
     tenant_id: str = Field(index=True, foreign_key="tenant.id")
     chat_id: str = Field(index=True)
+
+    # Origin conversation where the commitment was extracted (not lifecycle scope)
+    conversation_id: Optional[str] = Field(default=None, index=True)
 
     committed_party: Optional[str] = None
     required_action: str

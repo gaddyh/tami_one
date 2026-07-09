@@ -26,6 +26,12 @@ class Settings:
     database_path: str
     database_url: str
     max_group_participants: int
+    session_gap_minutes: int
+    conversation_dormant_hours: int
+    conversation_closed_days: int
+    waiting_reply_hours: int
+    max_extraction_attempts: int
+    expected_authorization_header: str
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -62,6 +68,12 @@ class Settings:
             database_path=os.getenv("DATABASE_PATH", "tami.db"),
             database_url=os.getenv("DATABASE_URL", "").strip(),
             max_group_participants=int(os.getenv("MAX_GROUP_PARTICIPANTS", "3")),
+            session_gap_minutes=int(os.getenv("SESSION_GAP_MINUTES", "45")),
+            conversation_dormant_hours=int(os.getenv("CONVERSATION_DORMANT_HOURS", "24")),
+            conversation_closed_days=int(os.getenv("CONVERSATION_CLOSED_DAYS", "7")),
+            waiting_reply_hours=int(os.getenv("WAITING_REPLY_HOURS", "4")),
+            max_extraction_attempts=int(os.getenv("MAX_EXTRACTION_ATTEMPTS", "3")),
+            expected_authorization_header=os.getenv("EXPECTED_AUTHORIZATION_HEADER", "").strip(),
         )
 
 settings = Settings.from_env()

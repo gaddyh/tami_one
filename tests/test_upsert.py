@@ -116,10 +116,16 @@ async def test_creates_new_contact_and_queues_message(db_session):
 
 async def test_second_message_skips_existing_contact(db_session):
     session, tenant, _ = db_session
-    event1 = _make_event(message_time=datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc))
+    event1 = _make_event(
+        message_time=datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+        provider_message_id="msg-1",
+    )
     await upsert_contact_and_chat(event1, session=session)
 
-    event2 = _make_event(message_time=datetime(2025, 1, 2, 14, 0, 0, tzinfo=timezone.utc))
+    event2 = _make_event(
+        message_time=datetime(2025, 1, 2, 14, 0, 0, tzinfo=timezone.utc),
+        provider_message_id="msg-2",
+    )
     result = await upsert_contact_and_chat(event2, session=session)
 
     assert result["ok"] is True
@@ -155,13 +161,13 @@ async def test_unknown_account_returns_not_ok(db_session):
 
 async def test_existing_contact_not_updated(db_session):
     session, _, _ = db_session
-    event1 = _make_event(chat_name=None)
+    event1 = _make_event(chat_name=None, provider_message_id="msg-a")
     await upsert_contact_and_chat(event1, session=session)
 
     contact = session.exec(select(Contact)).first()
     assert contact.display_name is None
 
-    event2 = _make_event(chat_name="Gaddy Updated")
+    event2 = _make_event(chat_name="Gaddy Updated", provider_message_id="msg-b")
     await upsert_contact_and_chat(event2, session=session)
 
     session.refresh(contact)
@@ -170,10 +176,10 @@ async def test_existing_contact_not_updated(db_session):
 
 async def test_different_chats_create_separate_contacts_and_queues(db_session):
     session, tenant, _ = db_session
-    event1 = _make_event(chat_id="972500000001@c.us", chat_name="Alice")
+    event1 = _make_event(chat_id="972500000001@c.us", chat_name="Alice", provider_message_id="msg-alice")
     await upsert_contact_and_chat(event1, session=session)
 
-    event2 = _make_event(chat_id="972500000002@c.us", chat_name="Bob")
+    event2 = _make_event(chat_id="972500000002@c.us", chat_name="Bob", provider_message_id="msg-bob")
     await upsert_contact_and_chat(event2, session=session)
 
     contacts = list(session.exec(select(Contact)))

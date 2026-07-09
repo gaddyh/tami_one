@@ -7,7 +7,7 @@ from app.config import settings
 from app.commitments.commitments_agent import configure_dspy
 from app.commitments.processor import drain_and_process
 from app.db import init_db, load_cache
-from app.routers import business_webhook, personal_webhook
+from app.routers import business_webhook, digest, personal_webhook
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 
@@ -64,6 +64,7 @@ async def health() -> dict[str, str]:
 
 app.include_router(business_webhook.router)
 app.include_router(personal_webhook.router)
+app.include_router(digest.router)
 
 
 def serve() -> None:

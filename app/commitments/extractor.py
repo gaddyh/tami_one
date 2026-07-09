@@ -15,6 +15,7 @@ async def extract_commitments(
     messages: list[dict],
     existing: list[Commitment] | None = None,
     current_datetime: str | None = None,
+    conversation_summary: str = "",
 ) -> list[Commitment]:
     text = "\n".join(
         f"{m.get('senderName') or m.get('senderId')}: "
@@ -28,6 +29,7 @@ async def extract_commitments(
         existing_commitments_json=format_existing_commitments(existing),
         messages=text,
         current_datetime=current_datetime,
+        conversation_summary=conversation_summary,
     )
 
     commitments = normalize_commitments(
