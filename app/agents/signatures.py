@@ -40,10 +40,21 @@ class ExtractReminder(dspy.Signature):
     - "<weekday>" alone (e.g. "on friday") means the nearest upcoming occurrence,
       excluding today. If today is Friday, "on friday" = next Friday (7 days from now).
 
-    RELATIVE TIME: Handle expressions like "in an hour", "in 30 minutes", "in 2 hours",
-    "עוד שעה" (in an hour), "בעוד חצי שעה" (in half an hour), etc.
-    These specify a time relative to current_time. Set time_raw to the expression as written
-    and compute the resolved_datetime accordingly.
+    RELATIVE TIME: Handle any expression that specifies an offset from current_time:
+    - English: "in a minute", "in N minutes", "in an hour", "in N hours",
+      "in half an hour", "in a couple of hours".
+    - Hebrew: "עוד דקה" (in a minute), "עוד N דקות" (in N minutes),
+      "עוד שעה" (in an hour), "עוד N שעות" (in N hours),
+      "בעוד חצי שעה" (in half an hour), "עוד רגע" (in a moment ≈ 1 minute).
+    A relative-time expression is SELF-CONTAINED: it fixes BOTH the date and the time by
+    itself. Set time_raw to the expression as written and compute resolved_datetime as
+    current_time + the offset (rolling over to the next day if needed).
+
+    MULTI-TURN MERGE: If the current message is a relative-time clarification answer
+    (e.g. the user previously said a date like "today" and now replies "עוד דקה" /
+    "in a minute"), the relative time OVERRIDES any partial date from prior_context:
+    compute resolved_datetime = current_time + offset. Do NOT combine "today" with the
+    offset as if it were midnight — "today" + "in a minute" means one minute from now.
 
     TIME EXPRESSIONS: Recognize all common time formats including:
     - 12-hour: "3pm", "3 pm", "9am", "9:00 am", "3:30 pm"
@@ -77,8 +88,9 @@ class ExtractReminder(dspy.Signature):
         "EMPTY if the user did not mention any date. Do NOT default to today."
     )
     time_raw: str = dspy.OutputField(
-        desc="Time expression as explicitly written by the user (e.g. '3pm', '15:00', 'noon', 'midnight', '6pm', 'in an hour', 'עוד שעה'). "
-        "EMPTY only if the user did not mention ANY time. 'at noon' IS a time. 'at 6pm' IS a time."
+        desc="Time expression as explicitly written by the user (e.g. '3pm', '15:00', 'noon', 'midnight', '6pm', "
+        "'in a minute', 'in 10 minutes', 'in an hour', 'עוד דקה', 'עוד 10 דקות', 'עוד שעה'). "
+        "EMPTY only if the user did not mention ANY time. 'at noon' IS a time. 'עוד דקה' IS a time."
     )
     resolved_datetime: str = dspy.OutputField(
         desc="ISO 8601 datetime if both date and time are explicitly present (including relative times like 'in an hour'), or empty"

@@ -3,20 +3,13 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-import dspy
-
+from app.agents.compiled_agent import get_compiled_agent
 from app.agents.schemas import (
     ConversationTurn,
     Reminder,
     ReminderInput,
     ReminderOutput,
     ReminderStatus,
-)
-from app.agents.signatures import (
-    ClassifyIntent,
-    ExtractReminder,
-    GenerateClarification,
-    RenderReminder,
 )
 
 
@@ -35,10 +28,11 @@ def _is_empty(value: str | None) -> bool:
 
 def run_agent(input_data: ReminderInput) -> ReminderOutput:
     """Process a reminder request and return either a reminder or a clarification question."""
-    classifier = dspy.Predict(ClassifyIntent)
-    extractor = dspy.Predict(ExtractReminder)
-    clarifier = dspy.Predict(GenerateClarification)
-    renderer = dspy.Predict(RenderReminder)
+    agent = get_compiled_agent()
+    classifier = agent.classifier
+    extractor = agent.extractor
+    clarifier = agent.clarifier
+    renderer = agent.renderer
 
     context_str = _format_context(input_data.prior_context)
 

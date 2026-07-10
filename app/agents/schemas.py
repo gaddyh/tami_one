@@ -39,3 +39,4 @@ class ReminderOutput(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     language: str = "en"
     rendered_message: str | None = None
+    timings: dict[str, float] = Field(default_factory=dict)

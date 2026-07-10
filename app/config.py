@@ -34,6 +34,7 @@ class Settings:
     conversation_history_context_messages: int
     expected_authorization_header: str
     tenant_timezone: str
+    compiled_agent_path: str
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -78,6 +79,7 @@ class Settings:
             conversation_history_context_messages=int(os.getenv("CONVERSATION_HISTORY_CONTEXT_MESSAGES", "10")),
             expected_authorization_header=os.getenv("EXPECTED_AUTHORIZATION_HEADER", "").strip(),
             tenant_timezone=os.getenv("TENANT_TIMEZONE", "Asia/Jerusalem").strip(),
+            compiled_agent_path=os.getenv("COMPILED_AGENT_PATH", "compiled_agent.json").strip(),
         )
 
 settings = Settings.from_env()
