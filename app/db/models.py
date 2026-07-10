@@ -248,7 +248,7 @@ class ReminderItem(SQLModel, table=True):
 
     id: str = Field(default_factory=new_id, primary_key=True)
 
-    tenant_id: str = Field(index=True, foreign_key="tenant.id")
+    tenant_id: str = Field(index=True)
     chat_id: str = Field(index=True)
 
     reminder_id: str  # agent-generated id (e.g. r-abc12345)
