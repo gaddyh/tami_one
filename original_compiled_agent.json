@@ -2,40 +2,7 @@
   "classifier": {
     "traces": [],
     "train": [],
-    "demos": [
-      {
-        "augmented": true,
-        "text": "remind me tomorrow at 3pm to call dad",
-        "prior_context": "",
-        "intent": "reminder_request",
-        "language": "en",
-        "confidence": 1.0
-      },
-      {
-        "augmented": true,
-        "text": "remind me tomorrow to call dad",
-        "prior_context": "",
-        "intent": "reminder_request",
-        "language": "en",
-        "confidence": 1.0
-      },
-      {
-        "augmented": true,
-        "text": "remind me at 3pm to call mom",
-        "prior_context": "",
-        "intent": "reminder_request",
-        "language": "en",
-        "confidence": 1.0
-      },
-      {
-        "augmented": true,
-        "text": "remind me to buy milk",
-        "prior_context": "",
-        "intent": "reminder_request",
-        "language": "en",
-        "confidence": 1.0
-      }
-    ],
+    "demos": [],
     "signature": {
       "instructions": "Classify the intent of a user message in the context of a reminder conversation.\n\nA reminder request asks the agent to remind the user about something later.\nThis includes: \"remind me to...\", \"don't forget to...\", \"set an alarm for 7am\",\n\"set a timer for 10 minutes\", and similar time-based trigger requests.\nA clarification answer is a short response to a previous agent question (e.g. just \"3pm\").\nAnything else is irrelevant, including: weather questions, jokes, general questions,\nor commands that are not about reminders or time-based triggers.\n\nDetect the language of the user's message (ISO 639-1 code, e.g. 'en', 'he', 'es', 'fr').",
       "fields": [
@@ -66,48 +33,7 @@
   "extractor": {
     "traces": [],
     "train": [],
-    "demos": [
-      {
-        "augmented": true,
-        "text": "remind me tomorrow at 3pm to call dad",
-        "prior_context": "",
-        "current_time": "2026-07-10T00:51:00+03:00",
-        "task": "call dad",
-        "date_raw": "tomorrow",
-        "time_raw": "3pm",
-        "resolved_datetime": "2026-07-11T15:00:00+03:00"
-      },
-      {
-        "augmented": true,
-        "text": "3pm",
-        "prior_context": "user: remind me tomorrow to call dad\nagent: What time should I remind you to call dad?",
-        "current_time": "2026-07-10T00:51:30+03:00",
-        "task": "call dad",
-        "date_raw": "tomorrow",
-        "time_raw": "3pm",
-        "resolved_datetime": "2026-07-11T15:00:00+03:00"
-      },
-      {
-        "augmented": true,
-        "text": "what's the weather today",
-        "prior_context": "",
-        "current_time": "2026-07-10T00:51:00+03:00",
-        "task": "",
-        "date_raw": "",
-        "time_raw": "",
-        "resolved_datetime": ""
-      },
-      {
-        "augmented": true,
-        "text": "don't forget to call dad tomorrow at 3pm",
-        "prior_context": "",
-        "current_time": "2026-07-10T00:51:00+03:00",
-        "task": "call dad",
-        "date_raw": "tomorrow",
-        "time_raw": "3pm",
-        "resolved_datetime": "2026-07-11T15:00:00+03:00"
-      }
-    ],
+    "demos": [],
     "signature": {
       "instructions": "Extract task, date, and time from a reminder request or clarification answer.\n\nIf the message is a clarification answer (e.g. just \"3pm\"), use the prior_context\nto determine the task and any previously specified date.\nResolve relative dates (today, tomorrow) using current_time.\n\nDATE RESOLUTION RULES:\n- \"this <weekday>\" means the nearest occurrence of that weekday, including today.\n  If today IS that weekday, \"this friday\" = today.\n- \"next <weekday>\" means the nearest upcoming occurrence of that weekday.\n  E.g. if today is Friday July 10, \"next monday\" = July 13 (the nearest Monday).\n  If today is Friday and user says \"next friday\", that means 7 days from now (July 17),\n  NOT today.\n- \"<weekday>\" alone (e.g. \"on friday\") means the nearest upcoming occurrence,\n  excluding today. If today is Friday, \"on friday\" = next Friday (7 days from now).\n\nRELATIVE TIME: Handle any expression that specifies an offset from current_time:\n- English: \"in a minute\", \"in N minutes\", \"in an hour\", \"in N hours\",\n  \"in half an hour\", \"in a couple of hours\".\n- Hebrew: \"עוד דקה\" (in a minute), \"עוד N דקות\" (in N minutes),\n  \"עוד שעה\" (in an hour), \"עוד N שעות\" (in N hours),\n  \"בעוד חצי שעה\" (in half an hour), \"עוד רגע\" (in a moment ≈ 1 minute).\nA relative-time expression is SELF-CONTAINED: it fixes BOTH the date and the time by\nitself. Set time_raw to the expression as written and compute resolved_datetime as\ncurrent_time + the offset (rolling over to the next day if needed).\n\nMULTI-TURN MERGE: If the current message is a relative-time clarification answer\n(e.g. the user previously said a date like \"today\" and now replies \"עוד דקה\" /\n\"in a minute\"), the relative time OVERRIDES any partial date from prior_context:\ncompute resolved_datetime = current_time + offset. Do NOT combine \"today\" with the\noffset as if it were midnight — \"today\" + \"in a minute\" means one minute from now.\n\nTIME EXPRESSIONS: Recognize all common time formats including:\n- 12-hour: \"3pm\", \"3 pm\", \"9am\", \"9:00 am\", \"3:30 pm\"\n- 24-hour: \"15:00\", \"09:00\", \"11:15\"\n- Named: \"noon\" (12:00), \"midnight\" (00:00), \"morning\", \"afternoon\", \"evening\"\n- Relative: \"in an hour\", \"in 30 minutes\", \"in 2 hours\"\nAny of these counts as a time expression. Do NOT leave time_raw empty if the user\nsaid \"at noon\", \"at midnight\", or any similar expression.\n\nCRITICAL: Only extract what the user EXPLICITLY stated. Do NOT infer or default\nany field. If the user did not mention a date, leave date_raw empty — do NOT\nassume \"today\". If the user did not mention a time, leave time_raw empty.\nOnly return resolved_datetime if BOTH date and time are explicitly present.\nA relative time expression like \"in an hour\" counts as specifying BOTH date and time\n(since it resolves to a specific datetime).\n\nTASK EXTRACTION: The task is the action only, without any leading words like\n\"remind me to\", \"to\", \"don't forget to\", \"make sure I\", or \"that I need to\".\nFor example: \"remind me to call dad\" -> task=\"call dad\" (NOT \"remind me to call dad\"\nor \"to call dad\"). If no task/action is specified, leave task EMPTY.\nA message like \"remind me tomorrow at 3pm\" has NO task — the user said when but not what.\nDo NOT use \"remind me\" or \"don't forget\" as the task.",
       "fields": [
@@ -146,29 +72,7 @@
   "clarifier": {
     "traces": [],
     "train": [],
-    "demos": [
-      {
-        "augmented": true,
-        "task": "",
-        "missing_fields": "time",
-        "language": "en",
-        "question": "What time should I remind you?"
-      },
-      {
-        "augmented": true,
-        "task": "",
-        "missing_fields": "date",
-        "language": "en",
-        "question": "What date should I remind you?"
-      },
-      {
-        "augmented": true,
-        "task": "",
-        "missing_fields": "date, time",
-        "language": "en",
-        "question": "What date and time should I remind you?"
-      }
-    ],
+    "demos": [],
     "signature": {
       "instructions": "Generate a natural language clarification question for missing reminder fields.\n\nThe question should reference the task and ask specifically for the missing information.\nThe question MUST be in the same language as the user's message.",
       "fields": [
@@ -195,29 +99,7 @@
   "renderer": {
     "traces": [],
     "train": [],
-    "demos": [
-      {
-        "augmented": true,
-        "task": "call dad",
-        "when": "2026-07-11T15:00:00+03:00",
-        "language": "en",
-        "message": "Your reminder to call dad is set for July 11, 2026, at 3:00 PM."
-      },
-      {
-        "augmented": true,
-        "task": "call dad",
-        "when": "2026-07-11T15:00:00+03:00",
-        "language": "en",
-        "message": "Your reminder to call dad is set for July 11, 2026, at 3:00 PM."
-      },
-      {
-        "augmented": true,
-        "task": "call dad",
-        "when": "2026-07-11T15:00:00+03:00",
-        "language": "en",
-        "message": "Your reminder to call dad is set for July 11, 2026, at 3:00 PM."
-      }
-    ],
+    "demos": [],
     "signature": {
       "instructions": "Generate a human-readable confirmation message for a created reminder.\n\nThe message MUST be in the specified language.",
       "fields": [
