@@ -86,7 +86,7 @@ async def seed_db() -> dict[str, Any]:
     """Insert demo Tenant and WhatsAppAccount rows. For initial setup on Render."""
     from app.db.seed import run_seed
 
-    return run_seed(overwrite=True)
+    return run_seed(name="Gaddy Test", instance_id="7700673764", chat_id="972546610653@c.us", overwrite=True)
 
 
 # curl -X POST https://i-me.onrender.com/admin/drain

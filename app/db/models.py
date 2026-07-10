@@ -8,7 +8,7 @@ from typing import Optional
 from uuid import uuid4
 
 from sqlmodel import SQLModel, Field
-from sqlalchemy import JSON, Column, UniqueConstraint
+from sqlalchemy import JSON, Column, Index, UniqueConstraint
 
 from app.commitments.models import CommitmentStatus, NotificationType
 
@@ -231,6 +231,39 @@ class Conversation(SQLModel, table=True):
 
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
+
+
+class ReminderItemStatus(StrEnum):
+    PENDING = "pending"
+    SENDING = "sending"
+    SENT = "sent"
+    FAILED = "failed"
+
+
+class ReminderItem(SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "reminder_id"),
+        Index("ix_reminderitem_status_due_at", "status", "due_at"),
+    )
+
+    id: str = Field(default_factory=new_id, primary_key=True)
+
+    tenant_id: str = Field(index=True, foreign_key="tenant.id")
+    chat_id: str = Field(index=True)
+
+    reminder_id: str  # agent-generated id (e.g. r-abc12345)
+
+    what: str
+    due_at: datetime = Field(index=True)  # UTC naive, when to fire
+
+    status: ReminderItemStatus = ReminderItemStatus.PENDING
+    attempts: int = 0
+
+    rendered_message: Optional[str] = None
+
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+    sent_at: Optional[datetime] = Field(default=None)
 
 
 class CommitmentItem(SQLModel, table=True):

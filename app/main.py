@@ -8,6 +8,7 @@ from app.commitments.commitments_agent import configure_dspy
 from app.commitments.processor import drain_and_process
 from app.db import init_db, load_cache
 from app.routers import business_webhook, digest, personal_webhook
+from app.reminders.scheduler import start_scheduler, stop_scheduler
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 
@@ -39,6 +40,7 @@ async def _on_startup() -> None:
     load_cache()
     global _drain_task
     _drain_task = asyncio.create_task(_drain_loop())
+    start_scheduler()
 
 
 @app.on_event("shutdown")
@@ -49,6 +51,7 @@ async def _on_shutdown() -> None:
             await _drain_task
         except asyncio.CancelledError:
             pass
+    await stop_scheduler()
 
 
 @app.get("/")

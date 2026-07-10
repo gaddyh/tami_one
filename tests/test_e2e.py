@@ -34,6 +34,16 @@ from app.db.upsert import upsert_contact_and_chat
 from app.commitments.processor import drain_and_process
 from app.routers.green_api import MessageDirection, MessageEvent
 
+from app.agents.core import run_agent
+from app.agents.schemas import (
+    ConversationTurn,
+    Reminder,
+    ReminderInput,
+    ReminderOutput,
+    ReminderStatus,
+)
+from app.db.models import ReminderItem, ReminderItemStatus
+
 
 @pytest.fixture
 async def e2e_env():
@@ -416,3 +426,305 @@ async def test_e2e_failure_requeues_and_no_summary_update(e2e_env):
     drained = await message_buffer.drain()
     assert key in drained
     assert len(drained[key]) == 1
+
+
+# ─── Reminder Agent Scenarios ───
+
+
+@pytest.fixture
+def reminder_env():
+    """Fresh temp DB for reminder tests."""
+    fd, db_path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+
+    engine = create_engine(
+        f"sqlite:///{db_path}",
+        connect_args={"check_same_thread": False},
+    )
+    SQLModel.metadata.create_all(engine)
+
+    yield engine
+
+    engine.dispose()
+    os.unlink(db_path)
+
+
+def _make_reminder_input(
+    text: str,
+    input_id: str = "test-input-1",
+    current_time: datetime | None = None,
+    prior_context: list[ConversationTurn] | None = None,
+) -> ReminderInput:
+    return ReminderInput(
+        input_id=input_id,
+        text=text,
+        current_time=current_time or datetime(2025, 7, 10, 10, 0, 0, tzinfo=timezone.utc),
+        prior_context=prior_context,
+    )
+
+
+@pytest.mark.integration
+def test_reminder_created_persists_to_db(reminder_env):
+    """Reminder agent returns CREATED → ReminderItem row is persisted with correct fields."""
+    from app.commitments.commitments_agent import configure_dspy
+    from app.config import settings
+    configure_dspy(settings)
+
+    future_time = datetime(2025, 7, 10, 14, 0, 0, tzinfo=timezone.utc)
+    input_data = _make_reminder_input("remind me to call mom at 2pm")
+
+    result = run_agent(input_data)
+
+    assert result.status == ReminderStatus.CREATED
+    assert result.reminder is not None
+    assert result.reminder.what == "call mom"
+    assert result.rendered_message is not None
+
+    # Simulate what the webhook does: persist to DB
+    due_at_utc = result.reminder.when
+    if due_at_utc.tzinfo is not None:
+        due_at_utc = due_at_utc.astimezone(timezone.utc).replace(tzinfo=None)
+
+    with Session(reminder_env) as session:
+        item = ReminderItem(
+            tenant_id="default",
+            chat_id="972500000001@c.us",
+            reminder_id=result.reminder.reminder_id,
+            what=result.reminder.what,
+            due_at=due_at_utc,
+            status=ReminderItemStatus.PENDING,
+            rendered_message=result.rendered_message,
+        )
+        session.add(item)
+        session.commit()
+        session.refresh(item)
+
+        assert item.id is not None
+        assert item.what == "call mom"
+        assert item.status == ReminderItemStatus.PENDING
+        assert item.due_at == datetime(2025, 7, 10, 14, 0, 0)
+
+
+@pytest.mark.integration
+def test_reminder_needs_clarification():
+    """Agent returns NEEDS_CLARIFICATION when task is missing."""
+    from app.commitments.commitments_agent import configure_dspy
+    from app.config import settings
+    configure_dspy(settings)
+
+    input_data = _make_reminder_input("remind me tomorrow at 3pm")
+
+    result = run_agent(input_data)
+
+    assert result.status == ReminderStatus.NEEDS_CLARIFICATION
+    assert result.clarification_question is not None
+    assert "task" in result.missing_fields
+    assert result.reminder is None
+
+
+@pytest.mark.integration
+def test_reminder_ignored_returns_no_reminder():
+    """Agent returns IGNORED for non-reminder messages."""
+    from app.commitments.commitments_agent import configure_dspy
+    from app.config import settings
+    configure_dspy(settings)
+
+    input_data = _make_reminder_input("what's the weather today?")
+
+    result = run_agent(input_data)
+
+    assert result.status == ReminderStatus.IGNORED
+    assert result.reminder is None
+    assert result.clarification_question is None
+
+
+@pytest.mark.integration
+def test_reminder_clarification_round_trip_with_context():
+    """Clarification answer uses prior_context to merge with earlier request."""
+    from app.commitments.commitments_agent import configure_dspy
+    from app.config import settings
+    configure_dspy(settings)
+
+    # First turn: user asks for reminder but missing time
+    input_1 = _make_reminder_input("remind me to call mom tomorrow")
+    result_1 = run_agent(input_1)
+
+    assert result_1.status == ReminderStatus.NEEDS_CLARIFICATION
+
+    # Second turn: user answers "3pm" with prior context
+    prior = [
+        ConversationTurn(role="user", text="remind me to call mom tomorrow"),
+        ConversationTurn(role="assistant", text=result_1.clarification_question),
+    ]
+
+    input_2 = _make_reminder_input(
+        "3pm",
+        input_id="test-input-4b",
+        prior_context=prior,
+    )
+    result_2 = run_agent(input_2)
+
+    assert result_2.status == ReminderStatus.CREATED
+    assert result_2.reminder.what == "call mom"
+
+
+@pytest.mark.integration
+def test_reminder_past_due_returns_clarification():
+    """Agent returns NEEDS_CLARIFICATION when resolved datetime is in the past."""
+    from app.commitments.commitments_agent import configure_dspy
+    from app.config import settings
+    configure_dspy(settings)
+
+    current_time = datetime(2025, 7, 10, 10, 0, 0, tzinfo=timezone.utc)
+
+    input_data = _make_reminder_input(
+        "remind me to call mom at 8am",
+        current_time=current_time,
+    )
+
+    result = run_agent(input_data)
+
+    assert result.status == ReminderStatus.NEEDS_CLARIFICATION
+    assert result.reminder is None
+
+
+@pytest.mark.asyncio
+async def test_reminder_scheduler_sends_due_reminder(reminder_env):
+    """Scheduler picks up a PENDING reminder past due_at and sends it via WhatsApp."""
+    from app.reminders.scheduler import _send_due_reminders
+
+    # Insert a due reminder (past due_at)
+    past_time = datetime.utcnow() - timedelta(minutes=5)
+    with Session(reminder_env) as session:
+        item = ReminderItem(
+            tenant_id="default",
+            chat_id="972500000001@c.us",
+            reminder_id="r-sched-1",
+            what="call dad",
+            due_at=past_time,
+            status=ReminderItemStatus.PENDING,
+            rendered_message="Reminder set.",
+        )
+        session.add(item)
+        session.commit()
+        session.refresh(item)
+        item_id = item.id
+
+    # Mock the WhatsApp client
+    mock_wa = AsyncMock()
+    mock_wa.send_text = AsyncMock(return_value={"ok": True})
+
+    with patch("app.reminders.scheduler.engine", reminder_env):
+        sent = await _send_due_reminders(mock_wa)
+
+    assert sent == 1
+    mock_wa.send_text.assert_called_once_with(
+        to="972500000001@c.us",
+        body="⏰ Reminder: call dad",
+    )
+
+    # Verify it's marked SENT
+    with Session(reminder_env) as session:
+        row = session.get(ReminderItem, item_id)
+        assert row.status == ReminderItemStatus.SENT
+        assert row.sent_at is not None
+
+
+@pytest.mark.asyncio
+async def test_reminder_scheduler_skips_future_reminders(reminder_env):
+    """Scheduler does not send reminders that are not yet due."""
+    from app.reminders.scheduler import _send_due_reminders
+
+    future_time = datetime.utcnow() + timedelta(hours=2)
+    with Session(reminder_env) as session:
+        item = ReminderItem(
+            tenant_id="default",
+            chat_id="972500000001@c.us",
+            reminder_id="r-sched-2",
+            what="call mom",
+            due_at=future_time,
+            status=ReminderItemStatus.PENDING,
+        )
+        session.add(item)
+        session.commit()
+
+    mock_wa = AsyncMock()
+    mock_wa.send_text = AsyncMock()
+
+    with patch("app.reminders.scheduler.engine", reminder_env):
+        sent = await _send_due_reminders(mock_wa)
+
+    assert sent == 0
+    mock_wa.send_text.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_reminder_scheduler_failed_after_max_attempts(reminder_env):
+    """Reminder is marked FAILED after 3 failed send attempts."""
+    from app.reminders.scheduler import _send_due_reminders
+
+    past_time = datetime.utcnow() - timedelta(minutes=5)
+    with Session(reminder_env) as session:
+        item = ReminderItem(
+            tenant_id="default",
+            chat_id="972500000001@c.us",
+            reminder_id="r-sched-3",
+            what="call boss",
+            due_at=past_time,
+            status=ReminderItemStatus.PENDING,
+            attempts=2,  # already failed twice
+        )
+        session.add(item)
+        session.commit()
+        session.refresh(item)
+        item_id = item.id
+
+    mock_wa = AsyncMock()
+    mock_wa.send_text = AsyncMock(side_effect=RuntimeError("WhatsApp API down"))
+
+    with patch("app.reminders.scheduler.engine", reminder_env):
+        sent = await _send_due_reminders(mock_wa)
+
+    assert sent == 0
+
+    with Session(reminder_env) as session:
+        row = session.get(ReminderItem, item_id)
+        assert row.status == ReminderItemStatus.FAILED
+        assert row.attempts == 3
+
+
+@pytest.mark.asyncio
+async def test_reminder_scheduler_recovers_stuck_sending(reminder_env):
+    """Stuck SENDING rows older than 5 minutes are reset to PENDING."""
+    from app.reminders.scheduler import _send_due_reminders
+
+    stuck_time = datetime.utcnow() - timedelta(minutes=10)
+    with Session(reminder_env) as session:
+        item = ReminderItem(
+            tenant_id="default",
+            chat_id="972500000001@c.us",
+            reminder_id="r-sched-4",
+            what="call sister",
+            due_at=datetime.utcnow() - timedelta(minutes=15),
+            status=ReminderItemStatus.SENDING,
+            attempts=0,
+            updated_at=stuck_time,
+        )
+        session.add(item)
+        session.commit()
+        session.refresh(item)
+        item_id = item.id
+
+    mock_wa = AsyncMock()
+    mock_wa.send_text = AsyncMock(return_value={"ok": True})
+
+    with patch("app.reminders.scheduler.engine", reminder_env):
+        sent = await _send_due_reminders(mock_wa)
+
+    # Should have recovered and then sent
+    assert sent == 1
+
+    with Session(reminder_env) as session:
+        row = session.get(ReminderItem, item_id)
+        assert row.status == ReminderItemStatus.SENT
+        assert row.attempts == 1  # incremented during recovery

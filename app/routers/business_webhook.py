@@ -1,10 +1,18 @@
+import asyncio
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request
+from zoneinfo import ZoneInfo
+from sqlmodel import Session
 
 from app.agents.core import run_agent
+from app.agents.schemas import ConversationTurn, ReminderInput, ReminderStatus
 from app.config import settings
+from app.db.engine import engine
+from app.db.models import ReminderItem, ReminderItemStatus
+from app.agents.memory import memory_store
 from app.services.transcription import handle_360dialog_audio_message
 from app.services.whatsapp import (
     Dialog360Client,
@@ -126,16 +134,74 @@ async def process_single_message(message: dict[str, Any]) -> None:
             return
 
         logger.info(
-            "Replying to message_id=%s from=%s type=%s",
+            "Processing message_id=%s from=%s type=%s",
             message_id,
             sender,
             msg_type,
         )
 
-        result = await run_agent(user_msg, thread_id=sender)
+        # Build prior context from memory_store
+        history = memory_store.get(sender) if sender else []
+        prior_context = [
+            ConversationTurn(role=h["role"], text=h["content"])
+            for h in history
+        ] if history else None
 
-        reply = result.reply
-        await wa.send_text(to=sender, body=reply)
+        # Current time in user-local timezone (for LLM to resolve relative dates correctly)
+        tz = ZoneInfo(settings.tenant_timezone)
+        current_time_local = datetime.now(tz)
+
+        input_data = ReminderInput(
+            input_id=message_id or sender,
+            text=user_msg,
+            current_time=current_time_local,
+            prior_context=prior_context,
+        )
+
+        # DSPy calls are blocking — run in thread to avoid stalling the event loop
+        result = await asyncio.to_thread(run_agent, input_data)
+
+        # Determine reply text and persist if created
+        reply_text = ""
+
+        if result.status == ReminderStatus.CREATED and result.reminder:
+            # Persist ReminderItem to DB
+            reminder = result.reminder
+            # Strip tzinfo for SQLite (naive-UTC at DB boundary)
+            due_at_utc = reminder.when
+            if due_at_utc.tzinfo is not None:
+                due_at_utc = due_at_utc.astimezone(timezone.utc).replace(tzinfo=None)
+
+            with Session(engine) as session:
+                item = ReminderItem(
+                    tenant_id="default",  # TODO: use actual tenant_id when multi-tenant
+                    chat_id=sender,
+                    reminder_id=reminder.reminder_id,
+                    what=reminder.what,
+                    due_at=due_at_utc,
+                    status=ReminderItemStatus.PENDING,
+                    rendered_message=result.rendered_message,
+                )
+                session.add(item)
+                session.commit()
+
+            reply_text = result.rendered_message or "Reminder set."
+
+        elif result.status == ReminderStatus.NEEDS_CLARIFICATION:
+            reply_text = result.clarification_question or "Could you clarify?"
+
+        elif result.status == ReminderStatus.IGNORED:
+            reply_text = "I can set reminders for you — try 'remind me to...'"
+
+        # Send reply
+        if reply_text:
+            await wa.send_text(to=sender, body=reply_text)
+
+        # Update memory_store with both user message and agent reply
+        if sender:
+            memory_store.append(sender, "user", user_msg)
+            if reply_text:
+                memory_store.append(sender, "assistant", reply_text)
 
     except Exception:
         logger.exception(

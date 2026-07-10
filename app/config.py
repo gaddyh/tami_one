@@ -33,6 +33,7 @@ class Settings:
     max_extraction_attempts: int
     conversation_history_context_messages: int
     expected_authorization_header: str
+    tenant_timezone: str
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -76,6 +77,7 @@ class Settings:
             max_extraction_attempts=int(os.getenv("MAX_EXTRACTION_ATTEMPTS", "3")),
             conversation_history_context_messages=int(os.getenv("CONVERSATION_HISTORY_CONTEXT_MESSAGES", "10")),
             expected_authorization_header=os.getenv("EXPECTED_AUTHORIZATION_HEADER", "").strip(),
+            tenant_timezone=os.getenv("TENANT_TIMEZONE", "Asia/Jerusalem").strip(),
         )
 
 settings = Settings.from_env()

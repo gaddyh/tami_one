@@ -9,20 +9,20 @@ from app.db.engine import engine, init_db
 from app.db.models import Tenant, TenantKind, WhatsAppAccount, WhatsAppProvider
 
 
-def run_seed(overwrite: bool = False) -> dict[str, str]:
+def run_seed(name: str , instance_id: str, chat_id: str, overwrite: bool = False) -> dict[str, str]:
     init_db(overwrite=overwrite)
 
     with Session(engine) as session:
-        tenant = Tenant(name="Gaddy Test", kind=TenantKind.SOLO)
+        tenant = Tenant(name=name, kind=TenantKind.SOLO)
         session.add(tenant)
         session.flush()
 
         account = WhatsAppAccount(
             tenant_id=tenant.id,
             provider=WhatsAppProvider.GREEN_API,
-            provider_instance_id="7700673764",
-            chat_id="972546610653@c.us",
-            display_name="Gaddy Test WhatsApp",
+            provider_instance_id=instance_id,
+            chat_id=chat_id,
+            display_name=name,
         )
         session.add(account)
         session.commit()
