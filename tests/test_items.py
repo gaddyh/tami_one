@@ -245,6 +245,7 @@ async def test_e2e_pure_entity_no_time(_dspy_configured, _pg_engine):
     assert mock_wa.send_text.call_args.kwargs["to"] == sender
     body = mock_wa.send_text.call_args.kwargs["body"]
     assert "אופניים" in body
+    assert "נשמר" in body
 
     # Assert DB
     with Session(real_engine) as session:
@@ -285,6 +286,7 @@ async def test_e2e_entity_with_exact_time(_dspy_configured, _pg_engine):
     mock_wa.send_text.assert_awaited_once()
     body = mock_wa.send_text.call_args.kwargs["body"]
     assert "רשיון בינלאומי" in body
+    assert "התזכורת שלך" in body
 
     # Assert DB
     with Session(real_engine) as session:
@@ -329,6 +331,7 @@ async def test_e2e_entity_with_relative_time(_dspy_configured, _pg_engine):
     mock_wa.send_text.assert_awaited_once()
     body = mock_wa.send_text.call_args.kwargs["body"]
     assert "נעלי ים חגור ק״ש" in body
+    assert "התזכורת שלך" in body
 
     # Assert DB
     with Session(real_engine) as session:
@@ -373,6 +376,7 @@ async def test_e2e_entity_with_tomorrow_time(_dspy_configured, _pg_engine):
     mock_wa.send_text.assert_awaited_once()
     body = mock_wa.send_text.call_args.kwargs["body"]
     assert "עירית" in body
+    assert "התזכורת שלך" in body
 
     # Assert DB
     with Session(real_engine) as session:
@@ -417,6 +421,7 @@ async def test_e2e_relative_minutes_no_entity(_dspy_configured, _pg_engine):
     mock_wa.send_text.assert_awaited_once()
     body = mock_wa.send_text.call_args.kwargs["body"]
     assert "עשר דקות" in body
+    assert "התזכורת שלך" in body
 
     # Assert DB
     with Session(real_engine) as session:

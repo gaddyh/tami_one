@@ -23,6 +23,23 @@ from app.services.whatsapp import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+_HEBREW_MONTHS = [
+    "ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני",
+    "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר",
+]
+
+
+def _format_hebrew_datetime(dt: datetime, tz: ZoneInfo) -> str:
+    """Format a datetime as a human-readable Hebrew string.
+
+    e.g. '13 ביולי 2026, בשעה 00:49'
+    """
+    local = dt.replace(tzinfo=timezone.utc).astimezone(tz)
+    month = _HEBREW_MONTHS[local.month - 1]
+    return f"{local.day} ב{month} {local.year}, בשעה {local.strftime('%H:%M')}"
+
+
 wa = Dialog360Client(settings)
 _seen_message_ids: set[str] = set()
 
@@ -194,7 +211,8 @@ async def process_single_message(message: dict[str, Any], transcriber: Transcrib
             session.commit()
 
         if due_at_utc is not None:
-            reply_text = f"נשמר: {subject} — תזכיר לך ב-{due_at_str}"
+            hebrew_dt = _format_hebrew_datetime(due_at_utc, tz)
+            reply_text = f"התזכורת שלך {subject} מוגדרת ל-{hebrew_dt}."
         else:
             reply_text = f"נשמר: {subject}"
 
