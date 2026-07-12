@@ -266,6 +266,21 @@ class ReminderItem(SQLModel, table=True):
     sent_at: Optional[datetime] = Field(default=None)
 
 
+class ItemRecord(SQLModel, table=True):
+    id: str = Field(default_factory=new_id, primary_key=True)
+
+    tenant_id: str = Field(index=True)
+    chat_id: str = Field(index=True)
+
+    subject: str
+    due_at: Optional[datetime] = Field(default=None, index=True)
+
+    reminder_id: Optional[str] = Field(default=None, index=True)
+
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+
+
 class CommitmentItem(SQLModel, table=True):
     id: str = Field(default_factory=new_id, primary_key=True)
 

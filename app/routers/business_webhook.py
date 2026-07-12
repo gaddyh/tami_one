@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import uuid
 from datetime import datetime, timezone
 from typing import Any
 
@@ -7,12 +8,11 @@ from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request
 from zoneinfo import ZoneInfo
 from sqlmodel import Session
 
-from app.agents.core import run_agent
-from app.agents.schemas import ConversationTurn, ReminderInput, ReminderStatus
 from app.config import settings
 from app.db.engine import engine
-from app.db.models import ReminderItem, ReminderItemStatus
+from app.db.models import ItemRecord, ReminderItem, ReminderItemStatus
 from app.agents.memory import memory_store
+from app.items.extractor import extract_item
 from app.services.transcription import handle_360dialog_audio_message, Transcriber
 from app.services.whatsapp import (
     Dialog360Client,
@@ -140,58 +140,63 @@ async def process_single_message(message: dict[str, Any], transcriber: Transcrib
             msg_type,
         )
 
-        # Build prior context from memory_store
-        history = memory_store.get(sender) if sender else []
-        prior_context = [
-            ConversationTurn(role=h["role"], text=h["content"])
-            for h in history
-        ] if history else None
-
         # Current time in user-local timezone (for LLM to resolve relative dates correctly)
         tz = ZoneInfo(settings.tenant_timezone)
         current_time_local = datetime.now(tz)
 
-        input_data = ReminderInput(
-            input_id=message_id or sender,
+        # Extract subject and optional due_at via DSPy agent
+        result = await extract_item(
             text=user_msg,
-            current_time=current_time_local,
-            prior_context=prior_context,
+            current_time=current_time_local.isoformat(),
         )
 
-        # DSPy calls are blocking — run in thread to avoid stalling the event loop
-        result = await asyncio.to_thread(run_agent, input_data)
+        subject = result["subject"]
+        due_at_str = result["due_at"]
 
-        # Determine reply text and persist if created
+        # Parse due_at if present
+        due_at_utc: datetime | None = None
+        if due_at_str:
+            try:
+                due_at_dt = datetime.fromisoformat(due_at_str)
+                if due_at_dt.tzinfo is not None:
+                    due_at_utc = due_at_dt.astimezone(timezone.utc).replace(tzinfo=None)
+                else:
+                    due_at_utc = due_at_dt
+            except (ValueError, TypeError):
+                logger.warning("Failed to parse due_at=%r", due_at_str)
+
         reply_text = ""
 
-        if result.status == ReminderStatus.CREATED and result.reminder:
-            # Persist ReminderItem to DB
-            reminder = result.reminder
-            # Strip tzinfo for SQLite (naive-UTC at DB boundary)
-            due_at_utc = reminder.when
-            if due_at_utc.tzinfo is not None:
-                due_at_utc = due_at_utc.astimezone(timezone.utc).replace(tzinfo=None)
+        with Session(engine) as session:
+            # Persist ItemRecord
+            reminder_id: str | None = None
 
-            with Session(engine) as session:
-                item = ReminderItem(
-                    tenant_id="default",  # TODO: use actual tenant_id when multi-tenant
+            if due_at_utc is not None:
+                reminder_id = f"r-{uuid.uuid4().hex[:8]}"
+                reminder_item = ReminderItem(
+                    tenant_id="default",
                     chat_id=sender,
-                    reminder_id=reminder.reminder_id,
-                    what=reminder.what,
+                    reminder_id=reminder_id,
+                    what=subject,
                     due_at=due_at_utc,
                     status=ReminderItemStatus.PENDING,
-                    rendered_message=result.rendered_message,
                 )
-                session.add(item)
-                session.commit()
+                session.add(reminder_item)
 
-            reply_text = result.rendered_message or "Reminder set."
+            record = ItemRecord(
+                tenant_id="default",
+                chat_id=sender,
+                subject=subject,
+                due_at=due_at_utc,
+                reminder_id=reminder_id,
+            )
+            session.add(record)
+            session.commit()
 
-        elif result.status == ReminderStatus.NEEDS_CLARIFICATION:
-            reply_text = result.clarification_question or "Could you clarify?"
-
-        elif result.status == ReminderStatus.IGNORED:
-            reply_text = "I can set reminders for you — try 'remind me to...'"
+        if due_at_utc is not None:
+            reply_text = f"נשמר: {subject} — תזכיר לך ב-{due_at_str}"
+        else:
+            reply_text = f"נשמר: {subject}"
 
         # Send reply
         if reply_text:
