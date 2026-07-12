@@ -10,6 +10,9 @@ from app.db import init_db, load_cache
 from app.routers import business_webhook, digest, personal_webhook
 from app.reminders.scheduler import start_scheduler, stop_scheduler
 from app.services.transcription_factory import get_transcriber
+from app.tasks.processor import TaskReviewService
+from app.tasks.session import ReviewSessionStore
+from app.tasks.task_agent import TaskReviewAgent
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 
@@ -41,6 +44,12 @@ async def _on_startup() -> None:
     load_cache()
     logger.info("Building transcriber: provider=%s", settings.transcription_provider)
     app.state.transcriber = get_transcriber(settings)
+    task_review_agent = TaskReviewAgent()
+    app.state.task_review_service = TaskReviewService(
+        agent=task_review_agent,
+        session_store=ReviewSessionStore(),
+        settings=settings,
+    )
     global _drain_task
     _drain_task = asyncio.create_task(_drain_loop())
     start_scheduler()

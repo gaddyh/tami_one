@@ -266,6 +266,11 @@ class ReminderItem(SQLModel, table=True):
     sent_at: Optional[datetime] = Field(default=None)
 
 
+class ItemReviewStatus(StrEnum):
+    PENDING = "pending"
+    CONVERTED = "converted"
+
+
 class ItemRecord(SQLModel, table=True):
     id: str = Field(default_factory=new_id, primary_key=True)
 
@@ -276,6 +281,40 @@ class ItemRecord(SQLModel, table=True):
     due_at: Optional[datetime] = Field(default=None, index=True)
 
     reminder_id: Optional[str] = Field(default=None, index=True)
+
+    review_status: ItemReviewStatus = Field(
+        default=ItemReviewStatus.PENDING, index=True
+    )
+    converted_at: Optional[datetime] = Field(default=None)
+
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+
+
+class TaskStatus(StrEnum):
+    ACTIVE = "active"
+    DONE = "done"
+    SNOOZED = "snoozed"
+
+
+class Task(SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id", "source_item_id", name="uq_task_tenant_source_item"
+        ),
+    )
+
+    id: str = Field(default_factory=new_id, primary_key=True)
+
+    tenant_id: str = Field(index=True)
+    chat_id: str = Field(index=True)
+
+    subject: str
+    due_at: Optional[datetime] = Field(default=None, index=True)
+
+    source_item_id: Optional[str] = Field(default=None, index=True)
+
+    status: TaskStatus = TaskStatus.ACTIVE
 
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)

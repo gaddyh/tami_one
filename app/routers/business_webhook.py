@@ -85,7 +85,8 @@ async def webhook_360dialog(
     payload = await request.json()
     logger.info("Accepted 360dialog webhook")
 
-    background_tasks.add_task(process_webhook_payload, payload, request.app.state.transcriber)
+    task_review_service = getattr(request.app.state, "task_review_service", None)
+    background_tasks.add_task(process_webhook_payload, payload, request.app.state.transcriber, task_review_service)
 
     return {
         "ok": True,
@@ -93,7 +94,11 @@ async def webhook_360dialog(
     }
 
 
-async def process_webhook_payload(payload: dict[str, Any], transcriber: Transcriber) -> None:
+async def process_webhook_payload(
+    payload: dict[str, Any],
+    transcriber: Transcriber,
+    task_review_service: Any = None,
+) -> None:
     """
     Background processing.
 
@@ -107,13 +112,17 @@ async def process_webhook_payload(payload: dict[str, Any], transcriber: Transcri
             return
 
         for message in messages:
-            await process_single_message(message, transcriber)
+            await process_single_message(message, transcriber, task_review_service)
 
     except Exception:
         logger.exception("Failed processing webhook payload")
 
 
-async def process_single_message(message: dict[str, Any], transcriber: Transcriber) -> None:
+async def process_single_message(
+    message: dict[str, Any],
+    transcriber: Transcriber,
+    task_review_service: Any = None,
+) -> None:
     sender = message["from"]
     message_id = message.get("id", "")
     msg_type = message.get("type", "")
@@ -160,6 +169,20 @@ async def process_single_message(message: dict[str, Any], transcriber: Transcrib
         # Current time in user-local timezone (for LLM to resolve relative dates correctly)
         tz = ZoneInfo(settings.tenant_timezone)
         current_time_local = datetime.now(tz)
+
+        # Check for review session trigger / active session
+        trimmed = user_msg.strip()
+        if task_review_service is not None:
+            if trimmed == settings.review_start_keyword:
+                await task_review_service.start_review("default", sender, wa)
+                return
+
+            active_session = task_review_service.sessions.get("default", sender)
+            if active_session:
+                await task_review_service.handle_reply(
+                    "default", sender, user_msg, wa, current_time_local
+                )
+                return
 
         # Extract subject and optional due_at via DSPy agent
         result = await extract_item(

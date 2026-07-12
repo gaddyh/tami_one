@@ -40,6 +40,9 @@ class Settings:
     modal_transcription_key: str
     modal_transcription_secret: str
     modal_transcription_timeout_seconds: int
+    review_start_keyword: str
+    review_end_keyword: str
+    review_clarification_limit: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -90,6 +93,9 @@ class Settings:
             modal_transcription_key=os.getenv("MODAL_TRANSCRIPTION_KEY", "").strip(),
             modal_transcription_secret=os.getenv("MODAL_TRANSCRIPTION_SECRET", "").strip(),
             modal_transcription_timeout_seconds=int(os.getenv("MODAL_TRANSCRIPTION_TIMEOUT_SECONDS", "180")),
+            review_start_keyword=os.getenv("REVIEW_START_KEYWORD", "בוא").strip(),
+            review_end_keyword=os.getenv("REVIEW_END_KEYWORD", "בטל").strip(),
+            review_clarification_limit=int(os.getenv("REVIEW_CLARIFICATION_LIMIT", "3")),
         )
 
 settings = Settings.from_env()
