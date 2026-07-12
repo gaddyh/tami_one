@@ -14,6 +14,26 @@ from app.db.models import ItemRecord, ReminderItem, ReminderItemStatus
 
 
 @pytest.fixture()
+def _cleanup_after(request):
+    """Yield the sender phone, then clean up test data after the test (even on failure)."""
+    sender = request.param
+    yield sender
+    from app.db.engine import engine as real_engine
+    from sqlalchemy import text
+    with real_engine.connect() as conn:
+        conn.execute(text(
+            "DELETE FROM reminderitem WHERE chat_id = :chat_id"
+        ), {"chat_id": sender})
+        conn.execute(text(
+            "DELETE FROM itemrecord WHERE chat_id = :chat_id"
+        ), {"chat_id": sender})
+        conn.execute(text(
+            "DELETE FROM task WHERE chat_id = :chat_id"
+        ), {"chat_id": sender})
+        conn.commit()
+
+
+@pytest.fixture()
 def test_engine():
     """Create a fresh temp SQLite DB with all tables for each test."""
     fd, db_path = tempfile.mkstemp(suffix=".db")
@@ -222,12 +242,13 @@ def _pg_engine():
 
 
 @pytest.mark.integration
-async def test_e2e_pure_entity_no_time(_dspy_configured, _pg_engine):
+@pytest.mark.parametrize("_cleanup_after", ["972500000001@c.us"], indirect=True)
+async def test_e2e_pure_entity_no_time(_dspy_configured, _pg_engine, _cleanup_after):
     """Input: 'אופניים' → ItemRecord saved, no reminder, reply 'נשמר: אופניים'."""
     from app.routers import business_webhook as webhook
     from app.db.engine import engine as real_engine
 
-    sender = "972500000001@c.us"
+    sender = _cleanup_after
     msg_id = "e2e-int-1"
     msg = _make_text_message(msg_id, sender, "אופניים")
 
@@ -265,12 +286,13 @@ async def test_e2e_pure_entity_no_time(_dspy_configured, _pg_engine):
 
 
 @pytest.mark.integration
-async def test_e2e_entity_with_exact_time(_dspy_configured, _pg_engine):
+@pytest.mark.parametrize("_cleanup_after", ["972500000002@c.us"], indirect=True)
+async def test_e2e_entity_with_exact_time(_dspy_configured, _pg_engine, _cleanup_after):
     """Input: 'רשיון בינלאומי בחמש' → ItemRecord + ReminderItem, reply includes time."""
     from app.routers import business_webhook as webhook
     from app.db.engine import engine as real_engine
 
-    sender = "972500000002@c.us"
+    sender = _cleanup_after
     msg = _make_text_message("e2e-int-2", sender, "רשיון בינלאומי בחמש")
 
     mock_wa = AsyncMock()
@@ -310,12 +332,13 @@ async def test_e2e_entity_with_exact_time(_dspy_configured, _pg_engine):
 
 
 @pytest.mark.integration
-async def test_e2e_entity_with_relative_time(_dspy_configured, _pg_engine):
+@pytest.mark.parametrize("_cleanup_after", ["972500000003@c.us"], indirect=True)
+async def test_e2e_entity_with_relative_time(_dspy_configured, _pg_engine, _cleanup_after):
     """Input: 'נעלי ים חגור ק״ש בעוד שעה' → ItemRecord + ReminderItem with computed time."""
     from app.routers import business_webhook as webhook
     from app.db.engine import engine as real_engine
 
-    sender = "972500000003@c.us"
+    sender = _cleanup_after
     msg = _make_text_message("e2e-int-3", sender, "נעלי ים חגור ק״ש בעוד שעה")
 
     mock_wa = AsyncMock()
@@ -355,12 +378,13 @@ async def test_e2e_entity_with_relative_time(_dspy_configured, _pg_engine):
 
 
 @pytest.mark.integration
-async def test_e2e_entity_with_tomorrow_time(_dspy_configured, _pg_engine):
+@pytest.mark.parametrize("_cleanup_after", ["972500000004@c.us"], indirect=True)
+async def test_e2e_entity_with_tomorrow_time(_dspy_configured, _pg_engine, _cleanup_after):
     """Input: 'עירית מחר ב8' → ItemRecord + ReminderItem, subject stripped of time words."""
     from app.routers import business_webhook as webhook
     from app.db.engine import engine as real_engine
 
-    sender = "972500000004@c.us"
+    sender = _cleanup_after
     msg = _make_text_message("e2e-int-4", sender, "עירית מחר ב8")
 
     mock_wa = AsyncMock()
@@ -400,12 +424,13 @@ async def test_e2e_entity_with_tomorrow_time(_dspy_configured, _pg_engine):
 
 
 @pytest.mark.integration
-async def test_e2e_relative_minutes_no_entity(_dspy_configured, _pg_engine):
+@pytest.mark.parametrize("_cleanup_after", ["972500000005@c.us"], indirect=True)
+async def test_e2e_relative_minutes_no_entity(_dspy_configured, _pg_engine, _cleanup_after):
     """Input: 'עשר דקות' → subject is the time expression itself, ReminderItem created."""
     from app.routers import business_webhook as webhook
     from app.db.engine import engine as real_engine
 
-    sender = "972500000005@c.us"
+    sender = _cleanup_after
     msg = _make_text_message("e2e-int-5", sender, "עשר דקות")
 
     mock_wa = AsyncMock()

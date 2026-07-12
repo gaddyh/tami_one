@@ -802,14 +802,11 @@ def _seed_item(engine, sender: str, subject: str, due_at: datetime | None = None
 
 def _cleanup_items(engine, sender: str) -> None:
     """Remove ItemRecords and Tasks for a sender to keep tests isolated."""
-    with Session(engine) as session:
-        tasks = session.exec(select(Task).where(Task.chat_id == sender)).all()
-        for t in tasks:
-            session.delete(t)
-        items = session.exec(select(ItemRecord).where(ItemRecord.chat_id == sender)).all()
-        for item in items:
-            session.delete(item)
-        session.commit()
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        conn.execute(text("DELETE FROM task WHERE chat_id = :chat_id"), {"chat_id": sender})
+        conn.execute(text("DELETE FROM itemrecord WHERE chat_id = :chat_id"), {"chat_id": sender})
+        conn.commit()
 
 
 @pytest.fixture()

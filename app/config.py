@@ -40,9 +40,9 @@ class Settings:
     modal_transcription_key: str
     modal_transcription_secret: str
     modal_transcription_timeout_seconds: int
-    review_start_keyword: str
-    review_end_keyword: str
-    review_clarification_limit: int
+    review_start_keyword: str = "בוא"
+    review_end_keyword: str = "בטל"
+    review_clarification_limit: int = 3
 
     @classmethod
     def from_env(cls) -> "Settings":
