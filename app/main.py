@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="360dialog Echo Bot")
 
-DRAIN_INTERVAL_SECONDS = 30 * 60
+DRAIN_INTERVAL_SECONDS = 24 * 60 * 60  # 24 hours
 _drain_task: asyncio.Task | None = None
 
 
