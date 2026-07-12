@@ -35,6 +35,11 @@ class Settings:
     expected_authorization_header: str
     tenant_timezone: str
     compiled_agent_path: str
+    transcription_provider: str
+    modal_transcription_url: str
+    modal_transcription_key: str
+    modal_transcription_secret: str
+    modal_transcription_timeout_seconds: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -80,6 +85,11 @@ class Settings:
             expected_authorization_header=os.getenv("EXPECTED_AUTHORIZATION_HEADER", "").strip(),
             tenant_timezone=os.getenv("TENANT_TIMEZONE", "Asia/Jerusalem").strip(),
             compiled_agent_path=os.getenv("COMPILED_AGENT_PATH", "compiled_agent.json").strip(),
+            transcription_provider=os.getenv("TRANSCRIPTION_PROVIDER", "openai").strip().lower(),
+            modal_transcription_url=os.getenv("MODAL_TRANSCRIPTION_URL", "").strip(),
+            modal_transcription_key=os.getenv("MODAL_TRANSCRIPTION_KEY", "").strip(),
+            modal_transcription_secret=os.getenv("MODAL_TRANSCRIPTION_SECRET", "").strip(),
+            modal_transcription_timeout_seconds=int(os.getenv("MODAL_TRANSCRIPTION_TIMEOUT_SECONDS", "180")),
         )
 
 settings = Settings.from_env()

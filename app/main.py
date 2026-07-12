@@ -9,6 +9,7 @@ from app.commitments.processor import drain_and_process
 from app.db import init_db, load_cache
 from app.routers import business_webhook, digest, personal_webhook
 from app.reminders.scheduler import start_scheduler, stop_scheduler
+from app.services.transcription_factory import get_transcriber
 
 logging.basicConfig(level=getattr(logging, settings.log_level, logging.INFO))
 
@@ -38,6 +39,8 @@ async def _on_startup() -> None:
     configure_dspy(settings)
     init_db()
     load_cache()
+    logger.info("Building transcriber: provider=%s", settings.transcription_provider)
+    app.state.transcriber = get_transcriber(settings)
     global _drain_task
     _drain_task = asyncio.create_task(_drain_loop())
     start_scheduler()
@@ -52,6 +55,9 @@ async def _on_shutdown() -> None:
         except asyncio.CancelledError:
             pass
     await stop_scheduler()
+    transcriber = getattr(app.state, "transcriber", None)
+    if transcriber:
+        await transcriber.close()
 
 
 @app.get("/")

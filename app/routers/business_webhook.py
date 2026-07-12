@@ -13,7 +13,7 @@ from app.config import settings
 from app.db.engine import engine
 from app.db.models import ReminderItem, ReminderItemStatus
 from app.agents.memory import memory_store
-from app.services.transcription import handle_360dialog_audio_message
+from app.services.transcription import handle_360dialog_audio_message, Transcriber
 from app.services.whatsapp import (
     Dialog360Client,
     expected_basic_auth_header,
@@ -68,7 +68,7 @@ async def webhook_360dialog(
     payload = await request.json()
     logger.info("Accepted 360dialog webhook")
 
-    background_tasks.add_task(process_webhook_payload, payload)
+    background_tasks.add_task(process_webhook_payload, payload, request.app.state.transcriber)
 
     return {
         "ok": True,
@@ -76,7 +76,7 @@ async def webhook_360dialog(
     }
 
 
-async def process_webhook_payload(payload: dict[str, Any]) -> None:
+async def process_webhook_payload(payload: dict[str, Any], transcriber: Transcriber) -> None:
     """
     Background processing.
 
@@ -90,13 +90,13 @@ async def process_webhook_payload(payload: dict[str, Any]) -> None:
             return
 
         for message in messages:
-            await process_single_message(message)
+            await process_single_message(message, transcriber)
 
     except Exception:
         logger.exception("Failed processing webhook payload")
 
 
-async def process_single_message(message: dict[str, Any]) -> None:
+async def process_single_message(message: dict[str, Any], transcriber: Transcriber) -> None:
     sender = message["from"]
     message_id = message.get("id", "")
     msg_type = message.get("type", "")
@@ -124,7 +124,7 @@ async def process_single_message(message: dict[str, Any]) -> None:
 
             user_msg = await handle_360dialog_audio_message(
                 wa=wa,
-                settings=settings,
+                transcriber=transcriber,
                 media_id=media_id,
                 mime_type=mime_type,
             )
